@@ -79,6 +79,18 @@ MANUAL_FEED_OPT = {
     50: "50g",
 }
 
+# Calendar emoji
+
+CAT_VISIT_EMOJI = ["🐈‍⬛", "🐈", "🐾"]
+CAT_EAT_EMOJI = ["🐱", "😺", "😽", "🙀", "😸", "😹", "😼", "😻"]
+DISPENSE_EMOJI = {
+    "cancelled": "🚫",
+    "dispensed": "✅",
+    "skipped": "⏭️",
+    "failed dispense": "❌",
+    "pending": "⏳",
+}
+
 # Litter Event
 EVENT_MAPPING = {
     5: {
