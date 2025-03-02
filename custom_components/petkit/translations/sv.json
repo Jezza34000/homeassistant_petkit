@@ -1,0 +1,640 @@
+{
+  "config": {
+    "error": {
+      "account_exists": "Detta konto finns redan.",
+      "connection": "Det gick inte att ansluta till servern.",
+      "unknown": "Ett okänt fel inträffade, vänligen kontrollera loggarna."
+    },
+    "step": {
+      "user": {
+        "data": {
+          "password": "Lösenord",
+          "region": "Region",
+          "time_zone": "Tidszon",
+          "username": "Användarnamn/Id"
+        },
+        "data_description": {
+          "region": "Detta fält fylls i automatiskt baserat på din Home Assistant-konfiguration. Om du har en annan region, välj den från listan.",
+          "time_zone": "Detta fält fylls i automatiskt baserat på din Home Assistant-konfiguration. Om du har en annan tidszon, välj den från listan.",
+          "username": "Ange din PetKit-kontos e-postadress, eller id om du är en kinesisk användare."
+        },
+        "description": "Vänligen ange dina PetKit-kontouppgifter."
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "battery": {
+        "name": "Batteri"
+      },
+      "battery_installed": {
+        "name": "Batteri installerat"
+      },
+      "camera_status": {
+        "name": "Kamerastatus"
+      },
+      "care_plus_subscription": {
+        "name": "Care+ prenumeration"
+      },
+      "deodorizer": {
+        "name": "Deodoriserare"
+      },
+      "eating": {
+        "name": "Äter"
+      },
+      "feeding": {
+        "name": "Matar"
+      },
+      "food_level": {
+        "name": "Matnivå"
+      },
+      "food_level_1": {
+        "name": "Matnivå fack 1"
+      },
+      "food_level_2": {
+        "name": "Matnivå fack 2"
+      },
+      "frequent_use": {
+        "name": "Ofta användningsdetektering"
+      },
+      "lack_warning": {
+        "name": "Vattenbristvarning"
+      },
+      "liquid_empty": {
+        "name": "Deodoriseringsvätska slut"
+      },
+      "liquid_lack": {
+        "name": "Brist på deodoriseringsvätska"
+      },
+      "litter": {
+        "name": "Kattsand"
+      },
+      "low_battery": {
+        "name": "Låg batterinivå"
+      },
+      "low_power": {
+        "name": "Ström"
+      },
+      "manually_paused": {
+        "name": "Manuellt pausad"
+      },
+      "on_ac_power": {
+        "name": "Nätansluten"
+      },
+      "pura_air_liquid": {
+        "name": "Pura Air-vätska"
+      },
+      "replace_filter": {
+        "name": "Byt filter"
+      },
+      "sand_lack": {
+        "name": "Brist på kattsand"
+      },
+      "toilet_occupied": {
+        "name": "Toaletten upptagen"
+      },
+      "waste_bin": {
+        "name": "Sopbehållare full"
+      },
+      "waste_bin_presence": {
+        "name": "Sopbehållare närvarande"
+      },
+      "water_level": {
+        "name": "Vattennivå"
+      }
+    },
+    "button": {
+      "action_continue": {
+        "name": "Åtgärd: Fortsätt"
+      },
+      "action_pause": {
+        "name": "Åtgärd: Paus"
+      },
+      "action_reset": {
+        "name": "Åtgärd: Återställ"
+      },
+      "call_pet": {
+        "name": "Kalla på husdjur"
+      },
+      "cancel_manual_feed": {
+        "name": "Avbryt manuell matning"
+      },
+      "deodorize": {
+        "name": "Deodorisera"
+      },
+      "dump_litter": {
+        "name": "Töm kattsand"
+      },
+      "exit_maintenance": {
+        "name": "Underhåll: Avsluta"
+      },
+      "food_replenished": {
+        "name": "Mat påfylld"
+      },
+      "reset_desiccant": {
+        "name": "Återställ torkmedel"
+      },
+      "reset_odor_eliminator": {
+        "name": "Återställ luktborttagare"
+      },
+      "start_maintenance": {
+        "name": "Underhåll: Starta"
+      },
+      "start_scoop": {
+        "name": "Skopa"
+      }
+    },
+    "fan": {
+      "air_purifier_fan": {
+        "name": "Luftrenare"
+      }
+    },
+    "image": {
+      "last_eat_event": {
+        "name": "Senaste ät-event"
+      },
+      "last_feed_event": {
+        "name": "Senaste matnings-event"
+      },
+      "last_toileting_event": {
+        "name": "Senaste toalettbesöket"
+      },
+      "last_visit_event": {
+        "name": "Senaste besöket"
+      }
+    },
+    "number": {
+      "cleaning_delay": {
+        "name": "Fördröjning för rengöring"
+      },
+      "manual_feed": {
+        "name": "Manuell matning"
+      },
+      "min_eating_duration": {
+        "name": "Minsta ättid"
+      },
+      "surplus": {
+        "name": "Överskott"
+      },
+      "volume": {
+        "name": "Volym"
+      }
+    },
+    "select": {
+      "avoid_repeat_cleaning_interval": {
+        "name": "Undvik upprepad rengöring intervall"
+      },
+      "eat_detection_sensitivity": {
+        "name": "IA Ätdetekteringskänslighet"
+      },
+      "litter_type": {
+        "name": "Kattsandstyp"
+      },
+      "move_detection_sensitivity": {
+        "name": "Rörelsedetekteringskänslighet"
+      },
+      "pet_detection_sensitivity": {
+        "name": "IA Husdjursdetekteringskänslighet"
+      },
+      "surplus_level": {
+        "name": "Överskottskontrollnivå"
+      }
+    },
+    "sensor": {
+      "air_purified": {
+        "name": "Renad luft"
+      },
+      "amount_eaten": {
+        "name": "Mängd uppäten"
+      },
+      "average_time": {
+        "name": "Genomsnittlig användning"
+      },
+      "avg_eating_time": {
+        "name": "Genomsnittlig ättid"
+      },
+      "battery_level": {
+        "name": "Batterinivå"
+      },
+      "deodorant_left_days": {
+        "name": "Dagar kvar för deodoriserare"
+      },
+      "deodorizer_level": {
+        "name": "Deodoriseringsnivå"
+      },
+      "desiccant_left_days": {
+        "name": "Dagar kvar av torkmedel"
+      },
+      "device_status": {
+        "name": "Enhetsstatus"
+      },
+      "drink_times": {
+        "name": "Antal dricktillfällen"
+      },
+      "end_date_care_plus_subscription": {
+        "name": "Care+ slutdatum för prenumeration"
+      },
+      "error": {
+        "name": "Fel"
+      },
+      "error_message": {
+        "name": "Fel",
+        "state": {
+          "no_error": "Inget fel"
+        }
+      },
+      "feeder_error": {
+        "name": "Foderfel"
+      },
+      "filter_percent": {
+        "name": "Filter återstående"
+      },
+      "food_bowl_percentage": {
+        "name": "Matskål fyllnadsgrad"
+      },
+      "food_in_bowl": {
+        "name": "Mat i skålen"
+      },
+      "food_left": {
+        "name": "Mat kvar"
+      },
+      "last_connection": {
+        "name": "Senaste BLE-anslutningen"
+      },
+      "last_update": {
+        "name": "Senaste uppdateringen"
+      },
+      "last_used_by": {
+        "name": "Senast använd av"
+      },
+      "litter_last_event": {
+        "name": "Senaste händelse",
+        "state": {
+          "auto_cleaning_canceled": "Automatisk rengöring avbruten",
+          "auto_cleaning_canceled_kitten": "Automatisk rengöring avbruten: kattunge",
+          "auto_cleaning_completed": "Automatisk rengöring slutförd",
+          "auto_cleaning_failed_full": "Automatisk rengöring misslyckades: full",
+          "auto_cleaning_failed_hall_l": "Automatisk rengöring misslyckades: hall L",
+          "auto_cleaning_failed_hall_t": "Automatisk rengöring misslyckades: hall T",
+          "auto_cleaning_terminated": "Automatisk rengöring avbruten",
+          "auto_odor_failed": "Automatisk luktborttagning misslyckades",
+          "clean_over": "Rengöring klar",
+          "deodorant_finished": "Deodoriserare avslutad",
+          "deodorant_finished_liquid_lack": "Deodoriserare avslutad: vätskebrist",
+          "light_over": "Ljus",
+          "litter_empty_completed": "Tömning av kattsand slutförd",
+          "litter_empty_failed_full": "Tömning av kattsand misslyckades: full",
+          "litter_empty_failed_hall_l": "Tömning av kattsand misslyckades: hall L",
+          "litter_empty_failed_hall_t": "Tömning av kattsand misslyckades: hall T",
+          "litter_empty_terminated": "Tömning av kattsand avbruten",
+          "manual_cleaning_canceled": "Manuell rengöring avbruten",
+          "manual_cleaning_completed": "Manuell rengöring slutförd",
+          "manual_cleaning_failed_full": "Manuell rengöring misslyckades: full",
+          "manual_cleaning_failed_hall_l": "Manuell rengöring misslyckades: hall L",
+          "manual_cleaning_failed_hall_t": "Manuell rengöring misslyckades: hall T",
+          "manual_cleaning_terminated": "Manuell rengöring avbruten",
+          "manual_odor_completed": "Manuell luktborttagning slutförd",
+          "manual_odor_completed_liquid_lack": "Manuell luktborttagning slutförd: vätskebrist",
+          "manual_odor_failed": "Manuell luktborttagning misslyckades",
+          "periodic_cleaning_canceled": "Periodisk rengöring avbruten",
+          "periodic_cleaning_canceled_kitten": "Periodisk rengöring avbruten: kattunge",
+          "periodic_cleaning_completed": "Periodisk rengöring slutförd",
+          "periodic_cleaning_terminated": "Periodisk rengöring avbruten",
+          "periodic_odor_completed": "Periodisk luktborttagning slutförd",
+          "periodic_odor_completed_liquid_lack": "Periodisk luktborttagning slutförd: vätskebrist",
+          "periodic_odor_failed": "Periodisk luktborttagning misslyckades",
+          "pet_detect": "Husdjur upptäckt",
+          "pet_out": "Husdjur gick ut",
+          "reset_completed": "Återställning slutförd",
+          "reset_failed_full": "Återställning misslyckades: full",
+          "reset_failed_hall_l": "Återställning misslyckades: hall L",
+          "reset_failed_hall_t": "Återställning misslyckades: hall T",
+          "reset_over": "Återställ",
+          "reset_terminated": "Återställning avbruten",
+          "scheduled_cleaning_failed_full": "Schemalagd rengöring misslyckades: full",
+          "scheduled_cleaning_failed_hall_l": "Schemalagd rengöring misslyckades: hall L",
+          "scheduled_cleaning_failed_hall_t": "Schemalagd rengöring misslyckades: hall T",
+          "spray_over": "Deodorisera"
+        }
+      },
+      "litter_level": {
+        "name": "Kattsandsnivå"
+      },
+      "litter_state": {
+        "name": "Status",
+        "state": {
+          "calibrating": "Kalibrerar",
+          "cleaning": "Rengör",
+          "cleaning_paused": "Rengöring pausad",
+          "cleaning_paused_cover": "Rengöring pausad - Lock",
+          "cleaning_paused_pet_approach": "Rengöring pausad - Husdjur nära",
+          "cleaning_paused_pet_entered": "Rengöring pausad - Husdjur i",
+          "cleaning_paused_pet_using": "Rengöring pausad - Husdjur använder",
+          "cleaning_paused_system_error": "Rengöring pausad - Systemfel",
+          "dumping": "Tömmer",
+          "dumping_paused": "Tömning pausad",
+          "dumping_paused_cover": "Tömning pausad - Lock",
+          "dumping_paused_pet_approach": "Tömning pausad - Husdjur nära",
+          "dumping_paused_pet_entered": "Tömning pausad - Husdjur i",
+          "dumping_paused_pet_using": "Tömning pausad - Husdjur använder",
+          "dumping_paused_system_error": "Tömning pausad - Systemfel",
+          "idle": "Inaktiv",
+          "leveling": "Jämnar ut",
+          "maintenance": "Underhåll",
+          "maintenance_paused": "Underhåll pausad",
+          "maintenance_paused_cover": "Underhåll pausad - Lock",
+          "maintenance_paused_pet_approach": "Underhåll pausad - Husdjur nära",
+          "maintenance_paused_pet_entered": "Underhåll pausad - Husdjur i",
+          "maintenance_paused_pet_using": "Underhåll pausad - Husdjur använder",
+          "maintenance_paused_system_error": "Underhåll pausad - Systemfel",
+          "paused": "Pausad",
+          "paused_cover": "Pausad - Lock",
+          "paused_pet_approach": "Pausad - Husdjur nära",
+          "paused_pet_entered": "Pausad - Husdjur i",
+          "paused_pet_using": "Pausad - Husdjur använder",
+          "paused_system_error": "Pausad - Systemfel",
+          "resetting": "Återställer",
+          "resetting_device": "Återställer enhet",
+          "unknown": "Okänd"
+        }
+      },
+      "litter_weight": {
+        "name": "Kattsandsvikt"
+      },
+      "manual_dispensed": {
+        "name": "Manuellt utdelad"
+      },
+      "manual_dispensed_hopper_1": {
+        "name": "Manuellt utdelad fack 1"
+      },
+      "manual_dispensed_hopper_2": {
+        "name": "Manuellt utdelad fack 2"
+      },
+      "package_used": {
+        "name": "Förpackning använd"
+      },
+      "pet_last_device_used": {
+        "name": "Senast använda låda"
+      },
+      "pet_last_use_date": {
+        "name": "Senaste användningsdatum"
+      },
+      "pet_last_use_duration": {
+        "name": "Senaste användningstid"
+      },
+      "pet_last_weight_measurement": {
+        "name": "Senaste viktmätning"
+      },
+      "planned_dispensed": {
+        "name": "Schemalagd utdelning"
+      },
+      "planned_dispensed_hopper_1": {
+        "name": "Schemalagd utdelning fack 1"
+      },
+      "planned_dispensed_hopper_2": {
+        "name": "Schemalagd utdelning fack 2"
+      },
+      "purified_water": {
+        "name": "Renat vatten"
+      },
+      "purifier_liquid": {
+        "name": "Reningsvätska"
+      },
+      "raw_distribution_data": {
+        "name": "RÅ-data för utdelning"
+      },
+      "rssi": {
+        "name": "RSSI"
+      },
+      "smart_spray_battery": {
+        "name": "Smart spray-batteri"
+      },
+      "spray_deodorant_liquid": {
+        "name": "Spraydeodorantvätska"
+      },
+      "times_dispensed": {
+        "name": "Antal utdelningar"
+      },
+      "times_eaten": {
+        "name": "Antal ätningar"
+      },
+      "times_used": {
+        "name": "Antal användningar"
+      },
+      "total_dispensed": {
+        "name": "Totalt utdelat"
+      },
+      "total_dispensed_hopper_1": {
+        "name": "Totalt utdelat fack 1"
+      },
+      "total_dispensed_hopper_2": {
+        "name": "Totalt utdelat fack 2"
+      },
+      "total_package": {
+        "name": "Totalt förpackning"
+      },
+      "total_planned": {
+        "name": "Totalt schemalagt"
+      },
+      "total_planned_hopper_1": {
+        "name": "Totalt schemalagt fack 1"
+      },
+      "total_planned_hopper_2": {
+        "name": "Totalt schemalagt fack 2"
+      },
+      "total_time": {
+        "name": "Total användning"
+      }
+    },
+    "switch": {
+      "auto_clean": {
+        "name": "Automatisk rengöring"
+      },
+      "auto_odor": {
+        "name": "Automatisk luktborttagning"
+      },
+      "avoid_repeat_clean": {
+        "name": "Undvik upprepad rengöring"
+      },
+      "camera": {
+        "name": "Kamera"
+      },
+      "child_lock": {
+        "name": "Barnlås"
+      },
+      "cont_rotation": {
+        "name": "Kontinuerlig rotation"
+      },
+      "deep_cleaning": {
+        "name": "Djup rengöring"
+      },
+      "deep_deodor": {
+        "name": "Djup deodoriserare"
+      },
+      "deodorant_notify": {
+        "name": "Notifiering vid behov av deodoriserarbyte"
+      },
+      "desiccant_notif": {
+        "name": "Notifiering vid behov av torkmedelsbyte"
+      },
+      "dispensing_notif": {
+        "name": "Notifiering vid utdelning"
+      },
+      "display": {
+        "name": "Display"
+      },
+      "do_not_disturb": {
+        "name": "Stör ej"
+      },
+      "feed_sound": {
+        "name": "Matningsljud"
+      },
+      "feed_tone": {
+        "name": "Matningston"
+      },
+      "highlight": {
+        "name": "Markeringsspårning av husdjur"
+      },
+      "indicator_light": {
+        "name": "Indikatorlampa"
+      },
+      "kitten_mode": {
+        "name": "Kattungeläge"
+      },
+      "lack_liquid_notify": {
+        "name": "Notifiering vid brist på reningsvätska"
+      },
+      "lack_sand_notify": {
+        "name": "Notifiering vid brist på kattsand"
+      },
+      "light": {
+        "name": "Ljussättning"
+      },
+      "light_weight": {
+        "name": "Lätt vikt"
+      },
+      "litter_full_notify": {
+        "name": "Notifiering vid full avfallsbehållare"
+      },
+      "low_battery_notif": {
+        "name": "Notifiering vid låg batterinivå"
+      },
+      "microphone": {
+        "name": "Mikrofon"
+      },
+      "move_notif": {
+        "name": "Notifiering vid rörelse"
+      },
+      "night_vision": {
+        "name": "Mörkerseende"
+      },
+      "periodic_cleaning": {
+        "name": "Periodisk rengöring"
+      },
+      "periodic_odor": {
+        "name": "Periodisk luktborttagning"
+      },
+      "pet_eat_notif": {
+        "name": "Notifiering vid ätning"
+      },
+      "pet_in_notify": {
+        "name": "Notifiering vid husdjurs toalettbesök"
+      },
+      "pet_tracking": {
+        "name": "Husdjursövervakning"
+      },
+      "pet_visit_notif": {
+        "name": "Notifiering vid husdjursbesök"
+      },
+      "power": {
+        "name": "Ström"
+      },
+      "refill_notif": {
+        "name": "Notifiering vid påfyllningsbehov"
+      },
+      "shortage_alarm": {
+        "name": "Bristlarm"
+      },
+      "surplus_control": {
+        "name": "Överskottskontroll"
+      },
+      "system_notification": {
+        "name": "Systemljud"
+      },
+      "video_timestamp": {
+        "name": "Visa tidsstämpel"
+      },
+      "voice_dispense": {
+        "name": "Röstutdelning"
+      },
+      "waste_covering": {
+        "name": "Avfallsöverdrag"
+      },
+      "work_log_notify": {
+        "name": "Notifiering vid körning av schemalagda uppgifter"
+      },
+      "work_notify": {
+        "name": "Notifiering vid enhetsrengöring"
+      }
+    },
+    "text": {
+      "manual_feed_dual_h1": {
+        "name": "Manuell matning fack 1"
+      },
+      "manual_feed_dual_h2": {
+        "name": "Manuell matning fack 2"
+      },
+      "manual_feed_single": {
+        "name": "Manuell matning"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "region": "Region",
+          "scan_interval": "Standard avpollningsintervall (sekunder)",
+          "smart_polling": "Smart avpollning",
+          "time_zone": "Tidszon"
+        },
+        "data_description": {
+          "smart_polling": "Smart avpollning justerar automatiskt avpollningsintervallet baserat på enhetens händelser/åtgärder."
+        },
+        "sections": {
+          "bluetooth_options": {
+            "data": {
+              "ble_relay_enabled": "Aktivera bluetooth-relä",
+              "scan_interval_bluetooth": "Bluetooth uppdateringsintervall (minuter)"
+            },
+            "data_description": {
+              "ble_relay_enabled": "Om inaktiverad uppdateras fontänen endast när enheten uppdateras via appen."
+            },
+            "description": "Dessa alternativ är endast effektiva om du har en fontän och minst en enhet som kan fungera som ett bluetooth-relä (t.ex. utfodrare, kattlåda). Se Petkit-appen för mer information.",
+            "name": "Bluetooth-alternativ"
+          },
+          "medias_options": {
+            "data": {
+              "delete_media_after": "Radera media efter (dagar)",
+              "media_dl_image": "Hämta bilder",
+              "media_dl_video": "Hämta videor",
+              "media_ev_type": "Händelsetyp för nedladdning",
+              "media_path": "Mediaväg",
+              "scan_interval_media": "Uppdateringsintervall för media (minuter)"
+            },
+            "data_description": {
+              "delete_media_after": "Radera nedladdad media efter angivet antal dagar. (0 = radera aldrig)",
+              "media_dl_image": "Ladda ned alla bilder från dina enheter, filtrerade enligt de valda händelserna nedan (inget aktivt Care+-abonnemang krävs).",
+              "media_dl_video": "Ladda ned alla videor från dina enheter, filtrerade enligt de valda händelserna nedan. (kräver ett aktivt Care+-abonnemang)",
+              "media_path": "Sökväg där media kommer att lagras. Om ingen anges lagras media i /media-mappen i Home Assistant.",
+              "scan_interval_media": "Intervall för att ladda ned ny media (bilder och videor) från Petkits servrar."
+            },
+            "description": "Dessa alternativ är endast effektiva om du har minst en enhet (t.ex. utfodrare, kattlåda) som kan fånga bilder & videor",
+            "name": "Mediaalternativ"
+          }
+        },
+        "title": "Petkit-integrationskonfiguration"
+      }
+    }
+  }
+}
