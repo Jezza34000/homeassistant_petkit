@@ -18,7 +18,7 @@
           "time_zone": "This field is automatically completed based on your Home Assistant configuration. If you have a different timezone, please select it from the list.",
           "username": "Enter your PetKit account email, or id if you are a Chinese user"
         },
-        "description": "Please enter your PetKit account details."
+        "description": "Please enter your PetKit account details. DO NOT use the same account that you use in the PetKit app on your smartphone. Refer to the documentation for more information."
       }
     }
   },

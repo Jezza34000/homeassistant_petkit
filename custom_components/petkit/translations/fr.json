@@ -13,7 +13,7 @@
           "timezone": "Fuseau horaire",
           "username": "Nom d'utilisateur/Identifiant"
         },
-        "description": "Veuillez saisir les d\u00e9tails de votre compte PetKit."
+        "description": "Veuillez saisir les identifiants de votre compte PetKit. N'utilisez surtout pas le même compte que celui utilisé dans l'application PetKit sur votre smartphone. Consultez la documentation pour plus d'informations."
       }
     }
   },
