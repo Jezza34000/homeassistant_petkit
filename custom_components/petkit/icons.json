@@ -207,6 +207,15 @@
         "default": "mdi:camera"
       }
     },
+    "light": {
+      "light": {
+        "default": "mdi:lightbulb",
+        "state": {
+          "off": "mdi:lightbulb-off",
+          "on": "mdi:lightbulb-on"
+        }
+      }
+    },
     "number": {
       "cleaning_delay": {
         "default": "mdi:clock"
@@ -766,15 +775,6 @@
         "state": {
           "off": "mdi:bell-off",
           "on": "mdi:bell-check"
-        }
-      }
-    },
-    "light": {
-      "light": {
-        "default": "mdi:lightbulb",
-        "state": {
-          "off": "mdi:lightbulb-off",
-          "on": "mdi:lightbulb-on"
         }
       }
     },
