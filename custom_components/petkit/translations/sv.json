@@ -577,6 +577,11 @@
         "name": "Notifiering vid enhetsrengöring"
       }
     },
+    "light": {
+      "light": {
+        "name": "Ljussättning"
+      }
+    },
     "text": {
       "manual_feed_dual_h1": {
         "name": "Manuell matning fack 1"

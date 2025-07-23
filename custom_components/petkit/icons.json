@@ -769,6 +769,15 @@
         }
       }
     },
+    "light": {
+      "light": {
+        "default": "mdi:lightbulb",
+        "state": {
+          "off": "mdi:lightbulb-off",
+          "on": "mdi:lightbulb-on"
+        }
+      }
+    },
     "text": {
       "manual_feed_dual_h1": {
         "default": "mdi:shaker-outline"
