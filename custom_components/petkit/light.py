@@ -8,15 +8,9 @@ from dataclasses import dataclass
 from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
-from pypetkitapi import (
-    DeviceAction,
-    DeviceCommand,
-    LBCommand,
-    T4,
-)
+from pypetkitapi import T4, DeviceAction, DeviceCommand, LBCommand
 
 from homeassistant.components.light import LightEntity, LightEntityDescription
-from homeassistant.const import EntityCategory
 
 from .const import LOGGER, MIN_SCAN_INTERVAL, POWER_ONLINE_STATE
 from .entity import PetKitDescSensorBase, PetkitEntity
@@ -25,8 +19,7 @@ if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-    from .coordinator import PetkitDataUpdateCoordinator
-    from .data import PetkitConfigEntry, PetkitDevices
+    from .data import PetkitConfigEntry
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -46,9 +39,7 @@ LIGHT_ENTITIES = [
             None
             if device.k3_device is None
             else (
-                device.state.light_state
-                if device.state.light_state is not None
-                else 0
+                device.state.light_state if device.state.light_state is not None else 0
             )
         ),
         turn_on=lambda api, device: api.send_api_request(
@@ -67,9 +58,9 @@ LIGHT_ENTITIES = [
 
 
 async def async_setup_entry(
-        hass: HomeAssistant,
-        entry: PetkitConfigEntry,
-        async_add_entities: AddEntitiesCallback,
+    hass: HomeAssistant,
+    entry: PetkitConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up light entities using config entry."""
     devices = entry.runtime_data.client.petkit_entities.values()
@@ -96,10 +87,10 @@ class PetkitLight(PetkitEntity, LightEntity):
     entity_description: PetKitLightDesc
 
     def __init__(
-            self,
-            coordinator,
-            entity_description: PetKitLightDesc,
-            device: Any,
+        self,
+        coordinator,
+        entity_description: PetKitLightDesc,
+        device: Any,
     ) -> None:
         """Initialize the light class."""
         super().__init__(coordinator, device)
