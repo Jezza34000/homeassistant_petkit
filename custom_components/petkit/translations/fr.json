@@ -553,6 +553,11 @@
         "name": "Notif. nettoyage appareil"
       }
     },
+    "light": {
+      "light": {
+        "name": "Lumière"
+      }
+    },
     "text": {
       "manual_feed_dual_h1": {
         "name": "Distribution manuelle r\u00e9servoir 1"
