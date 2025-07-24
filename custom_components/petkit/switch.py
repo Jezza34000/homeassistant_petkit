@@ -15,7 +15,6 @@ from pypetkitapi import (
     DeviceAction,
     DeviceCommand,
     Feeder,
-    LBCommand,
     Litter,
     Pet,
     Purifier,
@@ -693,27 +692,6 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             turn_off=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"logNotify": 0}
             ),
-        ),
-        PetKitSwitchDesc(
-            # For T5 / T6
-            key="Light camera",
-            translation_key="light",
-            value=lambda device: (
-                device.state.light_state.work_process
-                if device.state.light_state is not None
-                else 0
-            ),
-            turn_on=lambda api, device: api.send_api_request(
-                device.id,
-                DeviceCommand.CONTROL_DEVICE,
-                {DeviceAction.START: LBCommand.LIGHT},
-            ),
-            turn_off=lambda api, device: api.send_api_request(
-                device.id,
-                DeviceCommand.CONTROL_DEVICE,
-                {DeviceAction.END: LBCommand.LIGHT},
-            ),
-            only_for_types=LITTER_WITH_CAMERA,
         ),
         PetKitSwitchDesc(
             key="Light Assist",
