@@ -168,10 +168,16 @@ class PetkitMediaUpdateCoordinator(DataUpdateCoordinator):
         event_type_config = media_options.get(CONF_MEDIA_EV_TYPE, DEFAULT_EVENTS)
         dl_image = media_options.get(CONF_MEDIA_DL_IMAGE, DEFAULT_DL_IMAGE)
         dl_video = media_options.get(CONF_MEDIA_DL_VIDEO, DEFAULT_DL_VIDEO)
-        self.media_path = Path(media_options.get(CONF_MEDIA_PATH, DEFAULT_MEDIA_PATH))
         self.delete_after = media_options.get(CONF_DELETE_AFTER, DEFAULT_DELETE_AFTER)
-
         self.event_type = [RecordType(element.lower()) for element in event_type_config]
+
+        raw = Path(media_options.get(CONF_MEDIA_PATH, DEFAULT_MEDIA_PATH))
+        if raw.is_absolute():
+            raw = raw.relative_to(raw.anchor)
+
+        self.media_path = Path("/media") / raw
+
+        LOGGER.debug(f"Media path = {self.media_path}")
 
         if dl_image:
             self.media_type.append(MediaType.IMAGE)

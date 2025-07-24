@@ -13,6 +13,7 @@ from custom_components.petkit.const import (
     COORDINATOR,
     DEFAULT_MEDIA_PATH,
     DOMAIN,
+    MEDIA_ROOT,
     MEDIA_SECTION,
 )
 from homeassistant.components.media_player import (
@@ -32,7 +33,6 @@ _LOGGER = logging.getLogger(__name__)
 
 EXT_MP4 = ".mp4"
 EXT_JPG = ".jpg"
-MEDIA_ROOT = "/media/local"
 
 
 async def async_get_media_source(hass: HomeAssistant) -> PetkitMediaSource:
@@ -45,7 +45,7 @@ class PetkitMediaSource(MediaSource):
 
     name: str = "Petkit"
 
-    def __init__(self, hass: HomeAssistant, name: str = "Petkit") -> None:
+    def __init__(self, hass: HomeAssistant) -> None:
         """Initialize PetkitMediaSource."""
         super().__init__(DOMAIN)
         self.hass = hass
@@ -71,7 +71,7 @@ class PetkitMediaSource(MediaSource):
 
         url = async_process_play_media_url(
             self.hass,
-            f"{MEDIA_ROOT}/{file_path.relative_to(self.media_path)}",
+            f"{MEDIA_ROOT}{file_path}",
             allow_relative_url=True,
             for_supervisor_network=True,
         )
@@ -132,9 +132,14 @@ class PetkitMediaSource(MediaSource):
 
     def _build_file_media_item(self, child: Path) -> BrowseMediaSource:
         """Build a file media item."""
+        snapshot_parent = child.parent.relative_to(Path("/")).with_name("snapshot")
+        thumbnail_path = (
+            Path(MEDIA_ROOT) / snapshot_parent / child.name.replace(EXT_MP4, EXT_JPG)
+        ).as_posix()
+
         thumbnail_url = async_process_play_media_url(
             self.hass,
-            f"{MEDIA_ROOT}/{str(child.parent.relative_to(self.media_path)).replace('video', 'snapshot')}/{child.name.replace('.mp4', '.jpg')}",
+            thumbnail_path,
             allow_relative_url=True,
             for_supervisor_network=True,
         )
