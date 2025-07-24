@@ -634,6 +634,11 @@
         "name": "设备清理时通知"
       }
     },
+    "light": {
+      "light": {
+        "name": "照明"
+      }
+    },
     "text": {
       "manual_feed_dual_h1": {
         "name": "1号粮仓手动出粮"

@@ -207,6 +207,15 @@
         "default": "mdi:camera"
       }
     },
+    "light": {
+      "light": {
+        "default": "mdi:lightbulb",
+        "state": {
+          "off": "mdi:lightbulb-off",
+          "on": "mdi:lightbulb-on"
+        }
+      }
+    },
     "number": {
       "cleaning_delay": {
         "default": "mdi:clock"
