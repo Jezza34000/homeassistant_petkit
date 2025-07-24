@@ -96,6 +96,10 @@
 | **🧴 Purifiers** | ✅ Air Magicube           | <a href=""><img src="https://raw.githubusercontent.com/Jezza34000/homeassistant_petkit/refs/heads/main/images/devices/k2.png" width="40"/></a>         |
 |                  | ✅ Air Smart Spray        | <a href=""><img src="https://raw.githubusercontent.com/Jezza34000/homeassistant_petkit/refs/heads/main/images/devices/k3.png" width="40"/></a>         |
 
+ℹ️ All other devices not listed above are **not supported**.
+
+🆕 New devices? Want to add support for your Petkit device? Open an issue on this repository or join us on our Discord channel.
+
 ## 📦 Installation
 
 Via HACS (recommended), click here :
