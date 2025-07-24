@@ -34,6 +34,7 @@ DEFAULT_SMART_POLLING = True
 DEFAULT_BLUETOOTH_RELAY = True
 DEFAULT_DELETE_AFTER = 3
 DEFAULT_MEDIA_PATH = "/media"
+MEDIA_ROOT = "/media/local"
 
 # Update interval
 MAX_SCAN_INTERVAL = 120
@@ -55,7 +56,9 @@ PETKIT_DEVICES_MAPPING = {
     "1t4": "Puramax",
     "2t4": "Puramax 2",
     "0t5": "Purobot Max",
+    "1t5": "Purobot Max",
     "0t6": "Purobot Ultra",
+    "1t6": "Purobot Ultra",
     "2w5": "Eversweet 5 Mini",
     "4w5": "Eversweet 3 Pro",
     "5w5": "Eversweet Solo 2",
