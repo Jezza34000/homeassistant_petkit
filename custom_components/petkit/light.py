@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
-from pypetkitapi import T4, DeviceAction, DeviceCommand, LBCommand
+from pypetkitapi import LITTER_WITH_CAMERA, T4, DeviceAction, DeviceCommand, LBCommand
 
 from homeassistant.components.light import LightEntity, LightEntityDescription
 
@@ -53,6 +53,27 @@ LIGHT_ENTITIES = [
             {DeviceAction.END: LBCommand.LIGHT},
         ),
         only_for_types=[T4],
+    ),
+    PetKitLightDesc(
+        # For T5 / T6
+        key="Light camera",
+        translation_key="light",
+        value=lambda device: (
+            device.state.light_state.work_process
+            if device.state.light_state is not None
+            else 0
+        ),
+        turn_on=lambda api, device: api.send_api_request(
+            device.id,
+            DeviceCommand.CONTROL_DEVICE,
+            {DeviceAction.START: LBCommand.LIGHT},
+        ),
+        turn_off=lambda api, device: api.send_api_request(
+            device.id,
+            DeviceCommand.CONTROL_DEVICE,
+            {DeviceAction.END: LBCommand.LIGHT},
+        ),
+        only_for_types=LITTER_WITH_CAMERA,
     ),
 ]
 
