@@ -637,6 +637,11 @@
         "name": "Notif on device cleaning"
       }
     },
+    "light": {
+      "light": {
+        "name": "Light"
+      }
+    },
     "text": {
       "manual_feed_dual_h1": {
         "name": "Manual feed hopper 1"
