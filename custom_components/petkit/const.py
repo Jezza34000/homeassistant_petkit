@@ -27,7 +27,15 @@ CONF_MEDIA_PATH = "media_path"
 DEFAULT_SCAN_INTERVAL = 60
 DEFAULT_SCAN_INTERVAL_MEDIA = 15
 DEFAULT_SCAN_INTERVAL_BLUETOOTH = 30
-DEFAULT_EVENTS = ["Eat", "Feed", "Toileting"]
+DEFAULT_EVENTS = [
+    "Pet",
+    "Eat",
+    "Feed",
+    "Toileting",
+    "Dish_Before",
+    "Dish_After",
+    "Waste_check",
+]
 DEFAULT_DL_VIDEO = False
 DEFAULT_DL_IMAGE = True
 DEFAULT_SMART_POLLING = True

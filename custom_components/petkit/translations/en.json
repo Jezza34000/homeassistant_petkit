@@ -185,6 +185,15 @@
       },
       "last_visit_event": {
         "name": "Last visit event"
+      },
+      "dish_before": {
+        "name": "Dish before"
+      },
+      "dish_after": {
+        "name": "Dish after"
+      },
+      "waste_check": {
+        "default": "Waste check"
       }
     },
     "number": {

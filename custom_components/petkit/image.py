@@ -62,6 +62,18 @@ IMAGE_MAPPING: dict[type[PetkitDevices], list[PetKitImageDesc]] = {
             translation_key="last_feed_event",
             only_for_types=FEEDER_WITH_CAMERA,
         ),
+        PetKitImageDesc(
+            key="Dish before",
+            event_key="dish_before",
+            translation_key="dish_before",
+            only_for_types=FEEDER_WITH_CAMERA,
+        ),
+        PetKitImageDesc(
+            key="Dish after",
+            event_key="dish_after",
+            translation_key="dish_after",
+            only_for_types=FEEDER_WITH_CAMERA,
+        ),
     ],
     Litter: [
         *COMMON_ENTITIES,
@@ -69,6 +81,18 @@ IMAGE_MAPPING: dict[type[PetkitDevices], list[PetKitImageDesc]] = {
             key="Last usage event",
             event_key="toileting",
             translation_key="last_toileting_event",
+            only_for_types=LITTER_WITH_CAMERA,
+        ),
+        PetKitImageDesc(
+            key="Last visit event",
+            event_key="pet",
+            translation_key="last_visit_event",
+            only_for_types=LITTER_WITH_CAMERA,
+        ),
+        PetKitImageDesc(
+            key="Waste check",
+            event_key="waste_check",
+            translation_key="waste_check",
             only_for_types=LITTER_WITH_CAMERA,
         ),
     ],

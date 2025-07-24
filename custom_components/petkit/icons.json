@@ -194,6 +194,12 @@
       }
     },
     "image": {
+      "dish_after": {
+        "default": "mdi:camera"
+      },
+      "dish_before": {
+        "default": "mdi:camera"
+      },
       "last_eat_event": {
         "default": "mdi:camera"
       },
@@ -204,6 +210,9 @@
         "default": "mdi:camera"
       },
       "last_visit_event": {
+        "default": "mdi:camera"
+      },
+      "waste_check": {
         "default": "mdi:camera"
       }
     },

@@ -136,6 +136,9 @@ class PetkitOptionsFlowHandler(OptionsFlow):
                                             "Feed",
                                             "Toileting",
                                             "Move",
+                                            "Dish_before",
+                                            "Dish_after",
+                                            "Waste_check",
                                         ],
                                     )
                                 ),
