@@ -193,7 +193,7 @@
         "name": "Dish after"
       },
       "waste_check": {
-        "default": "Waste check"
+        "name": "Waste check"
       }
     },
     "number": {
