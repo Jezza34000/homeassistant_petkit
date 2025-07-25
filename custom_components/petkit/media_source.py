@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime
-import logging
 from pathlib import Path
 import re
 
@@ -13,6 +12,7 @@ from custom_components.petkit.const import (
     COORDINATOR,
     DEFAULT_MEDIA_PATH,
     DOMAIN,
+    LOGGER,
     MEDIA_ROOT,
     MEDIA_SECTION,
 )
@@ -28,8 +28,6 @@ from homeassistant.components.media_source import (
     PlayMedia,
 )
 from homeassistant.core import HomeAssistant
-
-_LOGGER = logging.getLogger(__name__)
 
 EXT_MP4 = ".mp4"
 EXT_JPG = ".jpg"
@@ -60,7 +58,7 @@ class PetkitMediaSource(MediaSource):
         """Retrieve the integration's coordinator."""
         if DOMAIN in self.hass.data and COORDINATOR in self.hass.data[DOMAIN]:
             return self.hass.data[DOMAIN][COORDINATOR]
-        _LOGGER.error("Petkit coordinator not found in hass.data.")
+        LOGGER.error("Petkit coordinator not found in hass.data.")
         return None
 
     async def async_resolve_media(self, item: MediaSourceItem) -> PlayMedia:
@@ -68,6 +66,7 @@ class PetkitMediaSource(MediaSource):
         file_path = self.media_path / Path(item.identifier)
         if not file_path.exists():
             raise ValueError(f"File not found: {file_path}")
+        LOGGER.debug(f"Media Source: Resolving media {file_path}")
 
         url = async_process_play_media_url(
             self.hass,
@@ -85,6 +84,7 @@ class PetkitMediaSource(MediaSource):
 
         if not current_path.exists() or not current_path.is_dir():
             raise ValueError(f"Invalid path: {current_path}")
+        LOGGER.debug(f"Media Source: Browsing {current_path}")
 
         children = await asyncio.to_thread(self._get_children_from_path, current_path)
 
@@ -103,6 +103,7 @@ class PetkitMediaSource(MediaSource):
         """Get children from a path."""
         children = []
         for child in sorted(path.iterdir()):
+            LOGGER.debug(f"Media Source: Processing child {child.name} in {path}")
             if child.is_dir():
                 title = self.get_device_name_from_data(
                     self.convert_date(child.name)
