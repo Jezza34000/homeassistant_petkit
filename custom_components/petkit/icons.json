@@ -720,6 +720,34 @@
           "on": "mdi:power"
         }
       },
+      "privacy_camera_inward": {
+        "default": "mdi:camera",
+        "state": {
+          "off": "mdi:camera",
+          "on": "mdi:camera-flip"
+        }
+      },
+      "privacy_camera_off": {
+        "default": "mdi:cctv",
+        "state": {
+          "off": "mdi:cctv",
+          "on": "mdi:cctv-off"
+        }
+      },
+      "privacy_microphone_off": {
+        "default": "mdi:microphone",
+        "state": {
+          "off": "mdi:microphone",
+          "on": "mdi:microphone-off"
+        }
+      },
+      "privacy_mode": {
+        "default": "mdi:eye",
+        "state": {
+          "off": "mdi:eye",
+          "on": "mdi:eye-off"
+        }
+      },
       "refill_notif": {
         "default": "mdi:bell",
         "state": {
@@ -753,6 +781,13 @@
         "state": {
           "off": "mdi:volume-mute",
           "on": "mdi:volume-high"
+        }
+      },
+      "toilet_light": {
+        "default": "mdi:lightbulb-off",
+        "state": {
+          "off": "mdi:lightbulb-off",
+          "on": "mdi:lightbulb-auto"
         }
       },
       "video_timestamp": {

@@ -729,6 +729,65 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
                 device.id, DeviceCommand.UPDATE_SETTING, {"toiletNotify": 0}
             ),
         ),
+        PetKitSwitchDesc(
+            key="Toilet light",
+            translation_key="toilet_light",
+            value=lambda device: device.settings.toilet_light,
+            entity_category=EntityCategory.CONFIG,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"toiletLight": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"toiletLight": 0}
+            ),
+        ),
+        PetKitSwitchDesc(
+            key="Privacy mode",
+            translation_key="privacy_mode",
+            value=lambda device: device.settings.privacy_mode,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"homeMode": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"homeMode": 0}
+            ),
+        ),
+        # PetKitSwitchDesc(
+        #     key="Privacy Camera OFF",
+        #     translation_key="privacy_camera_off",
+        #     value=lambda device: device.settings.camera_off, # Unknown settings location ???
+        #     entity_category=EntityCategory.CONFIG,
+        #     turn_on=lambda api, device: api.send_api_request(
+        #         device.id, DeviceCommand.UPDATE_SETTING, {"cameraOff": 1}
+        #     ),
+        #     turn_off=lambda api, device: api.send_api_request(
+        #         device.id, DeviceCommand.UPDATE_SETTING, {"cameraOff": 0}
+        #     ),
+        # ),
+        # PetKitSwitchDesc(
+        #     key="Privacy Camera inward",
+        #     translation_key="privacy_camera_inward",
+        #     value=lambda device: device.settings.privacy_camera_inward, # Unknown settings location ???
+        #     entity_category=EntityCategory.CONFIG,
+        #     turn_on=lambda api, device: api.send_api_request(
+        #         device.id, DeviceCommand.UPDATE_SETTING, {"cameraInward": 1}
+        #     ),
+        #     turn_off=lambda api, device: api.send_api_request(
+        #         device.id, DeviceCommand.UPDATE_SETTING, {"cameraInward": 0}
+        #     ),
+        # ),
+        # PetKitSwitchDesc(
+        #     key="Privacy Microphone OFF",
+        #     translation_key="privacy_microphone_off",
+        #     value=lambda device: device.settings.privacy_microphone_off, # Unknown settings location ???
+        #     entity_category=EntityCategory.CONFIG,
+        #     turn_on=lambda api, device: api.send_api_request(
+        #         device.id, DeviceCommand.UPDATE_SETTING, {"noSound": 1}
+        #     ),
+        #     turn_off=lambda api, device: api.send_api_request(
+        #         device.id, DeviceCommand.UPDATE_SETTING, {"noSound": 0}
+        #     ),
+        # ),
     ],
     WaterFountain: [*COMMON_ENTITIES],
     Purifier: [

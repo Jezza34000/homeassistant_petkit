@@ -571,7 +571,7 @@
         "name": "Light"
       },
       "light_assist": {
-        "name": "Light assist"
+        "name": "Light on cleaning"
       },
       "light_weight": {
         "name": "Light weight"
@@ -642,8 +642,23 @@
       "work_log_notify": {
         "name": "Notif on executing scheduled tasks"
       },
+      "toilet_light": {
+        "name": "Light on toileting"
+      },
+      "privacy_mode": {
+        "name": "Privacy mode"
+      },
       "work_notify": {
         "name": "Notif on device cleaning"
+      },
+      "privacy_camera_off": {
+        "name": "Privacy : camera off"
+      },
+      "privacy_camera_inward": {
+        "name": "Privacy : camera inward"
+      },
+      "privacy_microphone_off": {
+        "name": "Privacy : microphone off"
       }
     },
     "light": {
