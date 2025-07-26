@@ -652,13 +652,13 @@
         "name": "Notif on device cleaning"
       },
       "privacy_camera_off": {
-        "name": "Privacy : camera off"
+        "name": "Privacy: camera off"
       },
       "privacy_camera_inward": {
-        "name": "Privacy : camera inward"
+        "name": "Privacy: camera inward"
       },
       "privacy_microphone_off": {
-        "name": "Privacy : microphone off"
+        "name": "Privacy: microphone off"
       }
     },
     "light": {
