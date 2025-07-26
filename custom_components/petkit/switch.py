@@ -744,7 +744,7 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
         PetKitSwitchDesc(
             key="Privacy mode",
             translation_key="privacy_mode",
-            value=lambda device: device.settings.privacy_mode,
+            value=lambda device: device.settings.home_mode,
             turn_on=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"homeMode": 1}
             ),
