@@ -94,9 +94,7 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
         if self.fast_poll_tic > 0:
             self.fast_poll_tic -= 1
             LOGGER.debug(f"Fast poll tic remaining = {self.fast_poll_tic}")
-        elif self.fast_poll_tic <= 0 and self.update_interval != timedelta(
-            seconds=DEFAULT_SCAN_INTERVAL
-        ):
+        elif self.update_interval != timedelta(seconds=DEFAULT_SCAN_INTERVAL):
             self.update_interval = timedelta(seconds=DEFAULT_SCAN_INTERVAL)
             LOGGER.debug("Fast poll tic ended, reset to default scan interval")
 
