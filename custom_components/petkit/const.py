@@ -75,7 +75,7 @@ PETKIT_DEVICES_MAPPING = {
     "0pet": "Pet",
 }
 
-# Messages consrtants
+# Messages constants
 NO_ERROR = "No error"
 
 # Status mapping
