@@ -70,6 +70,23 @@ class PetKitSensorDesc(PetKitDescSensorBase, SensorEntityDescription):
     smart_poll_trigger: Callable[[PetkitDevices], bool] | None = None
 
 
+def get_liquid_value(device):
+    """Get the liquid value for purifier devices."""
+    if (
+        hasattr(device.state, "liquid")
+        and device.state.liquid is not None
+        and 0 <= device.state.liquid <= 100
+    ):
+        return device.state.liquid
+    if (
+        hasattr(device, "liquid")
+        and device.liquid is not None
+        and 0 <= device.liquid <= 100
+    ):
+        return device.liquid
+    return None
+
+
 COMMON_ENTITIES = [
     PetKitSensorDesc(
         key="Device status",
@@ -551,19 +568,7 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             entity_category=EntityCategory.DIAGNOSTIC,
             state_class=SensorStateClass.MEASUREMENT,
             native_unit_of_measurement=PERCENTAGE,
-            value=lambda device: (
-                device.state.liquid
-                if hasattr(device.state, "liquid")
-                and device.state.liquid is not None
-                and 0 <= device.state.liquid <= 100
-                else (
-                    device.liquid
-                    if hasattr(device, "liquid")
-                    and device.liquid is not None
-                    and 0 <= device.liquid <= 100
-                    else None
-                )
-            ),
+            value=get_liquid_value,
         ),
         PetKitSensorDesc(
             key="Battery",

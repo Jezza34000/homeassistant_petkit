@@ -30,18 +30,21 @@ class PetKitLightDesc(PetKitDescSensorBase, LightEntityDescription):
     turn_off: Callable[[Any, Any], Any] | None = None
 
 
+def get_k3_light_value(device):
+    """Get the light value for K3 devices."""
+    if device.k3_device is None:
+        return None
+    if device.state.light_state is not None:
+        return device.state.light_state
+    return 0
+
+
 LIGHT_ENTITIES = [
     PetKitLightDesc(
         # For K3 or K3 (binded to T4)
         key="Light K3",
         translation_key="light",
-        value=lambda device: (
-            None
-            if device.k3_device is None
-            else (
-                device.state.light_state if device.state.light_state is not None else 0
-            )
-        ),
+        value=get_k3_light_value,
         turn_on=lambda api, device: api.send_api_request(
             device.id,
             DeviceCommand.CONTROL_DEVICE,
