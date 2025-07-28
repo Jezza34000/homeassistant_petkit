@@ -159,7 +159,7 @@ class PetkitImage(PetkitEntity, ImageEntity):
 
     @property
     def available(self) -> bool:
-        """Return if this button is available or not"""
+        """Return if this image is available or not"""
         if self.config_entry.get(MEDIA_SECTION, {}).get(CONF_MEDIA_DL_IMAGE, False):
             return True
         self._attr_image_last_updated = None
