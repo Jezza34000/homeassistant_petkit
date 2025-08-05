@@ -61,7 +61,25 @@ def map_work_state(work_state: WorkState | None) -> str:
 
 
 def get_raw_feed_plan(feeder_records_data) -> str | None:
-    """Get the raw feed plan from feeder data."""
+    """Get the raw feed plan from feeder data.
+
+    :param feeder_records_data: FeederRecordsData
+    :return: A string with the feed plan in the format "id_incremental,hours,minutes,amount,state"
+    where:
+        - id_incremental: The incremental ID of the feed item
+        - hours: Hours
+        - minutes: Minutes
+        - amount: The amount of food dispensed (for dual feeders, it will be the sum of amount1 and amount2)
+        - state: The state of the food depending on the device type
+            - 0: Food is pending (not dispensed yet)
+            - 1: Food was dispensed successfully (by schedule)
+            - 2: Food was dispensed successfully (by remote command on app)
+            - 3: Food was dispensed successfully (by local command on feeder)
+            - 7: Food was cancelled
+            - 8: Food was skipped due to SurplusControl (only for feeders with camera)
+            - 9: Food was not dispensed due to an error
+
+    """
     result = []
 
     if not feeder_records_data:
@@ -80,7 +98,7 @@ def get_raw_feed_plan(feeder_records_data) -> str | None:
             hours = time_in_seconds // 3600
             minutes = (time_in_seconds % 3600) // 60
 
-            # Calculate amount
+            # Calculate amount (sum of amount1 and amount2 if available)
             amount = (
                 item.amount
                 if item.amount is not None
@@ -88,18 +106,27 @@ def get_raw_feed_plan(feeder_records_data) -> str | None:
                 + (getattr(item, "amount2", 0) or 0)
             )
 
-            state = 255  # By default, we assume that the food is pending
-            if hasattr(item.state, "err_code"):
-                err_code = item.state.err_code
-                if err_code == 0:
-                    # Everything was OK dispensing food
-                    state = 0
-                elif err_code == 10:
-                    # Food was not dispensed cause SurplusControl skipped it
-                    state = 255
+            state = 0  # Default state is pending (not dispensed yet)
+
+            if item.status == 1:
+                state = 7  # Food was cancelled by the user
+            elif hasattr(item, "state") and item.state is not None:
+                if item.state.err_code == 0 and item.state.result == 0:
+                    # Food was dispensed successfully
+                    # Determinate the source of dispense
+                    if item.src == 1:
+                        state = 1  # By schedule
+                    elif item.src == 3:
+                        state = 2  # Remotely by command on app
+                    elif item.src == 4:
+                        state = 3  # Locally by command on feeder
+                    else:
+                        state = 1  # Default to state 1 if src is unknown
+                elif item.state.err_code == 10 and item.state.result == 8:
+                    state = 8  # Food was skipped due to SurplusControl
                 else:
-                    # Food was not dispensed cause of other reasons
-                    state = 1
+                    state = 9  # Food was not dispensed due to an error
+
             result.append(f"{id_incremental},{hours},{minutes},{amount},{state}")
     return ",".join(result) if result else None
 
