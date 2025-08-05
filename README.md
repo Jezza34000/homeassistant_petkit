@@ -51,19 +51,66 @@
     
     ```yaml
     type: custom:dispenser-schedule-card
-    entity: sensor.MY_FEEDER_NAME_raw_distribution_data
+    entity: sensor.yumshare_raw_distribution_data
     editable: never
+    device:
+      type: custom
+      max_entries: 15
+      min_amount: 1
+      max_amount: 20
+      step_amount: 1
+      status_map:
+        - 0 -> pending
+        - 1 -> dispensed_schedule
+        - 2 -> dispensed_remote
+        - 3 -> dispensed_local
+        - 7 -> cancelled
+        - 8 -> skipped
+        - 9 -> error
+      status_pattern: >-
+        (?<id>[0-9]),(?<hour>[0-9]{1,3}),(?<minute>[0-9]{1,3}),(?<amount>[0-9]{1,3}),(?<status>[0-9]{1,3}),?
+    actions:
+      edit: esphome.feeder_edit_scheduled_feed
+      remove: esphome.feeder_remove_scheduled_feed
     alternate_unit:
       unit_of_measurement: g
       conversion_factor: 10
       approximate: true
+    display:
+      pending:
+        icon: mdi:clock-outline
+        label: pending
+      dispensed_schedule:
+        color: green
+        icon: mdi:clock-check-outline
+        label: Dispensed (scheduled)
+      dispensed_remote:
+        color: green
+        icon: mdi:cellphone-check
+        label: Dispensed (remote app)
+      dispensed_local:
+        color: green
+        icon: mdi:account-check
+        label: Dispensed (locally)
+      cancelled:
+        color: orange
+        icon: mdi:cancel
+        label: Cancelled
+      skipped:
+        color: grey
+        icon: mdi:skip-next-circle-outline
+        label: Skipped (surplus control)
+      error:
+        color: red
+        icon: mdi:alert-circle
+        label: Failed
     ```
     
     > Not all feeders support this feature, if you don't have the sensor `raw_distribution_data`, your feeder is not supported.
     
     </details>
 
-<a href=""><img src="https://raw.githubusercontent.com/Jezza34000/homeassistant_petkit/refs/heads/main/images/feed_plan.png" width="400"></a>
+<a href=""><img src="https://raw.githubusercontent.com/Jezza34000/homeassistant_petkit/refs/heads/main/images/feed_plan2.png" width="400"></a>
 
 - **Petkit devices card**
 
