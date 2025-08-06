@@ -68,10 +68,7 @@
         - 8 -> skipped
         - 9 -> error
       status_pattern: >-
-        (?<id>[0-9]),(?<hour>[0-9]{1,3}),(?<minute>[0-9]{1,3}),(?<amount>[0-9]{1,3}),(?<status>[0-9]{1,3}),?
-    actions:
-      edit: esphome.feeder_edit_scheduled_feed
-      remove: esphome.feeder_remove_scheduled_feed
+        (?<id>[0-9]{1,2}),(?<hour>[0-9]{1,2}),(?<minute>[0-9]{1,2}),(?<amount>[0-9]{1,3}),(?<status>[0-9]{1}),?
     alternate_unit:
       unit_of_measurement: g
       conversion_factor: 10
@@ -81,27 +78,27 @@
         icon: mdi:clock-outline
         label: pending
       dispensed_schedule:
-        color: green
+        color: var(--success-color)
         icon: mdi:clock-check-outline
         label: Dispensed (scheduled)
       dispensed_remote:
-        color: green
+        color: var(--success-color)
         icon: mdi:cellphone-check
         label: Dispensed (remote app)
       dispensed_local:
-        color: green
+        color: var(--success-color)
         icon: mdi:account-check
         label: Dispensed (locally)
       cancelled:
-        color: orange
+        color: var(--warning-color)
         icon: mdi:cancel
         label: Cancelled
       skipped:
-        color: grey
+        color: var(--label-badge-grey)
         icon: mdi:skip-next-circle-outline
         label: Skipped (surplus control)
       error:
-        color: red
+        color: var(--error-color)
         icon: mdi:alert-circle
         label: Failed
     ```
