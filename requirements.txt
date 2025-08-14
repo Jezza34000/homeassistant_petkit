@@ -1,2 +1,2 @@
 aiofiles==24.1.0
-pypetkitapi==1.16.4
+pypetkitapi==1.19.1
