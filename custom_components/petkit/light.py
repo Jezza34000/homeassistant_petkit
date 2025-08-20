@@ -10,7 +10,11 @@ from typing import TYPE_CHECKING, Any
 
 from pypetkitapi import LITTER_WITH_CAMERA, T4, DeviceAction, DeviceCommand, LBCommand
 
-from homeassistant.components.light import LightEntity, LightEntityDescription
+from homeassistant.components.light import (
+    ColorMode,
+    LightEntity,
+    LightEntityDescription,
+)
 
 from .const import LOGGER, MIN_SCAN_INTERVAL, POWER_ONLINE_STATE
 from .entity import PetKitDescSensorBase, PetkitEntity
@@ -107,6 +111,9 @@ async def async_setup_entry(
 
 class PetkitLight(PetkitEntity, LightEntity):
     """Petkit Smart Devices Light class."""
+
+    _attr_supported_color_modes = {ColorMode.ONOFF}
+    _attr_color_mode = ColorMode.ONOFF
 
     entity_description: PetKitLightDesc
 

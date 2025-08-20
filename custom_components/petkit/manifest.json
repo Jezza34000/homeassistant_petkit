@@ -1,6 +1,6 @@
 {
   "domain": "petkit",
-  "name": "Petkit Smart Devices",
+  "name": "Petkit",
   "codeowners": ["@Jezza34000"],
   "config_flow": true,
   "documentation": "https://github.com/Jezza34000/homeassistant_petkit",
@@ -8,5 +8,5 @@
   "issue_tracker": "https://github.com/Jezza34000/homeassistant_petkit/issues",
   "loggers": ["petkit"],
   "requirements": ["pypetkitapi==1.19.1", "aiofiles==24.1.0"],
-  "version": "1.19.0"
+  "version": "1.19.1"
 }
