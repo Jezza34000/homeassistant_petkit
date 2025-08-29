@@ -27,6 +27,9 @@
       "battery": {
         "name": "Battery"
       },
+      "weight_error": {
+        "name": "Weight error"
+      },
       "light": {
         "name": "Light"
       },

@@ -156,6 +156,13 @@
           "off": "mdi:delete",
           "on": "mdi:delete-forever"
         }
+      },
+      "weight_error": {
+        "default": "mdi:weight",
+        "state": {
+          "off": "mdi:weight",
+          "on": "mdi:alert-circle"
+        }
       }
     },
     "button": {

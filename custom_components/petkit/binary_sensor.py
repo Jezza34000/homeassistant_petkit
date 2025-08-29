@@ -173,6 +173,13 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
                 else device.state.spray_state == 0
             ),
         ),
+        PetKitBinarySensorDesc(
+            key="Weight error",
+            translation_key="weight_error",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            value=lambda device: device.state.pet_error,
+        ),
     ],
     WaterFountain: [
         *COMMON_ENTITIES,
