@@ -14,6 +14,7 @@ from pypetkitapi import (
     D4SH,
     DEVICES_FEEDER,
     DEVICES_LITTER_BOX,
+    DEVICES_WATER_FOUNTAIN,
     LITTER_WITH_CAMERA,
     T4,
     T5,
@@ -28,6 +29,7 @@ from pypetkitapi import (
     Purifier,
     WaterFountain,
 )
+from pypetkitapi.command import FountainAction # FIXME: https://github.com/Jezza34000/py-petkit-api/pull/5
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 
@@ -234,7 +236,17 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
             is_available=lambda device: device.state.work_state is None,
         ),
     ],
-    WaterFountain: [*COMMON_ENTITIES],
+    WaterFountain: [
+        *COMMON_ENTITIES,
+        PetKitButtonDesc(
+            key="Reset filter",
+            translation_key="reset_filter",
+            action=lambda api, device: api.bluetooth_manager.send_ble_command(
+                device.id, FountainAction.RESET_FILTER
+            ),
+            only_for_types=DEVICES_WATER_FOUNTAIN,
+        ),
+    ],
     Purifier: [*COMMON_ENTITIES],
     Pet: [*COMMON_ENTITIES],
 }
@@ -294,19 +306,21 @@ class PetkitButton(PetkitEntity, ButtonEntity):
         """Only make available if device is online."""
 
         device_data = self.coordinator.data.get(self.device.id)
-        if (
-            hasattr(device_data.state, "pim")
-            and device_data.state.pim not in POWER_ONLINE_STATE
-        ):
-            return False
+        try:
+            if device_data.state.pim not in POWER_ONLINE_STATE:
+                return False
+        except AttributeError:
+            pass
 
         if self.entity_description.is_available:
+            is_available = self.entity_description.is_available(device_data)
             LOGGER.debug(
-                "Button %s availability result is : %s",
+                "Button %s availability result is: %s",
                 self.entity_description.key,
-                self.entity_description.is_available(device_data),
+                is_available,
             )
-            return self.entity_description.is_available(device_data)
+            return is_available
+
         return True
 
     async def async_press(self) -> None:
