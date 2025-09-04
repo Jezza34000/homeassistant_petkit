@@ -184,7 +184,7 @@ class PetkitOptionsFlowHandler(OptionsFlow):
 class PetkitFlowHandler(ConfigFlow, domain=DOMAIN):
     """Config flow for Petkit Smart Devices."""
 
-    VERSION = 1
+    VERSION = 7
 
     @staticmethod
     @callback

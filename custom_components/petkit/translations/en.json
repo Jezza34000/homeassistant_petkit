@@ -169,6 +169,9 @@
       },
       "level_litter": {
         "name": "Level litter"
+      },
+      "reset_filter": {
+        "name": "Reset filter"
       }
     },
     "fan": {
