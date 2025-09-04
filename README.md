@@ -164,6 +164,23 @@ Or follow these steps:
 10. Go to `settings` -> `integrations` -> `add integration` -> search for `Petkit Smart Devices`
 11. Follow the instructions to configure the integration
 
+## ⤵️ Migrating from [RobertD502/home-assistant-petkit](https://github.com/RobertD502/home-assistant-petkit) integration ?
+
+Migrating is simple and seamless! Just follow these steps:
+
+1. Install this integration directly over the existing one.
+2. Restart Home Assistant to apply the changes.
+
+That's it! 🎉
+
+No manual configuration or re-entry of credentials is required.
+Your existing credentials (username, password, and region) will be automatically preserved. \
+New entities and features will be automatically created and available.
+
+> [!NOTE]
+> Some entity names may have changed. If you encounter issues with automations or scripts, you may need to update or recreate them to match the new entity names.
+
+
 ## 🔧 Basic Setup
 
 Basic setup is simple, just follow the instructions in the integration setup. \
