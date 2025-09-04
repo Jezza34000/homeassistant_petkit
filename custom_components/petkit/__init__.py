@@ -171,9 +171,15 @@ async def async_remove_config_entry_device(
     return True
 
 
-async def async_migrate_entry(hass: HomeAssistant, config_entry: PetkitConfigEntry) -> bool:
+async def async_migrate_entry(
+    hass: HomeAssistant, config_entry: PetkitConfigEntry
+) -> bool:
     """Migrate old entry."""
-    LOGGER.debug("Migrating configuration from version %s.%s", config_entry.version, config_entry.minor_version)
+    LOGGER.debug(
+        "Migrating configuration from version %s.%s",
+        config_entry.version,
+        config_entry.minor_version,
+    )
 
     data = config_entry.data.copy()
     options = config_entry.options.copy()
@@ -183,14 +189,18 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: PetkitConfigEnt
             pass
 
         case 6:  # latest RobertD502's
-            data[CONF_USERNAME] = data.pop('email')
-            data[CONF_TIME_ZONE] = options.pop('timezone')
+            data[CONF_USERNAME] = data.pop("email")
+            data[CONF_TIME_ZONE] = options.pop("timezone")
 
-            options[CONF_SCAN_INTERVAL] = options.pop('polling_interval', DEFAULT_SCAN_INTERVAL)
+            options[CONF_SCAN_INTERVAL] = options.pop(
+                "polling_interval", DEFAULT_SCAN_INTERVAL
+            )
             options[CONF_SMART_POLLING] = DEFAULT_SMART_POLLING
 
             options[BT_SECTION] = {
-                CONF_BLE_RELAY_ENABLED: options.pop('use_ble_relay', DEFAULT_BLUETOOTH_RELAY),
+                CONF_BLE_RELAY_ENABLED: options.pop(
+                    "use_ble_relay", DEFAULT_BLUETOOTH_RELAY
+                ),
                 CONF_SCAN_INTERVAL_BLUETOOTH: DEFAULT_SCAN_INTERVAL_BLUETOOTH,
             }
 
@@ -206,7 +216,17 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: PetkitConfigEnt
         case _:
             return False
 
-    hass.config_entries.async_update_entry(config_entry, data=data, options=options, version=PetkitFlowHandler.VERSION, minor_version=PetkitFlowHandler.MINOR_VERSION)
+    hass.config_entries.async_update_entry(
+        config_entry,
+        data=data,
+        options=options,
+        version=PetkitFlowHandler.VERSION,
+        minor_version=PetkitFlowHandler.MINOR_VERSION,
+    )
 
-    LOGGER.debug("Migration to configuration version %s.%s successful", config_entry.version, config_entry.minor_version)
+    LOGGER.debug(
+        "Migration to configuration version %s.%s successful",
+        config_entry.version,
+        config_entry.minor_version,
+    )
     return True
