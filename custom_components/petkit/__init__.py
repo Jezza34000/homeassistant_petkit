@@ -190,7 +190,9 @@ async def async_migrate_entry(
 
         case 6:  # latest RobertD502's
             data[CONF_USERNAME] = data.pop("email")
-            data[CONF_TIME_ZONE] = options.pop("timezone")
+            old_timezone = options.pop("timezone", None)
+            if old_timezone and old_timezone != "Set Automatically":
+                data[CONF_TIME_ZONE] = old_timezone
 
             options[CONF_SCAN_INTERVAL] = options.pop(
                 "polling_interval", DEFAULT_SCAN_INTERVAL
