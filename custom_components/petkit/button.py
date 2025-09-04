@@ -29,7 +29,9 @@ from pypetkitapi import (
     Purifier,
     WaterFountain,
 )
-from pypetkitapi.command import FountainAction # FIXME: https://github.com/Jezza34000/py-petkit-api/pull/5
+from pypetkitapi.command import (
+    FountainAction,
+)
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 
