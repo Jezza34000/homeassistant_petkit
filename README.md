@@ -180,7 +180,6 @@ New entities and features will be automatically created and available.
 > [!NOTE]
 > Some entity names may have changed. If you encounter issues with automations or scripts, you may need to update or recreate them to match the new entity names.
 
-
 ## 🔧 Basic Setup
 
 Basic setup is simple, just follow the instructions in the integration setup. \
