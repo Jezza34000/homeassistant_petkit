@@ -48,6 +48,7 @@ if TYPE_CHECKING:
 class PetKitNumberDesc(PetKitDescSensorBase, NumberEntityDescription):
     """A class that describes number entities."""
 
+    entity_picture: Callable[[PetkitDevices], str | None] | None = None
     native_value: Callable[[PetkitDevices], None] | None = None
     action: Callable[[PetkitConfigEntry, PetkitDevices, str], Any] | None
 
@@ -141,6 +142,7 @@ NUMBER_MAPPING: dict[type[PetkitDevices], list[PetKitNumberDesc]] = {
         PetKitNumberDesc(
             key="Pet weight",
             translation_key="pet_weight",
+            entity_picture=lambda pet: pet.avatar,
             native_min_value=1,
             native_max_value=100,
             native_step=0.1,
@@ -200,6 +202,13 @@ class PetkitNumber(PetkitEntity, NumberEntity):
     def unique_id(self) -> str:
         """Return a unique ID for the binary_sensor."""
         return f"{self.device.device_nfo.device_type}_{self.device.sn}_{self.entity_description.key}"
+
+    @property
+    def entity_picture(self) -> str | None:
+        """Grab associated pet picture."""
+        if self.entity_description.entity_picture:
+            return self.entity_description.entity_picture(self.device)
+        return None
 
     @property
     def mode(self) -> NumberMode:
