@@ -29,9 +29,7 @@ from pypetkitapi import (
     Purifier,
     WaterFountain,
 )
-from pypetkitapi.command import (
-    FountainAction,
-)
+from pypetkitapi.command import FountainAction
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 
