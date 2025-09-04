@@ -19,13 +19,31 @@ from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.loader import async_get_loaded_integration
 
+from .config_flow import PetkitFlowHandler
 from .const import (
     BT_SECTION,
+    CONF_BLE_RELAY_ENABLED,
+    CONF_DELETE_AFTER,
+    CONF_MEDIA_DL_IMAGE,
+    CONF_MEDIA_DL_VIDEO,
+    CONF_MEDIA_EV_TYPE,
+    CONF_MEDIA_PATH,
     CONF_SCAN_INTERVAL_BLUETOOTH,
     CONF_SCAN_INTERVAL_MEDIA,
+    CONF_SMART_POLLING,
     COORDINATOR,
     COORDINATOR_BLUETOOTH,
     COORDINATOR_MEDIA,
+    DEFAULT_BLUETOOTH_RELAY,
+    DEFAULT_DELETE_AFTER,
+    DEFAULT_DL_IMAGE,
+    DEFAULT_DL_VIDEO,
+    DEFAULT_EVENTS,
+    DEFAULT_MEDIA_PATH,
+    DEFAULT_SCAN_INTERVAL,
+    DEFAULT_SCAN_INTERVAL_BLUETOOTH,
+    DEFAULT_SCAN_INTERVAL_MEDIA,
+    DEFAULT_SMART_POLLING,
     DOMAIN,
     LOGGER,
     MEDIA_SECTION,
@@ -150,4 +168,45 @@ async def async_remove_config_entry_device(
     hass: HomeAssistant, config_entry: PetkitConfigEntry, device_entry: dr.DeviceEntry
 ) -> bool:
     """Remove a config entry from a device."""
+    return True
+
+
+async def async_migrate_entry(hass: HomeAssistant, config_entry: PetkitConfigEntry) -> bool:
+    """Migrate old entry."""
+    LOGGER.debug("Migrating configuration from version %s.%s", config_entry.version, config_entry.minor_version)
+
+    data = config_entry.data.copy()
+    options = config_entry.options.copy()
+
+    match config_entry.version:
+        case 1:  # our pre-migratable
+            pass
+
+        case 6:  # latest RobertD502's
+            data[CONF_USERNAME] = data.pop('email')
+            data[CONF_TIME_ZONE] = options.pop('timezone')
+
+            options[CONF_SCAN_INTERVAL] = options.pop('polling_interval', DEFAULT_SCAN_INTERVAL)
+            options[CONF_SMART_POLLING] = DEFAULT_SMART_POLLING
+
+            options[BT_SECTION] = {
+                CONF_BLE_RELAY_ENABLED: options.pop('use_ble_relay', DEFAULT_BLUETOOTH_RELAY),
+                CONF_SCAN_INTERVAL_BLUETOOTH: DEFAULT_SCAN_INTERVAL_BLUETOOTH,
+            }
+
+            options[MEDIA_SECTION] = {
+                CONF_MEDIA_PATH: DEFAULT_MEDIA_PATH,
+                CONF_SCAN_INTERVAL_MEDIA: DEFAULT_SCAN_INTERVAL_MEDIA,
+                CONF_MEDIA_DL_IMAGE: DEFAULT_DL_IMAGE,
+                CONF_MEDIA_DL_VIDEO: DEFAULT_DL_VIDEO,
+                CONF_MEDIA_EV_TYPE: DEFAULT_EVENTS,
+                CONF_DELETE_AFTER: DEFAULT_DELETE_AFTER,
+            }
+
+        case _:
+            return False
+
+    hass.config_entries.async_update_entry(config_entry, data=data, options=options, version=PetkitFlowHandler.VERSION, minor_version=PetkitFlowHandler.MINOR_VERSION)
+
+    LOGGER.debug("Migration to configuration version %s.%s successful", config_entry.version, config_entry.minor_version)
     return True
