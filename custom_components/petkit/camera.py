@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from pypetkitapi import FEEDER_WITH_CAMERA, LITTER_WITH_CAMERA, Feeder, Litter
+
 from homeassistant.components.camera import (
     Camera,
     CameraEntityDescription,
@@ -15,18 +17,20 @@ from homeassistant.components.camera import (
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from pypetkitapi import Feeder, Litter, FEEDER_WITH_CAMERA, LITTER_WITH_CAMERA
 
+from .agora_wss import AgoraWebSocketHandler
 from .const import LOGGER
 from .coordinator import PetkitDataUpdateCoordinator
 from .data import PetkitConfigEntry, PetkitDevices
-from .entity import PetkitEntity, PetKitDescSensorBase
-from .agora_wss import AgoraWebSocketHandler
+from .entity import PetKitDescSensorBase, PetkitEntity
+
 
 @dataclass(frozen=True, kw_only=True)
 class PetKitCameraDesc(PetKitDescSensorBase, CameraEntityDescription):
     """Petkit camera with Agora streaming."""
+
     event_key: str | None = None
+
 
 COMMON_ENTITIES = []
 
@@ -96,6 +100,7 @@ class PetkitCamera(PetkitEntity, Camera):
         hass: HomeAssistant,
         device: PetkitDevices,
     ) -> None:
+        """Initialize PetkitCamera"""
         PetkitEntity.__init__(self, coordinator, device)
         Camera.__init__(self)
         self.coordinator = coordinator
@@ -121,31 +126,34 @@ class PetkitCamera(PetkitEntity, Camera):
         """Return a placeholder image for WebRTC cameras (no snapshot yet)."""
         return None
 
-    def _make_agora_subscription(self, device_id):
-        live_feed = getattr(self.coordinator.data.get(device_id), "live_feed", None)
-        if live_feed is None:
+    def _make_agora_subscription(self):
+        """Fetch live data from the device stream"""
+        device_data = self.coordinator.data.get(self.device.id)
+        if not device_data:
             return None
-        agora_sc = {
-            "app_rtm_user_id": live_feed.app_rtm_user_id,
-            "channel_id": live_feed.channel_id,
-            "rtc_token": live_feed.rtc_token,
-            "uid": None,  # Missing with petkit ???
-        }
-        LOGGER.debug(f"Agora Subscription : {agora_sc}")
-        return agora_sc
+        live_feed = getattr(device_data, "live_feed", None)
+        if not live_feed:
+            return None
+        return live_feed
 
     async def async_handle_async_webrtc_offer(
         self, offer_sdp: str, session_id: str, send_message: WebRTCSendMessage
     ) -> None:
-        """
-        Handle WebRTC offer, initiate negotiation with Agora backend.
+        """Handle WebRTC offer, initiate negotiation with Agora backend.
+
         This function intercepts the WebRTC request initiated from the HA UI and uses the Agora handler to negotiate the SDP answer
         """
-        LOGGER.info("Handling WebRTC offer for Petkit device %s session %s", self.device.name, session_id)
+        LOGGER.info(
+            "Handling WebRTC offer for Petkit device %s session %s",
+            self.device.name,
+            session_id,
+        )
         try:
-            stream_data = self._make_agora_subscription(self.device.id)
+            stream_data = self._make_agora_subscription()
             if not stream_data:
-                LOGGER.error("No stream data for device %s", self.device.name)
+                LOGGER.error(
+                    "No Agora.io subscription stream data for device %s", self.device.name
+                )
                 send_message(WebRTCError("500", "No stream data for camera"))
                 return
 
@@ -155,16 +163,16 @@ class PetkitCamera(PetkitEntity, Camera):
 
             if answer_sdp:
                 send_message(WebRTCAnswer(answer_sdp))
-                LOGGER.info("WebRTC negotiation completed OK for Petkit device %s", self.device.name)
+                LOGGER.info(
+                    "WebRTC negotiation completed OK for Petkit device %s", self.device.name
+                )
             else:
                 send_message(WebRTCError("500", "WebRTC negotiation failed"))
         except Exception as ex:
-            LOGGER.error("Error handling WebRTC offer for %s: %r", self.device.name, ex)
-            send_message(WebRTCError("500", f"Error handling WebRTC offer: {ex}"))
+           LOGGER.error("Error handling WebRTC offer for %s: %r", self.device.name, ex)
+           send_message(WebRTCError("500", f"Error handling WebRTC offer: {ex}"))
 
-    async def async_on_webrtc_candidate(
-        self, session_id: str, candidate: dict
-    ) -> None:
+    async def async_on_webrtc_candidate(self, session_id: str, candidate: dict) -> None:
         """Ignore WebRTC ICE candidates (handled by Agora, not us)."""
         return
 
@@ -172,4 +180,3 @@ class PetkitCamera(PetkitEntity, Camera):
     def close_webrtc_session(self, session_id: str) -> None:
         """Close WebRTC session if needed (optional for Agora)."""
         return
-
