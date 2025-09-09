@@ -9,6 +9,7 @@ import time
 from typing import Any, Optional
 
 import aiohttp
+from .const import LOGGER
 from pypetkitapi import LiveFeed
 from sdp_transform import parse as sdp_parse
 import websockets
@@ -399,6 +400,7 @@ class AgoraWebSocketHandler:
             Optional[SdpInfo]: Parsed SDP information or None if parsing fails.
 
         """
+
         try:
             parsed_sdp = sdp_parse(offer_sdp)
             fingerprint = ""
@@ -426,7 +428,7 @@ class AgoraWebSocketHandler:
             audio_extensions = []
             video_extensions = []
 
-            return SdpInfo(
+            sdp_info = SdpInfo(
                 parsed_sdp=parsed_sdp,
                 fingerprint=fingerprint,
                 ice_ufrag=ice_ufrag,
@@ -436,6 +438,8 @@ class AgoraWebSocketHandler:
                 audio_extensions=audio_extensions,
                 video_extensions=video_extensions,
             )
+            LOGGER.debug(f"SDP offer = {sdp_info}")
+            return sdp_info
         except Exception as ex:
             _LOGGER.error("Failed to parse offer SDP: %s", ex)
             return None
