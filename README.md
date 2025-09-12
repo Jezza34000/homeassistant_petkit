@@ -2,8 +2,6 @@
 
 [![GitHub Release][releases-shield]][releases] [![HACS Default](https://img.shields.io/badge/HACS-Default-blue.svg?style=for-the-badge&color=41BDF5)](https://hacs.xyz/docs/faq/custom_repositories)
 
-
-
 ### Need help ? Join us :
 
 [![Discord][discord-shield]][discord]
@@ -147,6 +145,7 @@
 🆕 New devices? Want to add support for your Petkit device? Open an issue on this repository or join us on our Discord channel.
 
 ## 📦 Installation
+
 ![Minimal HA version required](https://img.shields.io/badge/Minimal%20HA%20required-2025.1.0-blue?style=for-the-badge&color=41BDF5)
 
 Via HACS (recommended), click here :
