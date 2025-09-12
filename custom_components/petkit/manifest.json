@@ -8,5 +8,5 @@
   "issue_tracker": "https://github.com/Jezza34000/homeassistant_petkit/issues",
   "loggers": ["petkit"],
   "requirements": ["pypetkitapi==1.20.2", "aiofiles==24.1.0"],
-  "version": "1.20.0"
+  "version": "1.20.1"
 }
