@@ -48,11 +48,15 @@ class PetkitMediaSource(MediaSource):
         super().__init__(DOMAIN)
         self.hass = hass
         self.coordinator = self.get_coordinator()
-        self.media_path = Path(
+        # Normalize like the media coordinator: store under /media/<name>
+        raw = Path(
             self.coordinator.config_entry.options.get(MEDIA_SECTION, {}).get(
                 CONF_MEDIA_PATH, DEFAULT_MEDIA_PATH
             )
         )
+        if raw.is_absolute():
+            raw = raw.relative_to(raw.anchor)
+        self.media_path = Path("/media") / raw
 
     def get_coordinator(self):
         """Retrieve the integration's coordinator."""
@@ -67,10 +71,12 @@ class PetkitMediaSource(MediaSource):
         if not file_path.exists():
             raise ValueError(f"File not found: {file_path}")
         LOGGER.debug(f"Media Source: Resolving media {file_path}")
-
+        # Convert absolute FS path (/media/...) to URL under /media/local/<relative>
+        rel = file_path.relative_to(Path("/media"))
+        url_path = (Path(MEDIA_ROOT) / rel).as_posix()
         url = async_process_play_media_url(
             self.hass,
-            f"{MEDIA_ROOT}{file_path}",
+            url_path,
             allow_relative_url=True,
             for_supervisor_network=True,
         )
@@ -79,7 +85,8 @@ class PetkitMediaSource(MediaSource):
 
     async def async_browse_media(self, item: MediaSourceItem) -> BrowseMediaSource:
         """Browse the media source."""
-        identifier = item.identifier or str(self.media_path)
+        # Avoid duplicating the base path when identifier is empty.
+        identifier = item.identifier or ""
         current_path = self.media_path / Path(identifier)
 
         if not current_path.exists() or not current_path.is_dir():
@@ -133,9 +140,10 @@ class PetkitMediaSource(MediaSource):
 
     def _build_file_media_item(self, child: Path) -> BrowseMediaSource:
         """Build a file media item."""
-        snapshot_parent = child.parent.relative_to(Path("/")).with_name("snapshot")
+        # Build thumbnail URL under /media/local/<relative>
+        rel_snapshot_parent = child.parent.relative_to(Path("/media")).with_name("snapshot")
         thumbnail_path = (
-            Path(MEDIA_ROOT) / snapshot_parent / child.name.replace(EXT_MP4, EXT_JPG)
+            Path(MEDIA_ROOT) / rel_snapshot_parent / child.name.replace(EXT_MP4, EXT_JPG)
         ).as_posix()
 
         thumbnail_url = async_process_play_media_url(
