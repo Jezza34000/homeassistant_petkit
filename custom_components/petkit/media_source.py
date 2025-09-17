@@ -56,7 +56,7 @@ class PetkitMediaSource(MediaSource):
         )
         if raw.is_absolute():
             raw = raw.relative_to(raw.anchor)
-        self.media_path = Path("/media") / raw
+        self.media_path = Path(DEFAULT_MEDIA_PATH) / raw
 
     def get_coordinator(self):
         """Retrieve the integration's coordinator."""
@@ -72,7 +72,7 @@ class PetkitMediaSource(MediaSource):
             raise ValueError(f"File not found: {file_path}")
         LOGGER.debug(f"Media Source: Resolving media {file_path}")
         # Convert absolute FS path (/media/...) to URL under /media/local/<relative>
-        rel = file_path.relative_to(Path("/media"))
+        rel = file_path.relative_to(Path(DEFAULT_MEDIA_PATH))
         url_path = (Path(MEDIA_ROOT) / rel).as_posix()
         url = async_process_play_media_url(
             self.hass,
@@ -141,7 +141,7 @@ class PetkitMediaSource(MediaSource):
     def _build_file_media_item(self, child: Path) -> BrowseMediaSource:
         """Build a file media item."""
         # Build thumbnail URL under /media/local/<relative>
-        rel_snapshot_parent = child.parent.relative_to(Path("/media")).with_name(
+        rel_snapshot_parent = child.parent.relative_to(Path(DEFAULT_MEDIA_PATH)).with_name(
             "snapshot"
         )
         thumbnail_path = (
