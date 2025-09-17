@@ -141,9 +141,9 @@ class PetkitMediaSource(MediaSource):
     def _build_file_media_item(self, child: Path) -> BrowseMediaSource:
         """Build a file media item."""
         # Build thumbnail URL under /media/local/<relative>
-        rel_snapshot_parent = child.parent.relative_to(Path(DEFAULT_MEDIA_PATH)).with_name(
-            "snapshot"
-        )
+        rel_snapshot_parent = child.parent.relative_to(
+            Path(DEFAULT_MEDIA_PATH)
+        ).with_name("snapshot")
         thumbnail_path = (
             Path(MEDIA_ROOT)
             / rel_snapshot_parent
