@@ -34,12 +34,12 @@ repos:
         exclude: ^tests/fixtures/|homeassistant/generated/|tests/components/.*/snapshots/|.github|const.py
 
   - repo: https://github.com/psf/black
-    rev: 25.1.0
+    rev: 25.9.0
     hooks:
       - id: black
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.0
+    rev: v0.13.1
     hooks:
       - id: ruff
         args:
