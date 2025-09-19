@@ -11,15 +11,15 @@
 
 ## 📘 Integration Wiki
 
-- ### **[Supported Devices](https://github.com/Jezza34000/homeassistant_petkit/wiki/Supported-Devices)** - Complete list of compatible devices
-- ### **[Installation](https://github.com/Jezza34000/homeassistant_petkit/wiki/Installation)** - Complete installation guide
-- ### **[Migration](https://github.com/Jezza34000/homeassistant_petkit/wiki/Migration)** - Migration from RobertD502 integration
-- ### **[Configuration](https://github.com/Jezza34000/homeassistant_petkit/wiki/Configuration)** - Basic and advanced configuration
-- ### **[Media Management](https://github.com/Jezza34000/homeassistant_petkit/wiki/Media-Management)** - Photo and video management
-- ### **[Recommended Cards](https://github.com/Jezza34000/homeassistant_petkit/wiki/Recommended-Cards)** - Custom cards to enhance your dashboard
-- ### **[Translations](https://github.com/Jezza34000/homeassistant_petkit/wiki/Translations)** - Language support and contribution guide
-- ### **[Troubleshooting](https://github.com/Jezza34000/homeassistant_petkit/wiki/Troubleshooting)** - Solutions to common problems
-- ### **[Development](https://github.com/Jezza34000/homeassistant_petkit/wiki/Development)** - Guide for contributors
+- **[Supported Devices](https://github.com/Jezza34000/homeassistant_petkit/wiki/Supported-Devices)** - Complete list of compatible devices
+- **[Installation](https://github.com/Jezza34000/homeassistant_petkit/wiki/Installation)** - Complete installation guide
+- **[Migration](https://github.com/Jezza34000/homeassistant_petkit/wiki/Migration)** - Migration from RobertD502 integration
+- **[Configuration](https://github.com/Jezza34000/homeassistant_petkit/wiki/Configuration)** - Basic and advanced configuration
+- **[Media Management](https://github.com/Jezza34000/homeassistant_petkit/wiki/Media-Management)** - Photo and video management
+- **[Recommended Cards](https://github.com/Jezza34000/homeassistant_petkit/wiki/Recommended-Cards)** - Custom cards to enhance your dashboard
+- **[Translations](https://github.com/Jezza34000/homeassistant_petkit/wiki/Translations)** - Language support and contribution guide
+- **[Troubleshooting](https://github.com/Jezza34000/homeassistant_petkit/wiki/Troubleshooting)** - Solutions to common problems
+- **[Development](https://github.com/Jezza34000/homeassistant_petkit/wiki/Development)** - Guide for contributors
 
 ## 🛟 Need help?
 
