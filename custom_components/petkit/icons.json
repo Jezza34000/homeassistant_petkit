@@ -476,6 +476,20 @@
       }
     },
     "switch": {
+      "ai_ph_detection": {
+        "default": "mdi:magnify-remove-outline",
+        "state": {
+          "off": "mdi:magnify-remove-outline",
+          "on": "mdi:magnify-scan"
+        }
+      },
+      "ai_yowling": {
+        "default": "mdi:microphone-off",
+        "state": {
+          "off": "mdi:microphone-off",
+          "on": "mdi:microphone-settings"
+        }
+      },
       "auto_clean": {
         "default": "mdi:broom",
         "state": {

@@ -665,6 +665,12 @@
       },
       "privacy_microphone_off": {
         "name": "Privacy: microphone off"
+      },
+      "ai_ph_detection": {
+        "name": "AI Ph detection"
+      },
+      "ai_yowling": {
+        "name": "AI Yowling detection"
       }
     },
     "light": {

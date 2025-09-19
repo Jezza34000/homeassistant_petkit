@@ -788,6 +788,30 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
                 device.id, DeviceCommand.UPDATE_SETTING, {"noSound": 0}
             ),
         ),
+        PetKitSwitchDesc(
+            key="AI Urinary PhDetection",
+            translation_key="ai_ph_detection",
+            value=lambda device: device.settings.ph_detection,
+            entity_category=EntityCategory.CONFIG,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"phDetection": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"phDetection": 0}
+            ),
+        ),
+        PetKitSwitchDesc(
+            key="AI Yowling detection",
+            translation_key="ai_yowling",
+            value=lambda device: device.settings.voice,
+            entity_category=EntityCategory.CONFIG,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"voice": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"voice": 0}
+            ),
+        ),
     ],
     WaterFountain: [*COMMON_ENTITIES],
     Purifier: [
