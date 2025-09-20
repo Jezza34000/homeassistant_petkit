@@ -1,6 +1,13 @@
 {
   "entity": {
     "binary_sensor": {
+      "abnormal_ph_detected": {
+        "default": "mdi:test-tube-off",
+        "state": {
+          "off": "mdi:test-tube-off",
+          "on": "mdi:test-tube"
+        }
+      },
       "battery_installed": {
         "default": "mdi:battery",
         "state": {
@@ -140,6 +147,13 @@
           "on": "mdi:wave-arrow-down"
         }
       },
+      "soft_stool_detected": {
+        "default": "mdi:emoticon-poop-outline",
+        "state": {
+          "off": "mdi:emoticon-poop-outline",
+          "on": "mdi:emoticon-poop"
+        }
+      },
       "spray": {
         "default": "mdi:spray"
       },
@@ -162,6 +176,13 @@
         "state": {
           "off": "mdi:weight",
           "on": "mdi:alert-circle"
+        }
+      },
+      "yowling_detected": {
+        "default": "mdi:microphone-off",
+        "state": {
+          "off": "mdi:microphone-off",
+          "on": "mdi:microphone-settings"
         }
       }
     },

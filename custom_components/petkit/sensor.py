@@ -64,7 +64,6 @@ if TYPE_CHECKING:
 class PetKitSensorDesc(PetKitDescSensorBase, SensorEntityDescription):
     """A class that describes sensor entities."""
 
-    entity_picture: Callable[[PetkitDevices], str | None] | None = None
     restore_state: bool = False
     bluetooth_coordinator: bool = False
     smart_poll_trigger: Callable[[PetkitDevices], bool] | None = None
@@ -641,6 +640,36 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             ),
             restore_state=True,
         ),
+        PetKitSensorDesc(
+            key="Urine measured ph",
+            translation_key="urine_measured_ph",
+            entity_picture=lambda pet: pet.avatar,
+            state_class=SensorStateClass.MEASUREMENT,
+            value=lambda pet: pet.measured_ph,
+            restore_state=True,
+        ),
+        PetKitSensorDesc(
+            key="Pet last urination date",
+            translation_key="pet_last_urination_date",
+            entity_picture=lambda pet: pet.avatar,
+            value=lambda pet: (
+                datetime.fromtimestamp(pet.last_urination)
+                if pet.last_urination is not None and pet.last_urination != 0
+                else "Unknown"
+            ),
+            restore_state=True,
+        ),
+        PetKitSensorDesc(
+            key="Pet last defecation date",
+            translation_key="pet_last_defecation_date",
+            entity_picture=lambda pet: pet.avatar,
+            value=lambda pet: (
+                datetime.fromtimestamp(pet.last_defecation)
+                if pet.last_defecation is not None and pet.last_defecation != 0
+                else "Unknown"
+            ),
+            restore_state=True,
+        ),
     ],
 }
 
@@ -736,19 +765,9 @@ class PetkitSensor(PetkitEntity, SensorEntity):
     @property
     def entity_picture(self) -> str | None:
         """Grab associated pet picture."""
-
-        if self.check_smart_poll_trigger():
-            LOGGER.debug("Smart poll trigger detected for %s", self.device.id)
-            self.coordinator.enable_smart_polling(12)
-
         if self.entity_description.entity_picture:
             return self.entity_description.entity_picture(self.device)
         return None
-
-    @property
-    def unique_id(self) -> str:
-        """Return a unique ID for the binary_sensor."""
-        return f"{self.device.device_nfo.device_type}_{self.device.sn}_{self.entity_description.key}"
 
     @property
     def native_unit_of_measurement(self) -> str | None:

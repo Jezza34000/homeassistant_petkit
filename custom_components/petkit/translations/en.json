@@ -24,6 +24,15 @@
   },
   "entity": {
     "binary_sensor": {
+      "yowling_detected": {
+        "name": "Yowling detected"
+      },
+      "abnormal_ph_detected": {
+        "name": "Abnormal pH detected"
+      },
+      "soft_stool_detected": {
+        "name": "Soft stool detected"
+      },
       "battery": {
         "name": "Battery"
       },
@@ -246,6 +255,15 @@
       }
     },
     "sensor": {
+      "urine_measured_ph": {
+        "name": "Urine measured pH"
+      },
+      "pet_last_urination_date": {
+        "name": "Last urination"
+      },
+      "pet_last_defecation_date": {
+        "name": "Last defecation"
+      },
       "air_purified": {
         "name": "Air purified"
       },

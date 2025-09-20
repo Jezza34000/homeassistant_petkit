@@ -262,7 +262,40 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             ),
         ),
     ],
-    Pet: [*COMMON_ENTITIES],
+    Pet: [
+        *COMMON_ENTITIES,
+        PetKitBinarySensorDesc(
+            key="Yowling detected",
+            translation_key="yowling_detected",
+            entity_picture=lambda pet: pet.avatar,
+            device_class=BinarySensorDeviceClass.SOUND,
+            value=lambda pet: (
+                None if pet.yowling_detected is None else pet.yowling_detected == 1
+            ),
+        ),
+        PetKitBinarySensorDesc(
+            key="Abnormal urine Ph detected",
+            translation_key="abnormal_ph_detected",
+            entity_picture=lambda pet: pet.avatar,
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            value=lambda pet: (
+                None
+                if pet.abnormal_ph_detected is None
+                else pet.abnormal_ph_detected == 1
+            ),
+        ),
+        PetKitBinarySensorDesc(
+            key="Soft stool detected",
+            translation_key="soft_stool_detected",
+            entity_picture=lambda pet: pet.avatar,
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            value=lambda pet: (
+                None
+                if pet.soft_stool_detected is None
+                else pet.soft_stool_detected == 1
+            ),
+        ),
+    ],
 }
 
 
@@ -311,9 +344,11 @@ class PetkitBinarySensor(PetkitEntity, BinarySensorEntity):
         self.device = device
 
     @property
-    def unique_id(self) -> str:
-        """Return a unique ID for the binary_sensor."""
-        return f"{self.device.device_nfo.device_type}_{self.device.sn}_{self.entity_description.key}"
+    def entity_picture(self) -> str | None:
+        """Grab associated pet picture."""
+        if self.entity_description.entity_picture:
+            return self.entity_description.entity_picture(self.device)
+        return None
 
     @property
     def is_on(self) -> bool | None:
