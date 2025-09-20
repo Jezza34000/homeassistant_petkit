@@ -130,11 +130,6 @@ class PetkitLight(PetkitEntity, LightEntity):
         self.device = device
 
     @property
-    def unique_id(self) -> str:
-        """Return a unique ID for the light."""
-        return f"{self.device.device_nfo.device_type}_{self.device.sn}_{self.entity_description.key}"
-
-    @property
     def available(self) -> bool:
         """Return if this light is available or not."""
         device_data = self.coordinator.data.get(self.device.id)

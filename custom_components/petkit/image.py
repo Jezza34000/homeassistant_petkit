@@ -153,11 +153,6 @@ class PetkitImage(PetkitEntity, ImageEntity):
         self.async_write_ha_state()
 
     @property
-    def unique_id(self) -> str:
-        """Return a unique ID for the binary_sensor."""
-        return f"{self.device.device_nfo.device_type}_{self.device.sn}_{self.entity_description.key}"
-
-    @property
     def available(self) -> bool:
         """Return if this image is available or not"""
         if self.config_entry.get(MEDIA_SECTION, {}).get(CONF_MEDIA_DL_IMAGE, False):

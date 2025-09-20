@@ -145,11 +145,6 @@ class PetkitText(PetkitEntity, TextEntity):
         self.device = device
 
     @property
-    def unique_id(self) -> str:
-        """Return a unique ID for the binary_sensor."""
-        return f"{self.device.device_nfo.device_type}_{self.device.sn}_{self.entity_description.key}"
-
-    @property
     def native_max(self) -> int:
         """Max number of characters."""
 

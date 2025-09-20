@@ -18,6 +18,7 @@ from .coordinator import (
     PetkitDataUpdateCoordinator,
     PetkitMediaUpdateCoordinator,
 )
+from .data import PetkitDevices
 
 _DevicesT = TypeVar("_DevicesT", bound=Feeder | Litter | WaterFountain | Purifier | Pet)
 
@@ -30,6 +31,7 @@ class PetKitDescSensorBase(EntityDescription):
     ignore_types: list[str] | None = None  # List of device types to ignore
     only_for_types: list[str] | None = None  # List of device types to support
     force_add: list[str] | None = None
+    entity_picture: Callable[[PetkitDevices], str | None] | None = None
 
     def is_supported(self, device: _DevicesT) -> bool:
         """Check if the entity is supported by trying to execute the value lambda."""
@@ -130,6 +132,11 @@ class PetkitEntity(
                 ),
             },
         )
+
+    @property
+    def unique_id(self) -> str:
+        """Return a unique ID for the binary_sensor."""
+        return f"{self.device.device_nfo.device_type}_{self.device.sn}_{self.entity_description.key}"
 
     @property
     def device_info(self) -> DeviceInfo:

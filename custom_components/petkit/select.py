@@ -248,11 +248,6 @@ class PetkitSelect(PetkitEntity, SelectEntity):
             return device_data.state.pim in POWER_ONLINE_STATE
         return True
 
-    @property
-    def unique_id(self) -> str:
-        """Return a unique ID for the binary_sensor."""
-        return f"{self.device.device_nfo.device_type}_{self.device.sn}_{self.entity_description.key}"
-
     async def async_select_option(self, value: str) -> None:
         """Set manual feeding amount."""
         LOGGER.debug(

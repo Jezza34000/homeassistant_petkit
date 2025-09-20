@@ -878,11 +878,6 @@ class PetkitSwitch(PetkitEntity, SwitchEntity):
         self.device = device
 
     @property
-    def unique_id(self) -> str:
-        """Return a unique ID for the binary_sensor."""
-        return f"{self.device.device_nfo.device_type}_{self.device.sn}_{self.entity_description.key}"
-
-    @property
     def available(self) -> bool:
         """Return if this button is available or not"""
         device_data = self.coordinator.data.get(self.device.id)
