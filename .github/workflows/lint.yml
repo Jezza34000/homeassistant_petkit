@@ -27,7 +27,7 @@ jobs:
           fetch-depth: 0
 
       - name: Cache pip
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # Version 4.2.4
+        uses: actions/cache@638ed79f9dc94c1de1baef91bcab5edaa19451f4 # Version 4.2.4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
