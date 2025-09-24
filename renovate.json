@@ -1,7 +1,38 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "digest": {
+    "automerge": true
+  },
   "extends": [
     "config:recommended",
     "helpers:pinGitHubActionDigests"
-  ]
+  ],
+  "ignoreUnstable": true,
+  "packageRules": [
+    {
+      "automerge": true,
+      "automergeType": "branch",
+      "description": "GitHub Actions - Automerge digest updates only",
+      "matchDepTypes": [
+        "action"
+      ],
+      "pinDigests": true
+    },
+    {
+      "description": "Disable non-digest updates for GitHub Actions",
+      "enabled": false,
+      "matchDepTypes": [
+        "action"
+      ],
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch",
+        "pin"
+      ]
+    }
+  ],
+  "respectLatest": true,
+  "separateMajorMinor": false,
+  "separateMinorPatch": false
 }
