@@ -19,11 +19,11 @@ jobs:
         python-version: ["3.13"]
 
     steps:
-      - uses: "actions/checkout@v5"
+      - uses: "actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # Version 5.0.0"
         with:
           fetch-depth: 0
 
       - name: Bump version using semantic-release
-        uses: python-semantic-release/python-semantic-release@master
+        uses: python-semantic-release/python-semantic-release@4d4cb0ab842247caea1963132c242c62aab1e4d5 # Version 10.4.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
