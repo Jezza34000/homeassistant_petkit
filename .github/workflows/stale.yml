@@ -10,7 +10,7 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: actions/stale@3a9db7e6a41a89f618792c92c0e97cc736e1b13f # Version 10.0.0
+      - uses: actions/stale@3a9db7e6a41a89f618792c92c0e97cc736e1b13f  # Version 10.0.0
         with:
           exempt-issue-labels: "question,enhancement,Feature Request"
           stale-issue-message: "This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days."
