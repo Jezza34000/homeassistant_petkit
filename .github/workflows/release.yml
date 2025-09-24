@@ -15,7 +15,7 @@ jobs:
       contents: write
     steps:
       - name: "Checkout the repository"
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # Version 5.0.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # Version 5.0.0
 
       - name: "ZIP the integration directory"
         shell: "bash"
@@ -24,6 +24,6 @@ jobs:
           zip petkit.zip -r ./
 
       - name: "Upload the ZIP file to the release"
-        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836  # Version 2.3.3
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # Version 2.3.3
         with:
           files: ${{ github.workspace }}/custom_components/petkit/petkit.zip
