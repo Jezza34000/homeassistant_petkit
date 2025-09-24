@@ -1,8 +1,14 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    ":pinGitHubActionDigests",
-    ":disableDigestUpdates"
+  "extends": ["config:recommended"],
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "pinDigests": true,
+      "separateMajorMinor": true,
+      "updateTypes": ["minor", "patch", "pin"],
+      "excludeBranchNames": ["main", "master"]
+    }
   ]
 }
