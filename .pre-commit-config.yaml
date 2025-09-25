@@ -72,6 +72,6 @@ repos:
           - --keep-updates
 
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: 41.127.2
+    rev: 41.130.1
     hooks:
       - id: renovate-config-validator
