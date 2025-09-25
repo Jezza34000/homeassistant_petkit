@@ -30,6 +30,6 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # Version 5.0.0
 
       - name: "Run HACS validation"
-        uses: hacs/action@d556e736723344f83838d08488c983a15381059a # Version 22.5.0
+        uses: hacs/action@885037da508419fd08c13515967aec868dfdee2d # Version 22.5.0
         with:
           category: "integration"
