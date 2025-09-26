@@ -39,6 +39,9 @@
       "weight_error": {
         "name": "Weight error"
       },
+      "pet_error": {
+        "name": "Pet error"
+      },
       "light": {
         "name": "Light"
       },
@@ -522,6 +525,12 @@
       }
     },
     "switch": {
+      "soft_stool": {
+        "name": "AI soft stool detection"
+      },
+      "soft_stool_stop_cleaning": {
+        "name": "Stop cleaning on soft stool detected"
+      },
       "auto_clean": {
         "name": "Auto clean"
       },

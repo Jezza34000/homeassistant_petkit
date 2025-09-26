@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from pypetkitapi import (
     D4H,
     D4SH,
+    T7,
     DeviceCommand,
     Feeder,
     Litter,
@@ -155,6 +156,7 @@ SELECT_MAPPING: dict[type[PetkitDevices], list[PetKitSelectDesc]] = {
                 },
             ),
             entity_category=EntityCategory.CONFIG,
+            ignore_types=[T7],
         ),
         PetKitSelectDesc(
             key="Avoid repeat cleaning interval",

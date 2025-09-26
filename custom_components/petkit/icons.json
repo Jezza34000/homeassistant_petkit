@@ -126,6 +126,13 @@
           "on": "mdi:power-plug"
         }
       },
+      "pet_error": {
+        "default": "mdi:check-circle-outline",
+        "state": {
+          "off": "mdi:check-circle-outline",
+          "on": "mdi:alert-circle"
+        }
+      },
       "power": {
         "default": "mdi:power",
         "state": {
@@ -812,6 +819,20 @@
         "state": {
           "off": "mdi:bell-off",
           "on": "mdi:bell-check"
+        }
+      },
+      "soft_stool": {
+        "default": "mdi:emoticon-poop-outline",
+        "state": {
+          "off": "mdi:emoticon-poop-outline",
+          "on": "mdi:emoticon-poop"
+        }
+      },
+      "soft_stool_stop_cleaning": {
+        "default": "mdi:emoticon-poop-outline",
+        "state": {
+          "off": "mdi:play-box-outline",
+          "on": "mdi:pause-box-outline"
         }
       },
       "surplus_control": {

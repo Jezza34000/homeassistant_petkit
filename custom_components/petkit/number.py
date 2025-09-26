@@ -14,6 +14,7 @@ from pypetkitapi import (
     FEEDER,
     T5,
     T6,
+    T7,
     DeviceCommand,
     Feeder,
     FeederCommand,
@@ -133,6 +134,22 @@ NUMBER_MAPPING: dict[type[PetkitDevices], list[PetKitNumberDesc]] = {
             action=lambda api, device, value: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"stillTime": int(value * 60)}
             ),
+            ignore_types=[T7],
+        ),
+        PetKitNumberDesc(
+            key="Cleaning Delay",
+            translation_key="cleaning_delay",
+            entity_category=EntityCategory.CONFIG,
+            native_min_value=1200,
+            native_max_value=3600,
+            native_step=60,
+            native_unit_of_measurement=UnitOfTime.MINUTES,
+            mode=NumberMode.SLIDER,
+            native_value=lambda device: device.settings.still_time,
+            action=lambda api, device, value: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"stillTime": int(value)}
+            ),
+            only_for_types=[T7],
         ),
     ],
     WaterFountain: [*COMMON_ENTITIES],

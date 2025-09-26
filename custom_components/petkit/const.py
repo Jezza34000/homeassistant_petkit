@@ -67,6 +67,7 @@ PETKIT_DEVICES_MAPPING = {
     "1t5": "Purobot Max",
     "0t6": "Purobot Ultra",
     "1t6": "Purobot Ultra",
+    "0t7": "Purobot Crystal Duo",
     "2w5": "Eversweet 5 Mini",
     "4w5": "Eversweet 3 Pro",
     "5w5": "Eversweet Solo 2",

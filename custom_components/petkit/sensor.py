@@ -19,6 +19,7 @@ from pypetkitapi import (
     T4,
     T5,
     T6,
+    T7,
     W5,
     Feeder,
     Litter,
@@ -111,7 +112,7 @@ COMMON_ENTITIES = [
             if hasattr(device.state, "error_msg") and device.state.error_msg is not None
             else NO_ERROR
         ),
-        force_add=[K2, K3],
+        force_add=[K2, K3, T7],
     ),
     PetKitSensorDesc(
         key="End date care plus subscription",
@@ -334,6 +335,7 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             state_class=SensorStateClass.MEASUREMENT,
             native_unit_of_measurement=UnitOfMass.KILOGRAMS,
             value=lambda device: round((device.state.sand_weight / 1000), 1),
+            ignore_types=[T7],
         ),
         PetKitSensorDesc(
             key="State",

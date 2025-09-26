@@ -18,6 +18,7 @@ from pypetkitapi import (
     LITTER_WITH_CAMERA,
     T4,
     T5,
+    T7,
     DeviceAction,
     DeviceCommand,
     Feeder,
@@ -135,6 +136,7 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
                 {DeviceAction.START: LBCommand.DUMPING},
             ),
             only_for_types=DEVICES_LITTER_BOX,
+            ignore_types=[T7],  # T7 does not support Dumping
             is_available=lambda device: device.state.work_state is None,
         ),
         PetKitButtonDesc(
@@ -195,15 +197,15 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
             value=lambda device: device.k3_device,
         ),
         PetKitButtonDesc(
-            # For T5 only using the N60 deodorizer
-            key="Deodorize T5",
+            # For T5 / T7 only using the N60 deodorizer
+            key="Deodorize T5 T7",
             translation_key="deodorize",
             action=lambda api, device: api.send_api_request(
                 device.id,
                 DeviceCommand.CONTROL_DEVICE,
                 {DeviceAction.START: LBCommand.ODOR_REMOVAL},
             ),
-            only_for_types=[T5],
+            only_for_types=[T5, T7],
             value=lambda device: device.deodorant_tip,
             is_available=lambda device: device.state.refresh_state is None,
         ),
@@ -214,6 +216,7 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
                 device.id, LitterCommand.RESET_N50_DEODORIZER
             ),
             only_for_types=DEVICES_LITTER_BOX,
+            ignore_types=[T7],
         ),
         PetKitButtonDesc(
             key="Reset N60 odor eliminator",

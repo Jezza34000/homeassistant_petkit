@@ -12,6 +12,7 @@ from pypetkitapi import (
     T4,
     T5,
     T6,
+    T7,
     Feeder,
     Litter,
     Pet,
@@ -179,6 +180,15 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             entity_category=EntityCategory.DIAGNOSTIC,
             device_class=BinarySensorDeviceClass.PROBLEM,
             value=lambda device: device.state.pet_error,
+            ignore_types=[T7],
+        ),
+        PetKitBinarySensorDesc(
+            key="Pet error",
+            translation_key="pet_error",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            value=lambda device: device.state.pet_error,
+            only_for_types=[T7],
         ),
     ],
     WaterFountain: [
