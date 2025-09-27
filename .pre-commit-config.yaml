@@ -75,3 +75,6 @@ repos:
     rev: 41.131.5
     hooks:
       - id: renovate-config-validator
+
+ci:
+  skip: [renovate-config-validator]
