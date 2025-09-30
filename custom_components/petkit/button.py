@@ -206,7 +206,7 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
                 {DeviceAction.START: LBCommand.ODOR_REMOVAL},
             ),
             only_for_types=[T5, T7],
-            value=lambda device: device.deodorant_tip,
+            force_add=[T5, T7],
             is_available=lambda device: device.state.refresh_state is None,
         ),
         PetKitButtonDesc(
