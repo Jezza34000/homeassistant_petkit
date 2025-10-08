@@ -4,7 +4,8 @@
     "enabled": false
   },
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    ":disableDependencyDashboard"
   ],
   "ignoreUnstable": true,
   "packageRules": [
