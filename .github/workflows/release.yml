@@ -24,6 +24,6 @@ jobs:
           zip petkit.zip -r ./
 
       - name: "Upload the ZIP file to the release"
-        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # Version 2.3.3
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # Version 2.4.1
         with:
           files: ${{ github.workspace }}/custom_components/petkit/petkit.zip
