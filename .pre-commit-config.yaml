@@ -34,7 +34,7 @@ repos:
         exclude_types: [csv, json, html, markdown]
         exclude: ^tests/fixtures/|homeassistant/generated/|tests/components/.*/snapshots/|.github|const.py
 
-  - repo: https://github.com/psf/black
+  - repo: https://github.com/psf/black-pre-commit-mirror
     rev: 25.9.0
     hooks:
       - id: black
@@ -53,13 +53,13 @@ repos:
       - id: gitleaks
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.1.0
+    rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
         exclude: ./translations/|renovate.json
 
   - repo: https://github.com/cdce8p/python-typing-update
-    rev: v0.7.2
+    rev: v0.7.3
     hooks:
       # Run `python-typing-update` hook manually from time to time
       # to update python typing syntax.
@@ -73,7 +73,7 @@ repos:
           - --keep-updates
 
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: 41.143.0
+    rev: 41.147.1
     hooks:
       - id: renovate-config-validator
 
