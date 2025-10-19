@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from pypetkitapi import (
     CTW3,
@@ -655,9 +656,13 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             translation_key="pet_last_urination_date",
             entity_picture=lambda pet: pet.avatar,
             value=lambda pet: (
-                datetime.fromtimestamp(pet.last_urination)
-                if pet.last_urination is not None and pet.last_urination != 0
-                else "Unknown"
+                None
+                if pet.last_urination is None
+                else (
+                    "Unknown"
+                    if pet.last_urination == 0
+                    else datetime.fromtimestamp(pet.last_urination)
+                )
             ),
             restore_state=True,
         ),
@@ -666,9 +671,13 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             translation_key="pet_last_defecation_date",
             entity_picture=lambda pet: pet.avatar,
             value=lambda pet: (
-                datetime.fromtimestamp(pet.last_defecation)
-                if pet.last_defecation is not None and pet.last_defecation != 0
-                else "Unknown"
+                None
+                if pet.last_defecation is None
+                else (
+                    "Unknown"
+                    if pet.last_defecation == 0
+                    else datetime.fromtimestamp(pet.last_defecation)
+                )
             ),
             restore_state=True,
         ),
