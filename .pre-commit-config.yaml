@@ -1,6 +1,6 @@
 repos:
   - repo: https://gitlab.com/vojko.pribudic.foss/pre-commit-update
-    rev: v0.8.0
+    rev: v0.9.0
     hooks:
       - id: pre-commit-update
         stages: [manual]
@@ -34,13 +34,13 @@ repos:
         exclude_types: [csv, json, html, markdown]
         exclude: ^tests/fixtures/|homeassistant/generated/|tests/components/.*/snapshots/|.github|const.py
 
-  - repo: https://github.com/psf/black
-    rev: 25.9.0
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 25.11.0
     hooks:
       - id: black
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.1
+    rev: v0.14.4
     hooks:
       - id: ruff
         args:
@@ -48,12 +48,12 @@ repos:
     #      - id: ruff-format # Run `ruff-format` conflict with `black`
 
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.28.0
+    rev: v8.29.0
     hooks:
       - id: gitleaks
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.1.0
+    rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
         exclude: ./translations/|renovate.json
@@ -73,7 +73,7 @@ repos:
           - --keep-updates
 
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: 41.152.7
+    rev: 42.5.0
     hooks:
       - id: renovate-config-validator
 
