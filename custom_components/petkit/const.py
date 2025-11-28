@@ -32,8 +32,8 @@ DEFAULT_EVENTS = [
     "Eat",
     "Feed",
     "Toileting",
-    "Dish_Before",
-    "Dish_After",
+    "Dish_before",
+    "Dish_after",
     "Waste_check",
 ]
 DEFAULT_DL_VIDEO = False
