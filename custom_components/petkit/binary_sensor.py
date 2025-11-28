@@ -255,13 +255,13 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             key="Light",
             translation_key="light",
             device_class=BinarySensorDeviceClass.POWER,
-            value=lambda device: device.lighting,
+            value=lambda device: None if device.lighting == -1 else device.lighting,
         ),
         PetKitBinarySensorDesc(
             key="Spray",
             translation_key="spray",
             device_class=BinarySensorDeviceClass.RUNNING,
-            value=lambda device: device.refreshing,
+            value=lambda device: None if device.refreshing == -1 else device.refreshing,
         ),
         PetKitBinarySensorDesc(
             key="Liquid lack",
