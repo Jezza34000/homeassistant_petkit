@@ -457,6 +457,9 @@
       "pet_last_use_date": {
         "name": "Last use date"
       },
+      "connection_state": {
+        "name": "Connection state"
+      },
       "pet_last_use_duration": {
         "name": "Last use duration"
       },

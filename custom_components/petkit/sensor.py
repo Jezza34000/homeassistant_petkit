@@ -22,6 +22,7 @@ from pypetkitapi import (
     T6,
     T7,
     W5,
+    BluetoothState,
     Feeder,
     Litter,
     Pet,
@@ -86,6 +87,17 @@ def get_liquid_value(device):
     ):
         return device.liquid
     return None
+
+
+def get_bt_state_text(state: BluetoothState) -> str | None:
+    """Get the bluetooth state"""
+    return {
+        BluetoothState.NO_STATE: None,
+        BluetoothState.NOT_CONNECTED: "Not connected",
+        BluetoothState.CONNECTING: "Connecting…",
+        BluetoothState.CONNECTED: "Connected",
+        BluetoothState.ERROR: "Error",
+    }.get(state, "Unknown")
 
 
 COMMON_ENTITIES = [
@@ -699,7 +711,17 @@ SENSOR_BT_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             ),
             bluetooth_coordinator=True,
             force_add=[CTW3, W5],
-        )
+        ),
+        PetKitSensorDesc(
+            key="Connection status",
+            translation_key="connection_state",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            value=lambda device: device.coordinator_bluetooth.ble_connection_state.get(
+                device.id
+            ),
+            bluetooth_coordinator=True,
+            force_add=[CTW3, W5],
+        ),
     ]
 }
 
