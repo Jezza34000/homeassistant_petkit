@@ -712,16 +712,14 @@ SENSOR_BT_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             bluetooth_coordinator=True,
             force_add=[CTW3, W5],
         ),
-        PetKitSensorDesc(
-            key="Connection status",
-            translation_key="connection_state",
-            entity_category=EntityCategory.DIAGNOSTIC,
-            value=lambda device: device.coordinator_bluetooth.ble_connection_state.get(
-                device.id
-            ),
-            bluetooth_coordinator=True,
-            force_add=[CTW3, W5],
-        ),
+        # PetKitSensorDesc(
+        #     key="Connection status",
+        #     translation_key="connection_state",
+        #     entity_category=EntityCategory.DIAGNOSTIC,
+        #     value=lambda device: device.coordinator_bluetooth.ble_connection_state,
+        #     bluetooth_coordinator=True,
+        #     force_add=[CTW3, W5],
+        # ),
     ]
 }
 
