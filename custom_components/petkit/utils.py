@@ -1,5 +1,7 @@
 """Util functions for the Petkit integration."""
 
+from datetime import datetime
+
 from pypetkitapi import LitterRecord, RecordsItems, WorkState
 
 from .const import EVENT_MAPPING, LOGGER
@@ -75,6 +77,7 @@ def get_raw_feed_plan(feeder_records_data) -> str | None:
             - 1: Food was dispensed successfully (by schedule)
             - 2: Food was dispensed successfully (by remote command on app)
             - 3: Food was dispensed successfully (by local command on feeder)
+            - 6: Unknown state (probably disconnected)
             - 7: Food was cancelled
             - 8: Food was skipped due to SurplusControl (only for feeders with camera)
             - 9: Food was not dispensed due to an error
@@ -90,6 +93,10 @@ def get_raw_feed_plan(feeder_records_data) -> str | None:
         LOGGER.debug("No feed data found")
         return None
 
+    # Heure actuelle en secondes depuis minuit
+    now = datetime.now()
+    current_seconds = now.hour * 3600 + now.minute * 60 + now.second
+
     for feed in feeder_records_data.feed:
         items = feed.items
         for idx, item in enumerate(items):
@@ -98,7 +105,7 @@ def get_raw_feed_plan(feeder_records_data) -> str | None:
             hours = time_in_seconds // 3600
             minutes = (time_in_seconds % 3600) // 60
 
-            # Calculate amount (sum of amount1 and amount2 if available)
+            # Calculate amount
             amount = (
                 item.amount
                 if item.amount is not None
@@ -106,28 +113,34 @@ def get_raw_feed_plan(feeder_records_data) -> str | None:
                 + (getattr(item, "amount2", 0) or 0)
             )
 
-            state = 0  # Default state is pending (not dispensed yet)
+            state = 0  # Pending by default
 
-            if item.status == 1:
-                state = 7  # Food was cancelled by the user
+            if (
+                (not hasattr(item, "state") or item.state is None)
+                and item.status == 0
+                and time_in_seconds < current_seconds
+            ):
+                state = 6
+
+            elif item.status == 1:
+                state = 7  # Food was cancelled
             elif hasattr(item, "state") and item.state is not None:
                 if item.state.err_code == 0 and item.state.result == 0:
-                    # Food was dispensed successfully
-                    # Determinate the source of dispense
                     if item.src == 1:
-                        state = 1  # By schedule
+                        state = 1
                     elif item.src == 3:
-                        state = 2  # Remotely by command on app
+                        state = 2
                     elif item.src == 4:
-                        state = 3  # Locally by command on feeder
+                        state = 3
                     else:
-                        state = 1  # Default to state 1 if src is unknown
+                        state = 1
                 elif item.state.err_code == 10 and item.state.result == 8:
-                    state = 8  # Food was skipped due to SurplusControl
+                    state = 8
                 else:
-                    state = 9  # Food was not dispensed due to an error
+                    state = 9
 
             result.append(f"{id_incremental},{hours},{minutes},{amount},{state}")
+
     return ",".join(result) if result else None
 
 
