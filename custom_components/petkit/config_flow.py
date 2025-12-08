@@ -71,7 +71,7 @@ class PetkitOptionsFlowHandler(OptionsFlow):
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Manage the Reolink options."""
+        """Manage the options."""
         if user_input is not None:
             return self.async_create_entry(data=user_input)
 
@@ -191,7 +191,7 @@ class PetkitFlowHandler(ConfigFlow, domain=DOMAIN):
     def async_get_options_flow(
         config_entry: ConfigEntry,
     ) -> PetkitOptionsFlowHandler:
-        """Options callback for Reolink."""
+        """Options callback."""
         return PetkitOptionsFlowHandler()
 
     async def async_step_user(
