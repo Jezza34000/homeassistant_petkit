@@ -35,12 +35,12 @@ repos:
         exclude: ^tests/fixtures/|homeassistant/generated/|tests/components/.*/snapshots/|.github|const.py
 
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 25.11.0
+    rev: 25.12.0
     hooks:
       - id: black
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.7
+    rev: v0.14.8
     hooks:
       - id: ruff
         args:
@@ -73,7 +73,7 @@ repos:
           - --keep-updates
 
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: 42.29.3
+    rev: 42.39.4
     hooks:
       - id: renovate-config-validator
 
