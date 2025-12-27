@@ -10,7 +10,7 @@
         "data": {
           "password": "密码",
           "region": "区域",
-          "timezone": "时区",
+          "time_zone": "时区",
           "username": "用户名/手机号"
         },
         "data_description": {
@@ -24,8 +24,23 @@
   },
   "entity": {
     "binary_sensor": {
+      "yowling_detected": {
+        "name": "检测到猫叫"
+      },
+      "abnormal_ph_detected": {
+        "name": "检测到尿液pH值异常"
+      },
+      "soft_stool_detected": {
+        "name": "检测到软便"
+      },
       "battery": {
         "name": "电池"
+      },
+      "weight_error": {
+        "name": "重量错误"
+      },
+      "pet_error": {
+        "name": "宠物错误"
       },
       "light": {
         "name": "指示灯"
@@ -166,6 +181,9 @@
       },
       "level_litter": {
         "name": "抚平"
+      },
+      "reset_filter": {
+        "name": "复位滤芯"
       }
     },
     "fan": {
@@ -185,6 +203,15 @@
       },
       "last_visit_event": {
         "name": "上次路过事件"
+      },
+      "dish_before": {
+        "name": "进食前"
+      },
+      "dish_after": {
+        "name": "进食后"
+      },
+      "waste_check": {
+        "name": "集便盒检查"
       }
     },
     "number": {
@@ -231,6 +258,15 @@
       }
     },
     "sensor": {
+      "urine_measured_ph": {
+        "name": "尿液pH值"
+      },
+      "pet_last_urination_date": {
+        "name": "上次排尿"
+      },
+      "pet_last_defecation_date": {
+        "name": "上次排便"
+      },
       "air_purified": {
         "name": "空气净化"
       },
@@ -421,6 +457,9 @@
       "pet_last_use_date": {
         "name": "上次使用日期"
       },
+      "connection_state": {
+        "name": "连接状态"
+      },
       "pet_last_use_duration": {
         "name": "上次使用时长"
       },
@@ -489,6 +528,12 @@
       }
     },
     "switch": {
+      "soft_stool": {
+        "name": "AI 软便识别"
+      },
+      "soft_stool_stop_cleaning": {
+        "name": "检测到软便时停止清理"
+      },
       "auto_clean": {
         "name": "自动清理"
       },
@@ -609,6 +654,9 @@
       "refill_notif": {
         "name": "缺粮通知"
       },
+      "sand_saving": {
+        "name": "节省猫砂"
+      },
       "shortage_alarm": {
         "name": "空粮报警"
       },
@@ -630,8 +678,29 @@
       "work_log_notify": {
         "name": "计划执行时通知"
       },
+      "toilet_light": {
+        "name": "如厕时灯光辅助"
+      },
+      "privacy_mode": {
+        "name": "回家模式"
+      },
       "work_notify": {
         "name": "设备清理时通知"
+      },
+      "privacy_camera_off": {
+        "name": "回家模式: 摄像头关闭"
+      },
+      "privacy_camera_inward": {
+        "name": "回家模式: 摄像头转向筒内"
+      },
+      "privacy_microphone_off": {
+        "name": "回家模式: 麦克风关闭"
+      },
+      "ai_ph_detection": {
+        "name": "AI pH值检测"
+      },
+      "ai_yowling": {
+        "name": "AI 猫叫检测"
       }
     },
     "light": {
@@ -653,12 +722,12 @@
   },
   "options": {
     "step": {
-      "petkit_options": {
+      "init": {
         "data": {
           "region": "区域",
           "scan_interval": "默认轮询间隔（秒）",
           "smart_polling": "智能轮询",
-          "timezone": "时区"
+          "time_zone": "时区"
         },
         "data_description": {
           "smart_polling": "智能轮询会根据设备的事件/操作自动调整轮询间隔。"
