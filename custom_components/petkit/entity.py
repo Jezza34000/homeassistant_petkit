@@ -140,7 +140,7 @@ class PetkitEntity(
 
     @property
     def device_info(self) -> DeviceInfo:
-        """Return the device information"""
+        """Return the device information."""
 
         if self.device.device_nfo.device_type:
             device_type = self.device.device_nfo.device_type

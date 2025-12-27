@@ -253,7 +253,7 @@ class PetkitNumber(PetkitEntity, NumberEntity):
 
     @property
     def native_value(self) -> float | None:
-        """Always reset to native_value"""
+        """Always reset to native_value."""
         device_data = self.coordinator.data.get(self.device.id)
         if device_data:
             return self.entity_description.native_value(device_data)
@@ -261,7 +261,7 @@ class PetkitNumber(PetkitEntity, NumberEntity):
 
     @property
     def available(self) -> bool:
-        """Return if this button is available or not"""
+        """Return if this button is available or not."""
         device_data = self.coordinator.data.get(self.device.id)
         if (
             device_data

@@ -145,7 +145,7 @@ def get_raw_feed_plan(feeder_records_data) -> str | None:
 
 
 def map_litter_event(litter_event: list[LitterRecord | None]) -> str | None:
-    """Return a description of the last event
+    """Return a description of the last event.
 
     Use the 'litter_last_event' translation table to map the state to a human-readable string.
     """

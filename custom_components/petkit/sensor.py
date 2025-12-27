@@ -90,7 +90,7 @@ def get_liquid_value(device):
 
 
 def get_bt_state_text(state: BluetoothState) -> str | None:
-    """Get the bluetooth state"""
+    """Get the bluetooth state."""
     return {
         BluetoothState.NO_STATE: None,
         BluetoothState.NOT_CONNECTED: "Not connected",
