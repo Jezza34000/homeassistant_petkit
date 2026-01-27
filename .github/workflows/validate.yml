@@ -17,7 +17,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Checkout the repository"
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # Version 6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # Version 6.0.2
 
       - name: "Run hassfest validation"
         uses: home-assistant/actions/hassfest@55b4a5d23e09d627c2773c2ef82afa98904d65b4 # Version 11 September 2025
@@ -27,7 +27,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Checkout the repository"
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # Version 6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # Version 6.0.2
 
       - name: "Run HACS validation"
         uses: hacs/action@d556e736723344f83838d08488c983a15381059a # Version 22.5.0
