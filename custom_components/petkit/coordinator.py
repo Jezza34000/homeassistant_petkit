@@ -72,6 +72,9 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
         self.previous_devices = set()
         self.curent_devices = set()
         self.fast_poll_tic = 0
+        # Stream
+        self._ice_servers = []
+        self._agora_response = None
 
     def enable_smart_polling(self, nb_tic: int) -> None:
         """Enable smart polling."""
