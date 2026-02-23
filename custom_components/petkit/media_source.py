@@ -195,7 +195,7 @@ class PetkitMediaSource(MediaSource):
     def extract_timestamp_and_convert(filename: str) -> str:
         """Extract the timestamp from a filename and convert it to HH:MM:SS."""
         try:
-            timestamp_str = filename.split("_")[1].split(".")[0]
+            timestamp_str = filename.split("_")[1].split(".", maxsplit=1)[0]
             timestamp = int(timestamp_str)
             time_obj = datetime.fromtimestamp(timestamp).time()
             return time_obj.strftime("%H:%M:%S")
