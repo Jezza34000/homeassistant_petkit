@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from pypetkitapi import (
+    D3,
     D4S,
     D4SH,
     T4,
@@ -90,8 +91,15 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             key="Food level",
             translation_key="food_level",
             device_class=BinarySensorDeviceClass.PROBLEM,
+            value=lambda device: device.state.food < 2,
+            only_for_types=[D3],
+        ),
+        PetKitBinarySensorDesc(
+            key="Food level",
+            translation_key="food_level",
+            device_class=BinarySensorDeviceClass.PROBLEM,
             value=lambda device: device.state.food == 0,
-            ignore_types=[D4S, D4SH],
+            ignore_types=[D4S, D4SH, D3],
         ),
         PetKitBinarySensorDesc(
             key="Food level 1",
