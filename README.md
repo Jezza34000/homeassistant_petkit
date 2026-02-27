@@ -18,6 +18,9 @@
 - **[Media Management](https://github.com/Jezza34000/homeassistant_petkit/wiki/Media-Management)** - Photo and video management
 - **[Recommended Cards](https://github.com/Jezza34000/homeassistant_petkit/wiki/Recommended-Cards)** - Custom cards to enhance your dashboard
 - **[Translations](https://github.com/Jezza34000/homeassistant_petkit/wiki/Translations)** - Language support and contribution guide
+  <a href="https://hosted.weblate.org/engage/homeassistant_petkit/"><img src="https://hosted.weblate.org/widget/homeassistant_petkit/homeassistant_petkit/language-badge.svg" alt="Translation status" height="15"></a>
+  <a href="https://hosted.weblate.org/engage/homeassistant_petkit/"><img src="https://hosted.weblate.org/widget/homeassistant_petkit/homeassistant_petkit/status-badge.png" alt="Translation status" height="15"></a>
+
 - **[Troubleshooting](https://github.com/Jezza34000/homeassistant_petkit/wiki/Troubleshooting)** - Solutions to common problems
 - **[Development](https://github.com/Jezza34000/homeassistant_petkit/wiki/Development)** - Guide for contributors
 
