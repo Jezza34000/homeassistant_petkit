@@ -75,6 +75,10 @@ PETKIT_DEVICES_MAPPING = {
     "5w5": "Eversweet Solo 2",
     "6w5": "Eversweet 3 Pro (UVC Version)",
     "0ctw3": "Eversweet Max",
+    "1ctw3": "Eversweet Max",
+    "2ctw3": "Eversweet Max 2",
+    "3ctw3": "Eversweet Max",
+    "4ctw3": "Eversweet Max 2",
     "0pet": "Pet",
 }
 
