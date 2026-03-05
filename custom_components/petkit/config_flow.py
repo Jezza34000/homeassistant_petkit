@@ -45,6 +45,7 @@ from .const import (
     CONF_MEDIA_DL_VIDEO,
     CONF_MEDIA_EV_TYPE,
     CONF_MEDIA_PATH,
+    CONF_REALTIME_MQTT,
     CONF_SCAN_INTERVAL_BLUETOOTH,
     CONF_SCAN_INTERVAL_MEDIA,
     CONF_SMART_POLLING,
@@ -55,6 +56,7 @@ from .const import (
     DEFAULT_DL_VIDEO,
     DEFAULT_EVENTS,
     DEFAULT_MEDIA_PATH,
+    DEFAULT_REALTIME_MQTT,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL_BLUETOOTH,
     DEFAULT_SCAN_INTERVAL_MEDIA,
@@ -89,6 +91,12 @@ class PetkitOptionsFlowHandler(OptionsFlow):
                         CONF_SMART_POLLING,
                         default=self.config_entry.options.get(
                             CONF_SMART_POLLING, DEFAULT_SMART_POLLING
+                        ),
+                    ): BooleanSelector(BooleanSelectorConfig()),
+                    vol.Required(
+                        CONF_REALTIME_MQTT,
+                        default=self.config_entry.options.get(
+                            CONF_REALTIME_MQTT, DEFAULT_REALTIME_MQTT
                         ),
                     ): BooleanSelector(BooleanSelectorConfig()),
                     vol.Required(MEDIA_SECTION): section(
@@ -246,6 +254,7 @@ class PetkitFlowHandler(ConfigFlow, domain=DOMAIN):
                         options={
                             CONF_SCAN_INTERVAL: DEFAULT_SCAN_INTERVAL,
                             CONF_SMART_POLLING: DEFAULT_SMART_POLLING,
+                            CONF_REALTIME_MQTT: DEFAULT_REALTIME_MQTT,
                             MEDIA_SECTION: {
                                 CONF_MEDIA_PATH: DEFAULT_MEDIA_PATH,
                                 CONF_SCAN_INTERVAL_MEDIA: DEFAULT_SCAN_INTERVAL_MEDIA,

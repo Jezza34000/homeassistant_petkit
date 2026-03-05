@@ -18,6 +18,7 @@ if TYPE_CHECKING:
         PetkitDataUpdateCoordinator,
         PetkitMediaUpdateCoordinator,
     )
+    from .iot_mqtt import PetkitIotMqttListener
 
 type PetkitConfigEntry = ConfigEntry[PetkitData]
 
@@ -34,3 +35,4 @@ class PetkitData:
     coordinator_media: PetkitMediaUpdateCoordinator
     coordinator_bluetooth: PetkitBluetoothUpdateCoordinator
     integration: Integration
+    mqtt_listener: PetkitIotMqttListener | None = None

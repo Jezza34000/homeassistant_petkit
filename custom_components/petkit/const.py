@@ -8,9 +8,17 @@ COORDINATOR = "coordinator"
 COORDINATOR_MEDIA = "coordinator_media"
 COORDINATOR_BLUETOOTH = "coordinator_bluetooth"
 
+# Services
+SERVICE_MQTT_DUMP = "mqtt_dump"
+
+# Events
+EVENT_MQTT_MESSAGE = "petkit_mqtt_message"
+EVENT_MQTT_DUMP = "petkit_mqtt_dump"
+
 # Configuration
 CONF_SCAN_INTERVAL_MEDIA = "scan_interval_media"
 CONF_SMART_POLLING = "smart_polling"
+CONF_REALTIME_MQTT = "realtime_mqtt"
 
 BT_SECTION = "bluetooth_options"
 CONF_BLE_RELAY_ENABLED = "ble_relay_enabled"
@@ -24,7 +32,7 @@ CONF_DELETE_AFTER = "delete_media_after"
 CONF_MEDIA_PATH = "media_path"
 
 # Default configuration values
-DEFAULT_SCAN_INTERVAL = 60
+DEFAULT_SCAN_INTERVAL = 90
 DEFAULT_SCAN_INTERVAL_MEDIA = 15
 DEFAULT_SCAN_INTERVAL_BLUETOOTH = 30
 DEFAULT_EVENTS = [
@@ -39,6 +47,7 @@ DEFAULT_EVENTS = [
 DEFAULT_DL_VIDEO = False
 DEFAULT_DL_IMAGE = True
 DEFAULT_SMART_POLLING = True
+DEFAULT_REALTIME_MQTT = False
 DEFAULT_BLUETOOTH_RELAY = True
 DEFAULT_DELETE_AFTER = 3
 DEFAULT_MEDIA_PATH = "/media"
@@ -57,7 +66,6 @@ PETKIT_DEVICES_MAPPING = {
     "0d4s": "Fresh Element Gemini",
     "0d4h": "YumShare Solo",
     "0d4sh": "YumShare Dual Hopper",
-    "2d4sh": "YumShare Dual Hopper 2",
     "0feeder": "Fresh Element",
     "0feedermini": "Fresh Element Mini Pro",
     "0t3": "Pura X",
@@ -66,7 +74,6 @@ PETKIT_DEVICES_MAPPING = {
     "2t4": "Puramax 2",
     "0t5": "Purobot Max",
     "1t5": "Purobot Max",
-    "2t5": "Purobot Max 2",
     "0t6": "Purobot Ultra",
     "1t6": "Purobot Ultra",
     "0t7": "Purobot Crystal Duo",
@@ -75,10 +82,6 @@ PETKIT_DEVICES_MAPPING = {
     "5w5": "Eversweet Solo 2",
     "6w5": "Eversweet 3 Pro (UVC Version)",
     "0ctw3": "Eversweet Max",
-    "1ctw3": "Eversweet Max",
-    "2ctw3": "Eversweet Max 2",
-    "3ctw3": "Eversweet Max",
-    "4ctw3": "Eversweet Max 2",
     "0pet": "Pet",
 }
 

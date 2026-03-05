@@ -48,7 +48,7 @@ from homeassistant.const import (
     UnitOfVolume,
 )
 
-from .const import BATTERY_LEVEL_MAP, DEVICE_STATUS_MAP, LOGGER, NO_ERROR
+from .const import BATTERY_LEVEL_MAP, DEVICE_STATUS_MAP, DOMAIN, LOGGER, NO_ERROR
 from .entity import PetKitDescSensorBase, PetkitEntity
 from .utils import get_raw_feed_plan, map_litter_event, map_work_state
 
@@ -731,7 +731,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up binary_sensors using config entry."""
     devices = entry.runtime_data.client.petkit_entities.values()
-    entities = [
+    entities: list[SensorEntity] = [
         PetkitSensor(
             coordinator=entry.runtime_data.coordinator,
             entity_description=entity_description,
@@ -765,6 +765,12 @@ async def async_setup_entry(
         len(entities_bt),
         sum(len(descriptors) for descriptors in SENSOR_MAPPING.values()),
     )
+
+    # Add MQTT diagnostic sensor if listener is active
+    mqtt_listener = getattr(entry.runtime_data, "mqtt_listener", None)
+    if mqtt_listener is not None:
+        entities.append(PetkitMqttStatusSensor(hass, entry, mqtt_listener))
+
     async_add_entities(entities + entities_bt)
 
 
@@ -846,3 +852,48 @@ class PetkitSensorBt(PetkitEntity, SensorEntity):
     def native_unit_of_measurement(self) -> str | None:
         """Return the unit of measurement."""
         return self.entity_description.native_unit_of_measurement
+
+
+class PetkitMqttStatusSensor(SensorEntity):
+    """Diagnostic sensor showing MQTT connection status."""
+
+    _attr_has_entity_name = True
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_translation_key = "mqtt_status"
+    _attr_should_poll = True
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        entry: PetkitConfigEntry,
+        mqtt_listener: Any,
+    ) -> None:
+        """Initialize the MQTT status sensor."""
+        from .iot_mqtt import PetkitIotMqttListener
+
+        self._listener: PetkitIotMqttListener = mqtt_listener
+        self._entry = entry
+        self._attr_unique_id = f"{entry.entry_id}_mqtt_status"
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, f"{entry.entry_id}_mqtt")},
+            "name": "Petkit MQTT",
+            "manufacturer": "Petkit",
+            "model": "IoT MQTT Listener",
+            "entry_type": "service",
+        }
+
+    @property
+    def native_value(self) -> str:
+        """Return the MQTT connection status."""
+        return self._listener.connection_status.value
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return extra state attributes."""
+        diag = self._listener.diagnostics
+        return {
+            "messages_received": diag["messages_received"],
+            "last_message_at": diag["last_message_at"],
+            "buffer_size": diag["buffer_size"],
+            "topics": diag["topics"],
+        }
