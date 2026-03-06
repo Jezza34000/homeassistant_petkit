@@ -12,11 +12,12 @@ import asyncio
 import base64
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import StrEnum
 import hashlib
 import hmac
 import json
+import logging
 import re
 from typing import Any
 
@@ -25,8 +26,10 @@ from pypetkitapi.client import PetKitClient
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 
-from .const import LOGGER
+from .const import DEFAULT_SCAN_INTERVAL, SCAN_INTERVAL_SLOW
 from .coordinator import PetkitDataUpdateCoordinator
+
+LOGGER = logging.getLogger(__name__)
 
 try:  # pragma: no cover
     import paho.mqtt.client as mqtt
@@ -211,7 +214,7 @@ class PetkitIotMqttListener:
         client: PetKitClient,
         coordinator: PetkitDataUpdateCoordinator,
         *,
-        refresh_debounce_s: float = 2.0,
+        refresh_debounce_s: float = 0.5,
     ) -> None:
         """Init PetkitIotMqttListener"""
         self.hass = hass
@@ -272,16 +275,14 @@ class PetkitIotMqttListener:
         if not (
             iot.mqtt_host and iot.device_name and iot.device_secret and iot.product_key
         ):
-            LOGGER.warning(
-                "Petkit IoT MQTT config is missing required fields; listener disabled"
-            )
+            LOGGER.warning("Config is missing required fields; listener disabled")
             self._connection_status = MqttConnectionStatus.FAILED
             return
 
         try:
             endpoint = _parse_mqtt_host(iot.mqtt_host)
         except ValueError as err:
-            LOGGER.warning("Invalid Petkit MQTT host %r: %s", iot.mqtt_host, err)
+            LOGGER.warning("Invalid host %r: %s", iot.mqtt_host, err)
             self._connection_status = MqttConnectionStatus.FAILED
             return
 
@@ -322,14 +323,14 @@ class PetkitIotMqttListener:
             paho_client.connect_async(endpoint.host, endpoint.port, keepalive=60)
             paho_client.loop_start()
         except Exception as err:  # noqa: BLE001
-            LOGGER.warning("Failed to start Petkit MQTT connection: %s", err)
+            LOGGER.warning("Failed to start connection: %s", err)
             self._mqtt_client = None
             self._subscribe_topics = []
             self._connection_status = MqttConnectionStatus.FAILED
             return
 
         LOGGER.info(
-            "Petkit MQTT listener started (broker=%s:%s, topics=%s)",
+            "Listener started (broker=%s:%s, topics=%s)",
             endpoint.host,
             endpoint.port,
             self._subscribe_topics,
@@ -355,42 +356,50 @@ class PetkitIotMqttListener:
         try:
             client.disconnect()
         except Exception:  # noqa: BLE001
-            LOGGER.debug("Petkit MQTT disconnect raised", exc_info=True)
+            LOGGER.debug("Disconnect raised", exc_info=True)
 
         try:
             client.loop_stop()
         except Exception:  # noqa: BLE001
-            LOGGER.debug("Petkit MQTT loop_stop raised", exc_info=True)
+            LOGGER.debug("Loop_stop raised", exc_info=True)
 
         self._connection_status = MqttConnectionStatus.DISCONNECTED
-        LOGGER.info("Petkit MQTT listener stopped")
+        LOGGER.info("Listener stopped")
 
     def _on_connect(self, client, userdata, flags, rc, *args, **kwargs) -> None:
         topics = self._subscribe_topics
         if rc != 0:
-            LOGGER.warning("Petkit MQTT connect failed (rc=%s)", rc)
+            LOGGER.warning("connect failed (rc=%s)", rc)
             self._connection_status = MqttConnectionStatus.FAILED
             return
         self._connection_status = MqttConnectionStatus.CONNECTED
+        self.hass.loop.call_soon_threadsafe(
+            self._set_polling_interval, SCAN_INTERVAL_SLOW
+        )
+        self.hass.loop.call_soon_threadsafe(self._update_coordinator_mqtt_state, True)
         if not topics:
-            LOGGER.warning("Petkit MQTT connected but subscribe topics are missing")
+            LOGGER.warning("connected but subscribe topics are missing")
             return
         try:
             for topic in topics:
                 client.subscribe(topic, qos=0)
-            LOGGER.info("Petkit MQTT subscribed to %s", topics)
+            LOGGER.info("Subscribed to %s", topics)
         except Exception:  # noqa: BLE001
-            LOGGER.warning("Petkit MQTT subscribe failed", exc_info=True)
+            LOGGER.warning("Subscribe failed", exc_info=True)
 
     def _on_disconnect(self, client, userdata, rc, *args, **kwargs) -> None:
         # paho-mqtt will try to reconnect (reconnect_on_failure / reconnect_delay_set),
         # so we just log.
         if rc != 0:
-            LOGGER.warning("Petkit MQTT disconnected unexpectedly (rc=%s)", rc)
+            LOGGER.warning("Disconnected unexpectedly (rc=%s)", rc)
             self._connection_status = MqttConnectionStatus.DISCONNECTED
         else:
-            LOGGER.info("Petkit MQTT disconnected cleanly")
+            LOGGER.info("Disconnected cleanly")
             self._connection_status = MqttConnectionStatus.DISCONNECTED
+        self.hass.loop.call_soon_threadsafe(
+            self._set_polling_interval, DEFAULT_SCAN_INTERVAL
+        )
+        self.hass.loop.call_soon_threadsafe(self._update_coordinator_mqtt_state, False)
 
     def _on_message(self, client, userdata, msg) -> None:
         # Called from the paho-mqtt network thread. Always hop back onto HA's loop.
@@ -420,8 +429,7 @@ class PetkitIotMqttListener:
         if parsed and parsed.payload and parsed.payload.inner:
             inner_type_str = parsed.payload.inner.inner_type
             LOGGER.info(
-                "Petkit MQTT #%d: topic=%s type=%s inner=%s from=%s",
-                self._messages_received,
+                "Received: topic=%s type=%s inner=%s from=%s",
                 topic,
                 parsed.message_type,
                 inner_type_str,
@@ -429,8 +437,7 @@ class PetkitIotMqttListener:
             )
         else:
             LOGGER.info(
-                "Petkit MQTT #%d: topic=%s (%d bytes)",
-                self._messages_received,
+                "Received: topic=%s (%d bytes)",
                 topic,
                 len(payload),
             )
@@ -472,9 +479,18 @@ class PetkitIotMqttListener:
         self._refresh_task = self.hass.async_create_task(self._debounced_refresh())
 
     async def _debounced_refresh(self) -> None:
-        # Small debounce so bursts of MQTT events don't spam the REST API.
         await asyncio.sleep(self.refresh_debounce_s)
         try:
+            self.coordinator.enable_smart_polling(3)
             await self.coordinator.async_request_refresh()
         except Exception:  # noqa: BLE001
             LOGGER.warning("MQTT-triggered refresh failed", exc_info=True)
+
+    def _update_coordinator_mqtt_state(self, is_connected: bool) -> None:
+        """Met à jour le drapeau mqtt_connected dans le coordinateur."""
+        self.coordinator.mqtt_connected = is_connected
+
+    def _set_polling_interval(self, seconds: int) -> None:
+        """Modify coordinator refresh interval"""
+        self.coordinator.update_interval = timedelta(seconds=seconds)
+        LOGGER.debug("Change coordinator refresh interval to %s sec", seconds)

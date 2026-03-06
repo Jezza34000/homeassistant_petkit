@@ -25,7 +25,6 @@ from homeassistant.config_entries import (
 from homeassistant.const import (
     CONF_PASSWORD,
     CONF_REGION,
-    CONF_SCAN_INTERVAL,
     CONF_TIME_ZONE,
     CONF_USERNAME,
 )
@@ -45,10 +44,8 @@ from .const import (
     CONF_MEDIA_DL_VIDEO,
     CONF_MEDIA_EV_TYPE,
     CONF_MEDIA_PATH,
-    CONF_REALTIME_MQTT,
     CONF_SCAN_INTERVAL_BLUETOOTH,
     CONF_SCAN_INTERVAL_MEDIA,
-    CONF_SMART_POLLING,
     COUNTRY_TO_CODE_DICT,
     DEFAULT_BLUETOOTH_RELAY,
     DEFAULT_DELETE_AFTER,
@@ -56,11 +53,8 @@ from .const import (
     DEFAULT_DL_VIDEO,
     DEFAULT_EVENTS,
     DEFAULT_MEDIA_PATH,
-    DEFAULT_REALTIME_MQTT,
-    DEFAULT_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL_BLUETOOTH,
     DEFAULT_SCAN_INTERVAL_MEDIA,
-    DEFAULT_SMART_POLLING,
     DOMAIN,
     LOGGER,
     MEDIA_SECTION,
@@ -81,24 +75,6 @@ class PetkitOptionsFlowHandler(OptionsFlow):
             step_id="init",
             data_schema=vol.Schema(
                 {
-                    vol.Required(
-                        CONF_SCAN_INTERVAL,
-                        default=self.config_entry.options.get(
-                            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
-                        ),
-                    ): vol.All(int, vol.Range(min=15, max=3600)),
-                    vol.Required(
-                        CONF_SMART_POLLING,
-                        default=self.config_entry.options.get(
-                            CONF_SMART_POLLING, DEFAULT_SMART_POLLING
-                        ),
-                    ): BooleanSelector(BooleanSelectorConfig()),
-                    vol.Required(
-                        CONF_REALTIME_MQTT,
-                        default=self.config_entry.options.get(
-                            CONF_REALTIME_MQTT, DEFAULT_REALTIME_MQTT
-                        ),
-                    ): BooleanSelector(BooleanSelectorConfig()),
                     vol.Required(MEDIA_SECTION): section(
                         vol.Schema(
                             {
@@ -252,9 +228,6 @@ class PetkitFlowHandler(ConfigFlow, domain=DOMAIN):
                         title=user_input[CONF_USERNAME],
                         data=user_input,
                         options={
-                            CONF_SCAN_INTERVAL: DEFAULT_SCAN_INTERVAL,
-                            CONF_SMART_POLLING: DEFAULT_SMART_POLLING,
-                            CONF_REALTIME_MQTT: DEFAULT_REALTIME_MQTT,
                             MEDIA_SECTION: {
                                 CONF_MEDIA_PATH: DEFAULT_MEDIA_PATH,
                                 CONF_SCAN_INTERVAL_MEDIA: DEFAULT_SCAN_INTERVAL_MEDIA,

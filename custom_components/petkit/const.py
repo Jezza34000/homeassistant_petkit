@@ -8,17 +8,8 @@ COORDINATOR = "coordinator"
 COORDINATOR_MEDIA = "coordinator_media"
 COORDINATOR_BLUETOOTH = "coordinator_bluetooth"
 
-# Services
-SERVICE_MQTT_DUMP = "mqtt_dump"
-
-# Events
-EVENT_MQTT_MESSAGE = "petkit_mqtt_message"
-EVENT_MQTT_DUMP = "petkit_mqtt_dump"
-
 # Configuration
 CONF_SCAN_INTERVAL_MEDIA = "scan_interval_media"
-CONF_SMART_POLLING = "smart_polling"
-CONF_REALTIME_MQTT = "realtime_mqtt"
 
 BT_SECTION = "bluetooth_options"
 CONF_BLE_RELAY_ENABLED = "ble_relay_enabled"
@@ -32,7 +23,7 @@ CONF_DELETE_AFTER = "delete_media_after"
 CONF_MEDIA_PATH = "media_path"
 
 # Default configuration values
-DEFAULT_SCAN_INTERVAL = 90
+DEFAULT_SCAN_INTERVAL = 60
 DEFAULT_SCAN_INTERVAL_MEDIA = 15
 DEFAULT_SCAN_INTERVAL_BLUETOOTH = 30
 DEFAULT_EVENTS = [
@@ -54,8 +45,8 @@ DEFAULT_MEDIA_PATH = "/media"
 MEDIA_ROOT = "/media/local"
 
 # Update interval
-MAX_SCAN_INTERVAL = 120
-MIN_SCAN_INTERVAL = 5
+SCAN_INTERVAL_FAST = 5
+SCAN_INTERVAL_SLOW = 120
 
 # Messages constants
 NO_ERROR = "No error"

@@ -40,7 +40,6 @@ from .const import (
     CONF_MEDIA_DL_VIDEO,
     CONF_MEDIA_EV_TYPE,
     CONF_MEDIA_PATH,
-    CONF_SMART_POLLING,
     DEFAULT_BLUETOOTH_RELAY,
     DEFAULT_DELETE_AFTER,
     DEFAULT_DL_IMAGE,
@@ -48,11 +47,11 @@ from .const import (
     DEFAULT_EVENTS,
     DEFAULT_MEDIA_PATH,
     DEFAULT_SCAN_INTERVAL,
-    DEFAULT_SMART_POLLING,
     DOMAIN,
     LOGGER,
     MEDIA_SECTION,
-    MIN_SCAN_INTERVAL,
+    SCAN_INTERVAL_FAST,
+    SCAN_INTERVAL_SLOW,
 )
 
 
@@ -72,6 +71,7 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
         self.previous_devices = set()
         self.curent_devices = set()
         self.fast_poll_tic = 0
+        self.mqtt_connected = False
 
     def enable_smart_polling(self, nb_tic: int) -> None:
         """Enable smart polling."""
@@ -79,30 +79,33 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
             LOGGER.debug(f"Fast poll tic already enabled for {self.fast_poll_tic} tics")
             return
 
-        if not self.config_entry.options.get(CONF_SMART_POLLING, DEFAULT_SMART_POLLING):
-            LOGGER.debug("Smart polling is disabled by configuration")
-            return
-
-        self.update_interval = timedelta(seconds=MIN_SCAN_INTERVAL)
+        self.update_interval = timedelta(seconds=SCAN_INTERVAL_FAST)
         self.fast_poll_tic = nb_tic
         LOGGER.debug(
-            f"Fast poll tic enabled for {nb_tic} tics (at {MIN_SCAN_INTERVAL}sec interval)"
+            f"Fast poll tic enabled for {nb_tic} tics (at {SCAN_INTERVAL_FAST}sec interval)"
         )
 
-    async def update_smart_polling(self) -> None:
+    async def _update_smart_polling(self) -> None:
         """Update smart polling."""
         if self.fast_poll_tic > 0:
             self.fast_poll_tic -= 1
-            LOGGER.debug(f"Fast poll tic remaining = {self.fast_poll_tic}")
-        elif self.update_interval != timedelta(seconds=DEFAULT_SCAN_INTERVAL):
-            self.update_interval = timedelta(seconds=DEFAULT_SCAN_INTERVAL)
-            LOGGER.debug("Fast poll tic ended, reset to default scan interval")
+            LOGGER.debug(f"Fast poll tic remaining: {self.fast_poll_tic}")
+        else:
+            base_interval = (
+                SCAN_INTERVAL_SLOW if self.mqtt_connected else DEFAULT_SCAN_INTERVAL
+            )
+
+            if self.update_interval != timedelta(seconds=base_interval):
+                self.update_interval = timedelta(seconds=base_interval)
+                LOGGER.debug(
+                    f"Fast poll tic ended, reset to {base_interval} sec interval"
+                )
 
     async def _async_update_data(
         self,
     ) -> dict[int, Feeder | Litter | WaterFountain | Purifier | Pet]:
         """Update data via library."""
-        await self.update_smart_polling()
+        await self._update_smart_polling()
 
         try:
             await self.config_entry.runtime_data.client.get_devices_data()
