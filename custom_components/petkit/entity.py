@@ -12,7 +12,7 @@ from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, Device
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, LOGGER, PETKIT_DEVICES_MAPPING
+from .const import DOMAIN, LOGGER
 from .coordinator import (
     PetkitBluetoothUpdateCoordinator,
     PetkitDataUpdateCoordinator,
@@ -142,21 +142,11 @@ class PetkitEntity(
     def device_info(self) -> DeviceInfo:
         """Return the device information."""
 
-        if self.device.device_nfo.device_type:
-            device_type = self.device.device_nfo.device_type
-            device_model = PETKIT_DEVICES_MAPPING.get(
-                str(self.device.device_nfo.type_code) + str(device_type.lower()),
-                "Unknown Device",
-            )
-        else:
-            device_type = "Unknown"
-            device_model = "Unknown Device"
-
         device_info = DeviceInfo(
             identifiers={(DOMAIN, self.device.sn)},
             manufacturer="Petkit",
-            model=device_model,
-            model_id=device_type.upper(),
+            model=self.device.device_nfo.modele_name,
+            model_id=self.device.device_nfo.device_type.upper(),
             name=self.device.name,
         )
 
