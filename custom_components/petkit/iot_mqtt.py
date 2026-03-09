@@ -481,7 +481,6 @@ class PetkitIotMqttListener:
     async def _debounced_refresh(self) -> None:
         await asyncio.sleep(self.refresh_debounce_s)
         try:
-            self.coordinator.enable_smart_polling(3)
             await self.coordinator.async_request_refresh()
         except Exception:  # noqa: BLE001
             LOGGER.warning("MQTT-triggered refresh failed", exc_info=True)

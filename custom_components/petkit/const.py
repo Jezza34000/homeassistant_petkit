@@ -46,7 +46,7 @@ MEDIA_ROOT = "/media/local"
 
 # Update interval
 SCAN_INTERVAL_FAST = 5
-SCAN_INTERVAL_SLOW = 120
+SCAN_INTERVAL_SLOW = 190
 
 # Messages constants
 NO_ERROR = "No error"
