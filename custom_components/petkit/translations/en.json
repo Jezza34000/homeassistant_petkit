@@ -725,14 +725,7 @@
       "init": {
         "data": {
           "region": "Region",
-          "scan_interval": "Default polling interval (seconds)",
-          "realtime_mqtt": "Real-time update",
-          "smart_polling": "Smart polling",
           "time_zone": "Timezone"
-        },
-        "data_description": {
-          "realtime_mqtt": "Subscribe to Petkit's IoT MQTT broker, fire petkit_mqtt_message events, and refresh data when messages arrive (may increase API usage).",
-          "smart_polling": "Smart polling will automatically adjust the polling interval based on the devices's event/action."
         },
         "sections": {
           "bluetooth_options": {
