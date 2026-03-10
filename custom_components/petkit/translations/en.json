@@ -149,6 +149,9 @@
       "call_pet": {
         "name": "Call pet"
       },
+      "play_sound": {
+        "name": "Play sound"
+      },
       "cancel_manual_feed": {
         "name": "Cancel manual feed"
       },
