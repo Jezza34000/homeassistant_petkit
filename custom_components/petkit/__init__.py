@@ -36,6 +36,7 @@ from .coordinator import (
     PetkitMediaUpdateCoordinator,
 )
 from .data import PetkitData
+from .iot_mqtt import PetkitIotMqttListener
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -110,6 +111,17 @@ async def async_setup_entry(
     await coordinator_media.async_config_entry_first_refresh()
     await coordinator_bluetooth.async_config_entry_first_refresh()
 
+    # MQTT
+
+    mqtt_listener = PetkitIotMqttListener(
+        hass=hass,
+        client=entry.runtime_data.client,
+        coordinator=coordinator,
+    )
+
+    entry.runtime_data.mqtt_listener = mqtt_listener
+    await mqtt_listener.async_start()
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
@@ -128,6 +140,10 @@ async def async_unload_entry(
     entry: PetkitConfigEntry,
 ) -> bool:
     """Handle removal of an entry."""
+    mqtt_listener = getattr(entry.runtime_data, "mqtt_listener", None)
+    if mqtt_listener is not None:
+        await mqtt_listener.async_stop()
+
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 

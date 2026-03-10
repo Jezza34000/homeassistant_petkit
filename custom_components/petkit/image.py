@@ -198,7 +198,6 @@ class PetkitImage(PetkitEntity, ImageEntity):
         no_img = Path(__file__).parent / "img" / "no-image.png"
 
         if not self._last_image_file:
-            LOGGER.error("No media files found")
             self._attr_image_last_updated = None
             return await self._read_file(no_img)
 

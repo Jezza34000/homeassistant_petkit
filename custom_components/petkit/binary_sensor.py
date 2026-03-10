@@ -380,7 +380,7 @@ class PetkitBinarySensor(PetkitEntity, BinarySensorEntity):
                 and value
                 and self.coordinator.fast_poll_tic < 1
             ):
-                self.coordinator.enable_smart_polling(24)
+                self.coordinator.enable_smart_polling(3)
 
             return value
         return None

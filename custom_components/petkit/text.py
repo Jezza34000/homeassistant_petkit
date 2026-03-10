@@ -25,7 +25,7 @@ from pypetkitapi import (
 
 from homeassistant.components.text import TextEntity, TextEntityDescription
 
-from .const import INPUT_FEED_PATTERN, LOGGER, MIN_SCAN_INTERVAL, POWER_ONLINE_STATE
+from .const import INPUT_FEED_PATTERN, LOGGER, POWER_ONLINE_STATE, SCAN_INTERVAL_FAST
 from .entity import PetKitDescSensorBase, PetkitEntity
 
 if TYPE_CHECKING:
@@ -197,8 +197,8 @@ class PetkitText(PetkitEntity, TextEntity):
                 f"Feeding value '{value}' is not valid for this feeder. Valid values are: {valid_values}"
             )
 
-        self.coordinator.update_interval = timedelta(seconds=MIN_SCAN_INTERVAL)
-        self.coordinator.fast_poll_tic = 12
+        self.coordinator.update_interval = timedelta(seconds=SCAN_INTERVAL_FAST)
+        self.coordinator.fast_poll_tic = 3
         LOGGER.debug(
             "Setting value for : %s with value : %s", self.entity_description.key, value
         )
