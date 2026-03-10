@@ -48,6 +48,23 @@ class PetKitSelectDesc(PetKitDescSensorBase, SelectEntityDescription):
     action: Callable[PetkitConfigEntry]
 
 
+async def _handle_surplus_control(api, device, opt_value):
+    selected_key = next(
+        key for key, value in SURPLUS_FOOD_LEVEL_OPT.items() if value == opt_value
+    )
+
+    if selected_key == 0:
+        await api.send_api_request(
+            device.id, DeviceCommand.UPDATE_SETTING, {"surplusControl": 0}
+        )
+    else:
+        await api.send_api_request(
+            device.id,
+            DeviceCommand.UPDATE_SETTING,
+            {"surplusControl": 1, "surplusStandard": selected_key},
+        )
+
+
 COMMON_ENTITIES = []
 
 SELECT_MAPPING: dict[type[PetkitDevices], list[PetKitSelectDesc]] = {
@@ -56,21 +73,13 @@ SELECT_MAPPING: dict[type[PetkitDevices], list[PetKitSelectDesc]] = {
         PetKitSelectDesc(
             key="Surplus level",
             translation_key="surplus_level",
-            current_option=lambda device: SURPLUS_FOOD_LEVEL_OPT[
-                device.settings.surplus_standard
-            ],
-            options=lambda: list(SURPLUS_FOOD_LEVEL_OPT.values()),
-            action=lambda api, device, opt_value: api.send_api_request(
-                device.id,
-                DeviceCommand.UPDATE_SETTING,
-                {
-                    "surplusStandard": next(
-                        key
-                        for key, value in SURPLUS_FOOD_LEVEL_OPT.items()
-                        if value == opt_value
-                    )
-                },
+            current_option=lambda device: (
+                SURPLUS_FOOD_LEVEL_OPT[0]
+                if device.settings.surplus_control == 0
+                else SURPLUS_FOOD_LEVEL_OPT.get(device.settings.surplus_standard)
             ),
+            options=lambda: list(SURPLUS_FOOD_LEVEL_OPT.values()),
+            action=_handle_surplus_control,
             only_for_types=[D4H, D4SH],
         ),
         PetKitSelectDesc(

@@ -338,17 +338,6 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             ),
         ),
         PetKitSwitchDesc(
-            key="Surplus control",
-            translation_key="surplus_control",
-            value=lambda device: device.settings.surplus_control,
-            turn_on=lambda api, device: api.send_api_request(
-                device.id, DeviceCommand.UPDATE_SETTING, {"surplusControl": 1}
-            ),
-            turn_off=lambda api, device: api.send_api_request(
-                device.id, DeviceCommand.UPDATE_SETTING, {"surplusControl": 0}
-            ),
-        ),
-        PetKitSwitchDesc(
             key="Low battery notif",
             translation_key="low_battery_notif",
             value=lambda device: device.settings.low_battery_notify,

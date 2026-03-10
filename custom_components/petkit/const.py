@@ -69,7 +69,7 @@ BATTERY_LEVEL_MAP = {
 INPUT_FEED_PATTERN = "^(0|[1-9][0-9]?|1[0-9]{2}|200)$"
 
 # Select list mapping
-SURPLUS_FOOD_LEVEL_OPT = {1: "Less", 2: "Moderate", 3: "Full"}
+SURPLUS_FOOD_LEVEL_OPT = {0: "Disabled", 1: "Less", 2: "Moderate", 3: "Full"}
 IA_DETECTION_SENSITIVITY_OPT = {1: "Low", 2: "Mid", 3: "High"}
 LITTER_TYPE_OPT = {1: "Bentonite", 2: "Tofu", 3: "Mixed"}
 
