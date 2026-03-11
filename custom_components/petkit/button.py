@@ -257,6 +257,32 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
             ),
             only_for_types=DEVICES_WATER_FOUNTAIN,
         ),
+        PetKitButtonDesc(
+            key="Pause",
+            translation_key="pause",
+            action=lambda api, device: api.bluetooth_manager.send_ble_command(
+                device.id, FountainAction.PAUSE
+            ),
+            only_for_types=DEVICES_WATER_FOUNTAIN,
+            is_available=lambda device: (
+                False
+                if device.status.run_status is None
+                else device.status.run_status > 0
+            ),
+        ),
+        PetKitButtonDesc(
+            key="Resume",
+            translation_key="resume",
+            action=lambda api, device: api.bluetooth_manager.send_ble_command(
+                device.id, FountainAction.CONTINUE
+            ),
+            only_for_types=DEVICES_WATER_FOUNTAIN,
+            is_available=lambda device: (
+                False
+                if device.status.run_status is None
+                else device.status.run_status == 0
+            ),
+        ),
     ],
     Purifier: [*COMMON_ENTITIES],
     Pet: [*COMMON_ENTITIES],

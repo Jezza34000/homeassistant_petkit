@@ -143,6 +143,12 @@
       "action_pause": {
         "name": "Action : Pause"
       },
+      "pause": {
+        "name": "Pause"
+      },
+      "resume": {
+        "name": "Resume"
+      },
       "action_reset": {
         "name": "Action : Reset"
       },
