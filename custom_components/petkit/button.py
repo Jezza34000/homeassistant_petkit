@@ -90,6 +90,14 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
             ),
             only_for_types=[D4S, D4H, D4SH],
         ),
+        PetKitButtonDesc(
+            key="Play sound",
+            translation_key="play_sound",
+            action=lambda api, device: api.send_api_request(
+                device.id, FeederCommand.PLAY_SOUND, device.settings.selected_sound
+            ),
+            only_for_types=[D3, D4H, D4SH],
+        ),
     ],
     Litter: [
         *COMMON_ENTITIES,
@@ -328,5 +336,5 @@ class PetkitButton(PetkitEntity, ButtonEntity):
         await self.entity_description.action(
             self.coordinator.config_entry.runtime_data.client, self.device
         )
-        await asyncio.sleep(1.5)
+        await asyncio.sleep(0.5)
         await self.coordinator.async_request_refresh()
