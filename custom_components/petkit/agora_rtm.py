@@ -152,7 +152,7 @@ class AgoraRTMSignaling:
                 accepted_codes=SUCCESS_CODES,
                 suppress_errors=True,
             )
-            LOGGER.warning(
+            LOGGER.debug(
                 "start_live attempt %d/%d → sent=%s",
                 attempt + 1,
                 START_LIVE_RETRIES,
@@ -167,11 +167,10 @@ class AgoraRTMSignaling:
             if attempt < START_LIVE_RETRIES - 1:
                 await asyncio.sleep(START_LIVE_RETRY_DELAY_SECONDS)
 
-        LOGGER.warning(
+        LOGGER.error(
             "Signaling start_live failed after %d attempts",
             START_LIVE_RETRIES,
         )
-        LOGGER.debug("AgoraRTMSignaling => _send_start_live_with_retry has failed")
         return False
 
     async def _send_command(
@@ -274,7 +273,7 @@ class AgoraRTMSignaling:
 
             result = str(data.get("result", "")).lower()
             code = str(data.get("code", "")).lower()
-            LOGGER.warning(
+            LOGGER.debug(
                 "RTM response: status=%s result=%s code=%s body=%s",
                 response.status,
                 result,

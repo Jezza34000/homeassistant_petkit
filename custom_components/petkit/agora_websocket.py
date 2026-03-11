@@ -33,6 +33,7 @@ def _create_ws_ssl_context() -> ssl.SSLContext:
 
     return ssl_context
 
+
 _SSL_CONTEXT = _create_ws_ssl_context()
 
 
