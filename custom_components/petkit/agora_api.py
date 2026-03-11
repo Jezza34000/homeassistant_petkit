@@ -421,7 +421,11 @@ class AgoraAPIClient:
                         request_payload,
                         proxy_server,
                     )
-                except (aiohttp.ClientError, asyncio.TimeoutError, ValueError) as err:
+                except (
+                    aiohttp.ClientError,
+                    asyncio.TimeoutError,
+                    ValueError,
+                ) as err:
                     LOGGER.debug("Agora endpoint %s failed: %s", domain, err)
                     continue
 
