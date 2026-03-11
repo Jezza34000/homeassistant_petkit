@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import secrets
 from dataclasses import dataclass
 import hashlib
 import json
@@ -326,7 +327,7 @@ class AgoraAPIClient:
                 SERVICE_IDS["CLOUD_PROXY_FALLBACK"],
             ]
         if sid is None:
-            sid = str(randint(0, 2**31 - 1))
+            sid = str(secrets.randbelow(2**31))
 
         payload = self._build_request_payload(
             app_id=app_id,
@@ -366,7 +367,7 @@ class AgoraAPIClient:
         area_code: str,
     ) -> dict[str, Any]:
         client_ts = int(time.time() * 1000)
-        opid = randint(0, 10**12 - 1)
+        opid = secrets.randbelow(10**12)
 
         detail = self._merge_objects(
             {"11": area_code},
