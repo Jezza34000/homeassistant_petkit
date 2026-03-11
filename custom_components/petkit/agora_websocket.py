@@ -27,12 +27,11 @@ LOGGER = logging.getLogger(__name__)
 
 
 def _create_ws_ssl_context() -> ssl.SSLContext:
-    """Create permissive SSL context for Agora edge WebSocket."""
+    """Create a secure SSL context for Agora edge WebSocket."""
     ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-    return ssl_context
+    ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
 
+    return ssl_context
 
 _SSL_CONTEXT = _create_ws_ssl_context()
 
