@@ -21,6 +21,7 @@ from pypetkitapi import (
     Purifier,
     WaterFountain,
 )
+from pypetkitapi.command import FountainAction
 
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.const import EntityCategory
@@ -830,7 +831,24 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             ),
         ),
     ],
-    WaterFountain: [*COMMON_ENTITIES],
+    WaterFountain: [
+        *COMMON_ENTITIES,
+        PetKitSwitchDesc(
+            key="Power",
+            translation_key="power",
+            value=lambda device: (
+                None
+                if device.status.power_status is None
+                else device.status.power_status > 0
+            ),
+            turn_on=lambda api, device: api.bluetooth_manager.send_ble_command(
+                device.id, FountainAction.POWER_ON
+            ),
+            turn_off=lambda api, device: api.bluetooth_manager.send_ble_command(
+                device.id, FountainAction.POWER_OFF
+            ),
+        ),
+    ],
     Purifier: [
         *COMMON_ENTITIES,
         PetKitSwitchDesc(
@@ -897,10 +915,8 @@ class PetkitSwitch(PetkitEntity, SwitchEntity):
     @property
     def available(self) -> bool:
         """Return if this button is available or not."""
-        device_data = self.coordinator.data.get(self.device.id)
-        if hasattr(device_data.state, "pim"):
-            return device_data.state.pim in POWER_ONLINE_STATE
-        return True
+        state = getattr(self.coordinator.data.get(self.device.id), "state", None)
+        return state.pim in POWER_ONLINE_STATE if hasattr(state, "pim") else True
 
     @property
     def is_on(self) -> bool | None:
