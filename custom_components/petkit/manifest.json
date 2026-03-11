@@ -7,6 +7,7 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/Jezza34000/homeassistant_petkit/issues",
   "loggers": ["petkit"],
+  "after_dependencies": ["web_rtc"],
   "requirements": [
     "pypetkitapi==1.24.0",
     "aiofiles==24.1.0",
