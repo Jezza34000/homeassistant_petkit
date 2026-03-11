@@ -97,7 +97,6 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
                 device.id, FeederCommand.PLAY_SOUND, device.settings.selected_sound
             ),
             only_for_types=[D3, D4H, D4SH],
-            is_available=lambda device: device.settings.sound_enable == 1,
         ),
     ],
     Litter: [
