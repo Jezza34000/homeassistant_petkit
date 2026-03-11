@@ -10,7 +10,9 @@
   "requirements": [
     "pypetkitapi==1.24.0",
     "aiofiles==24.1.0",
-    "paho-mqtt==2.1.0"
+    "paho-mqtt==2.1.0",
+    "websockets==15.0.1",
+    "sdp-transform==1.1.0"
   ],
   "version": "1.23.0"
 }

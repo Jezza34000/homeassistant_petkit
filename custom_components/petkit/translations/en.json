@@ -708,6 +708,11 @@
         "name": "Light"
       }
     },
+    "camera": {
+      "camera": {
+        "name": "Camera stream"
+      }
+    },
     "text": {
       "manual_feed_dual_h1": {
         "name": "Manual feed hopper 1"

@@ -50,6 +50,7 @@ PLATFORMS: list[Platform] = [
     Platform.LIGHT,
     Platform.TEXT,
     Platform.BUTTON,
+    Platform.CAMERA,
     Platform.NUMBER,
     Platform.SELECT,
     Platform.IMAGE,

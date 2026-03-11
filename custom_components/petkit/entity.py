@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Generic, TypeVar
 
 from pypetkitapi import Feeder, Litter, Pet, Purifier, WaterFountain
 
+from homeassistant.components.camera import Camera, CameraEntityFeature
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -162,5 +164,64 @@ class PetkitEntity(
 
             if self.device.sn is not None:
                 device_info["serial_number"] = str(self.device.sn)
+
+        return device_info
+
+
+class PetkitCameraBaseEntity(
+    Camera,
+    CoordinatorEntity[PetkitDataUpdateCoordinator],
+    ABC,
+):
+    """Base class for PetKit camera entities."""
+
+    _attr_has_entity_name = True
+    _attr_name = None
+    _attr_is_streaming = True
+    _attr_supported_features = CameraEntityFeature.STREAM
+
+    def __init__(
+        self,
+        coordinator: PetkitDataUpdateCoordinator,
+        device: Feeder | Litter,
+        key: str,
+    ) -> None:
+        """Initialize the camera entity."""
+        Camera.__init__(self)
+        CoordinatorEntity.__init__(self, coordinator)
+        self.coordinator = coordinator
+        self.device = device
+        self._attr_unique_id = (
+            f"{self.device.device_nfo.device_type}_{self.device.sn}_{key}"
+        )
+
+    @property
+    def unique_id(self) -> str:
+        """Return the entity unique ID."""
+        return self._attr_unique_id
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return the device information."""
+
+        device_info = DeviceInfo(
+            identifiers={(DOMAIN, self.device.sn)},
+            manufacturer="Petkit",
+            model=self.device.device_nfo.modele_name,
+            model_id=self.device.device_nfo.device_type.upper(),
+            name=self.device.name,
+        )
+
+        if self.device.mac is not None:
+            device_info["connections"] = {(CONNECTION_NETWORK_MAC, self.device.mac)}
+
+        if self.device.firmware is not None:
+            device_info["sw_version"] = str(self.device.firmware)
+
+        if self.device.hardware is not None:
+            device_info["hw_version"] = str(self.device.hardware)
+
+        if self.device.sn is not None:
+            device_info["serial_number"] = str(self.device.sn)
 
         return device_info

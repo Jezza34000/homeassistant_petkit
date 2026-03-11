@@ -8,12 +8,18 @@ COORDINATOR = "coordinator"
 COORDINATOR_MEDIA = "coordinator_media"
 COORDINATOR_BLUETOOTH = "coordinator_bluetooth"
 
+STREAM_CONTROL_SHARED = "shared"
+STREAM_CONTROL_EXCLUSIVE = "exclusive"
+
+AGORA_APP_ID = "244c49951296440cbc1e3b937bf5e410"
+
 # Configuration
 CONF_SCAN_INTERVAL_MEDIA = "scan_interval_media"
 
 BT_SECTION = "bluetooth_options"
 CONF_BLE_RELAY_ENABLED = "ble_relay_enabled"
 CONF_SCAN_INTERVAL_BLUETOOTH = "scan_interval_bluetooth"
+CONF_STREAM_CONTROL_MODE = "stream_control_mode"
 
 MEDIA_SECTION = "medias_options"
 CONF_MEDIA_DL_VIDEO = "media_dl_video"
@@ -26,6 +32,7 @@ CONF_MEDIA_PATH = "media_path"
 DEFAULT_SCAN_INTERVAL = 60
 DEFAULT_SCAN_INTERVAL_MEDIA = 15
 DEFAULT_SCAN_INTERVAL_BLUETOOTH = 30
+DEFAULT_STREAM_CONTROL_MODE = STREAM_CONTROL_SHARED
 DEFAULT_EVENTS = [
     "Pet",
     "Eat",
