@@ -707,7 +707,7 @@ ignore = [
   "D417",     # Missing argument descriptions in docstring - to allow documenting only non-obvious parameters
   "D415", # First line should end with a period, question mark, or exclamation point"
   "E501",     # line too long
-
+  "PERF203", # `try`-`except` within a loop incurs performance overhead
   "PLC0415", # `import` should be at the top-level of a file
   "PLC1901", # {existing} can be simplified to {replacement} as an empty string is falsey; too many false positives
   "PLR0911", # Too many return statements ({returns} > {max_returns})
