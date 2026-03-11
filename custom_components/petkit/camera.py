@@ -396,12 +396,9 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
             if "typ srflx" in candidate_str or "typ prflx" in candidate_str:
                 filtered.append(candidate)
                 continue
-
             if "typ relay" in candidate_str:
                 if not valid_turn_ips or any(
                     ip in candidate_str for ip in valid_turn_ips
                 ):
                     filtered.append(candidate)
-                continue
-
         return filtered or candidates
