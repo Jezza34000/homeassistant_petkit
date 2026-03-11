@@ -249,6 +249,7 @@ class AgoraWebSocketHandler:
 
         except asyncio.CancelledError:
             LOGGER.debug("Agora message loop cancelled")
+            raise
         except WebSocketException as err:
             LOGGER.warning("Agora message loop closed: %s", err)
         finally:
@@ -268,6 +269,7 @@ class AgoraWebSocketHandler:
                 await self._websocket.send(json.dumps(ping_message))
         except asyncio.CancelledError:
             LOGGER.debug("Agora ping loop cancelled")
+            raise
         except (WebSocketException, OSError) as err:
             LOGGER.debug("Agora ping loop ended: %s", err)
 

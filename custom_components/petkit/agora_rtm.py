@@ -348,6 +348,7 @@ class AgoraRTMSignaling:
                     return
         except asyncio.CancelledError:
             LOGGER.debug("Signaling heartbeat loop cancelled")
+            raise
 
     async def _teardown_locked(self, send_stop: bool) -> None:
         """Stop heartbeat and release Signaling session."""
