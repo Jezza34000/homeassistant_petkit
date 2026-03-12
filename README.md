@@ -32,7 +32,7 @@
 
 ## ❤️ Enjoying this integration?
 
-### Leave a Github Start ⭐ it's free and helps others discover this integration.
+### Leave a Github Star ⭐ it's free and helps others discover this integration.
 
 [![Sponsor Jezza34000][github-sponsor-shield]][github-sponsor] [![Static Badge][buymeacoffee-shield]][buymeacoffee]
 
