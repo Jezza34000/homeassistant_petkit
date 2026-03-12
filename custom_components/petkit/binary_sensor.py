@@ -251,9 +251,13 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             translation_key="pump_running",
             device_class=BinarySensorDeviceClass.RUNNING,
             value=lambda device: (
-                None
-                if device.status.run_status is None
-                else device.status.run_status > 0
+                False
+                if device.status.power_status == 0
+                else (
+                    None
+                    if device.status.run_status is None
+                    else device.status.run_status > 0
+                )
             ),
         ),
     ],

@@ -265,9 +265,9 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
             ),
             only_for_types=DEVICES_WATER_FOUNTAIN,
             is_available=lambda device: (
-                False
-                if device.status.run_status is None
-                else device.status.run_status > 0
+                device.status.run_status is not None
+                and device.status.run_status > 0
+                and device.status.power_status == 1
             ),
         ),
         PetKitButtonDesc(
@@ -278,9 +278,9 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
             ),
             only_for_types=DEVICES_WATER_FOUNTAIN,
             is_available=lambda device: (
-                False
-                if device.status.run_status is None
-                else device.status.run_status == 0
+                device.status.run_status is not None
+                and device.status.run_status == 0
+                and device.status.power_status == 1
             ),
         ),
     ],
