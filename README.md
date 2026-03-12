@@ -8,12 +8,13 @@
 - **Monitor** : Monitor your devices status, monitor your pet's activity, feeding, drinking, and litter usage.
 - **Bluetooth relay** : Automatically check your fountain over bluetooth relay.
 - **Media** : Access all your media from Petkit devices directly in Home Assistant.
+- **Live Stream:** Watch live video from supported Petkit devices directly in Home Assistant.
 
 ## 📘 Integration Wiki
 
 - **[Supported Devices](https://github.com/Jezza34000/homeassistant_petkit/wiki/Supported-Devices)** - Complete list of compatible devices
 - **[Installation](https://github.com/Jezza34000/homeassistant_petkit/wiki/Installation)** - Complete installation guide
-- **[Migration](https://github.com/Jezza34000/homeassistant_petkit/wiki/Migration)** - Migration from RobertD502 integration
+- **[Migration](https://github.com/Jezza34000/homeassistant_petkit/wiki/Migration)** - Migration from RobertD502 or hasscc integration
 - **[Configuration](https://github.com/Jezza34000/homeassistant_petkit/wiki/Configuration)** - Basic and advanced configuration
 - **[Media Management](https://github.com/Jezza34000/homeassistant_petkit/wiki/Media-Management)** - Photo and video management
 - **[Recommended Cards](https://github.com/Jezza34000/homeassistant_petkit/wiki/Recommended-Cards)** - Custom cards to enhance your dashboard
@@ -30,6 +31,8 @@
 [![Community Forum][forum-shield]][forum]
 
 ## ❤️ Enjoying this integration?
+
+### Leave a Github Start ⭐ it's free and helps others discover this integration.
 
 [![Sponsor Jezza34000][github-sponsor-shield]][github-sponsor] [![Static Badge][buymeacoffee-shield]][buymeacoffee]
 
