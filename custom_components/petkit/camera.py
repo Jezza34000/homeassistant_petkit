@@ -274,6 +274,15 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
                     result,
                 )
 
+    async def async_ptz_ctrl(self, ptz_type: int, ptz_dir: int) -> bool:
+        """Send a PTZ control command via RTM signaling.
+
+        Requires an active live stream (RTM session must be running).
+        ptz_type: 0 = single step, 1 = continuous start/stop, 2 = flip.
+        ptz_dir:  -1 = left, 0 = stop, 1 = right.
+        """
+        return await self._agora_rtm.send_ptz_ctrl(ptz_type, ptz_dir)
+
     async def async_start_live_manual(self) -> bool:
         """Start RTM live signaling manually from HA controls."""
         live_feed = await self._async_get_live_feed(refresh=True)
