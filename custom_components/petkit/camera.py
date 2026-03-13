@@ -316,28 +316,26 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
         height: int | None = None,
     ) -> bytes | None:
         """Return bytes of camera image.
-        
+
         Implementation strategy:
         1. Try to get the latest event image from device records
         2. If no event image, return default placeholder image
-        
-        Note: WebRTC is a peer-to-peer protocol, the server cannot directly 
-        capture frames from the stream. Capturing frames from WebRTC streams 
+
+        Note: WebRTC is a peer-to-peer protocol, the server cannot directly
+        capture frames from the stream. Capturing frames from WebRTC streams
         requires the aiortc library, which is an additional dependency.
         """
         LOGGER.debug("async_camera_image called with width=%s, height=%s", width, height)
-        
+
         try:
-            # Try to get the latest event image from device records
             event_image = await self._get_latest_event_image()
             if event_image:
                 LOGGER.debug("Using event image for device %s", self.device.id)
                 return event_image
-            
-            # Return default placeholder image
+
             LOGGER.debug("No image available, returning default placeholder for device %s", self.device.id)
             return await self._get_default_image()
-        except Exception as err:
+        except OSError as err:
             LOGGER.error("Failed to get camera image: %s", err)
             return None
 
@@ -346,46 +344,48 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
         try:
             media_coordinator = self.coordinator.config_entry.runtime_data.coordinator_media
             media_table = media_coordinator.media_table
-            
+
             device_media = media_table.get(self.device.id, [])
-            
+
             if device_media:
                 from pypetkitapi import MediaType
+
                 image_files = [
                     media for media in device_media
                     if media.media_type == MediaType.IMAGE
                 ]
-                
+
                 if image_files:
                     latest_image = max(image_files, key=lambda m: m.timestamp)
                     LOGGER.debug("Found latest event image: %s", latest_image.full_file_path)
-                    
+
                     import aiofiles
+
                     async with aiofiles.open(latest_image.full_file_path, "rb") as image_file:
                         image_data = await image_file.read()
                     LOGGER.debug("Successfully loaded event image (%d bytes)", len(image_data))
                     return image_data
-            
-            return None
-        except Exception as err:
+        except OSError as err:
             LOGGER.debug("Failed to get event image: %s", err)
+        else:
             return None
 
     async def _get_default_image(self) -> bytes | None:
         """Get the default placeholder image."""
         try:
             default_image_path = Path(__file__).parent / "img" / "no-image.png"
-            
+
             if default_image_path.exists():
-                with open(default_image_path, "rb") as image_file:
-                    image_data = image_file.read()
+                import aiofiles
+
+                async with aiofiles.open(default_image_path, "rb") as image_file:
+                    image_data = await image_file.read()
                 LOGGER.debug("Successfully loaded default camera image (%d bytes)", len(image_data))
                 return image_data
-            else:
-                LOGGER.warning("Default camera image not found at: %s", default_image_path)
-                return None
-        except Exception as err:
+            LOGGER.warning("Default camera image not found at: %s", default_image_path)
+        except OSError as err:
             LOGGER.error("Failed to get default image: %s", err)
+        else:
             return None
 
     def _stream_control_mode(self) -> str:
