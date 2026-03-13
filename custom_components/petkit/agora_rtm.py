@@ -84,6 +84,20 @@ class AgoraRTMSignaling:
         async with self._state_lock:
             await self._teardown_locked(send_stop=send_stop)
 
+    async def send_ptz_ctrl(self, ptz_type: int, ptz_dir: int) -> bool:
+        """Send a ptz_ctrl RTM command to the device.
+
+        ptz_type: 0 = single step, 1 = continuous start/stop, 2 = flip.
+        ptz_dir:  -1 = left, 0 = stop, 1 = right.
+        """
+        return await self._send_command(
+            command="ptz_ctrl",
+            payload={"type": ptz_type, "ptz_dir": ptz_dir},
+            wait_for_ack=True,
+            accepted_codes=SUCCESS_CODES,
+            suppress_errors=False,
+        )
+
     async def update_tokens(self, live_feed: LiveFeed) -> None:
         """Update in-memory signaling token from refreshed live feed."""
         credentials = self._extract_rtm_credentials(live_feed)

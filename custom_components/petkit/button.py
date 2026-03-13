@@ -18,6 +18,7 @@ from pypetkitapi import (
     LITTER_WITH_CAMERA,
     T4,
     T5,
+    T6,
     T7,
     DeviceAction,
     DeviceCommand,
@@ -34,7 +35,7 @@ from pypetkitapi.command import FountainAction
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 
-from .const import LOGGER, POWER_ONLINE_STATE
+from .const import DOMAIN, LOGGER, POWER_ONLINE_STATE
 from .entity import PetKitDescSensorBase, PetkitEntity
 
 if TYPE_CHECKING:
@@ -289,6 +290,46 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
 }
 
 
+@dataclass(frozen=True, kw_only=True)
+class PetKitPtzButtonDesc(PetKitDescSensorBase, ButtonEntityDescription):
+    """Description for a PTZ button entity."""
+
+    ptz_type: int = 0
+    ptz_dir: int = 0
+
+
+PTZ_BUTTONS: list[PetKitPtzButtonDesc] = [
+    PetKitPtzButtonDesc(
+        key="ptz_left",
+        translation_key="ptz_left",
+        ptz_type=1,
+        ptz_dir=-1,
+        only_for_types=[T6],
+    ),
+    PetKitPtzButtonDesc(
+        key="ptz_right",
+        translation_key="ptz_right",
+        ptz_type=1,
+        ptz_dir=1,
+        only_for_types=[T6],
+    ),
+    PetKitPtzButtonDesc(
+        key="ptz_stop",
+        translation_key="ptz_stop",
+        ptz_type=1,
+        ptz_dir=0,
+        only_for_types=[T6],
+    ),
+    PetKitPtzButtonDesc(
+        key="ptz_flip",
+        translation_key="ptz_flip",
+        ptz_type=2,
+        ptz_dir=0,
+        only_for_types=[T6],
+    ),
+]
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: PetkitConfigEntry,
@@ -296,7 +337,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up binary_sensors using config entry."""
     devices = entry.runtime_data.client.petkit_entities.values()
-    entities = [
+    entities: list[ButtonEntity] = [
         PetkitButton(
             coordinator=entry.runtime_data.coordinator,
             entity_description=entity_description,
@@ -306,12 +347,28 @@ async def async_setup_entry(
         for device_type, entity_descriptions in BUTTON_MAPPING.items()
         if isinstance(device, device_type)
         for entity_description in entity_descriptions
-        if entity_description.is_supported(device)  # Check if the entity is supported
+        if entity_description.is_supported(device)
     ]
+
+    # Add PTZ buttons for camera devices that support it (T6).
+    entities.extend(
+        PetkitPtzButton(
+            hass=hass,
+            coordinator=entry.runtime_data.coordinator,
+            entity_description=desc,
+            device=device,
+        )
+        for device in devices
+        if isinstance(device, Litter)
+        for desc in PTZ_BUTTONS
+        if desc.is_supported(device)
+    )
+
     LOGGER.debug(
         "BUTTON : Adding %s (on %s available)",
         len(entities),
-        sum(len(descriptors) for descriptors in BUTTON_MAPPING.values()),
+        sum(len(descriptors) for descriptors in BUTTON_MAPPING.values())
+        + len(PTZ_BUTTONS),
     )
     async_add_entities(entities)
 
@@ -364,3 +421,58 @@ class PetkitButton(PetkitEntity, ButtonEntity):
         )
         await asyncio.sleep(0.5)
         await self.coordinator.async_request_refresh()
+
+
+class PetkitPtzButton(PetkitEntity, ButtonEntity):
+    """PTZ control button that sends commands via the camera's RTM session."""
+
+    entity_description: PetKitPtzButtonDesc
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        coordinator: PetkitDataUpdateCoordinator,
+        entity_description: PetKitPtzButtonDesc,
+        device: Litter,
+    ) -> None:
+        """Initialize the PTZ button."""
+        super().__init__(coordinator, device)
+        self.hass = hass
+        self.coordinator = coordinator
+        self.entity_description = entity_description
+        self.device = device
+
+    @property
+    def available(self) -> bool:
+        """Available when the device is online and a camera RTM session exists."""
+        device_data = self.coordinator.data.get(self.device.id)
+        try:
+            if device_data.state.pim not in POWER_ONLINE_STATE:
+                return False
+        except AttributeError:
+            pass
+        return True
+
+    async def async_press(self) -> None:
+        """Send PTZ command through the camera's RTM signaling."""
+        LOGGER.debug(
+            "PTZ button pressed: %s (type=%d dir=%d) for device %s",
+            self.entity_description.key,
+            self.entity_description.ptz_type,
+            self.entity_description.ptz_dir,
+            self.device.id,
+        )
+        cameras = self.hass.data.get(DOMAIN, {}).get("cameras", {})
+        camera = cameras.get(str(self.device.id))
+        if camera is None:
+            LOGGER.warning(
+                "PTZ button %s: no active camera entity for device %s",
+                self.entity_description.key,
+                self.device.id,
+            )
+            return
+
+        await camera.async_ptz_ctrl(
+            self.entity_description.ptz_type,
+            self.entity_description.ptz_dir,
+        )

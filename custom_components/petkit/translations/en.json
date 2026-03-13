@@ -193,6 +193,18 @@
       },
       "reset_filter": {
         "name": "Reset filter"
+      },
+      "ptz_left": {
+        "name": "PTZ Left"
+      },
+      "ptz_right": {
+        "name": "PTZ Right"
+      },
+      "ptz_stop": {
+        "name": "PTZ Stop"
+      },
+      "ptz_flip": {
+        "name": "PTZ Flip"
       }
     },
     "fan": {
