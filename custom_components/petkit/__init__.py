@@ -10,7 +10,6 @@ from pypetkitapi import PetKitClient
 from homeassistant.const import (
     CONF_PASSWORD,
     CONF_REGION,
-    CONF_SCAN_INTERVAL,
     CONF_TIME_ZONE,
     CONF_USERNAME,
     Platform,
@@ -26,6 +25,7 @@ from .const import (
     COORDINATOR,
     COORDINATOR_BLUETOOTH,
     COORDINATOR_MEDIA,
+    DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     LOGGER,
     MEDIA_SECTION,
@@ -71,7 +71,7 @@ async def async_setup_entry(
         hass=hass,
         logger=LOGGER,
         name=f"{DOMAIN}.devices",
-        update_interval=timedelta(seconds=entry.options[CONF_SCAN_INTERVAL]),
+        update_interval=timedelta(seconds=DEFAULT_SCAN_INTERVAL),
         config_entry=entry,
     )
     coordinator_media = PetkitMediaUpdateCoordinator(
