@@ -73,6 +73,7 @@ This repository is based on my client library for the Petkit API, which can be f
 
 - @ludeeus for the [integration_blueprint](https://github.com/ludeeus/integration_blueprint) template.
 - @RobertD502 for the great reverse engineering done in this repository which helped a lot [home-assistant-petkit](https://github.com/RobertD502/home-assistant-petkit)
+- @mikey0000 for his expertise and deep dive into Agora's reverse engineering: this integration wouldn't have live video without him. [Mammotion-HA](https://github.com/mikey0000/Mammotion-HA)
 
 ---
 
