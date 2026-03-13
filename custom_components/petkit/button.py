@@ -368,7 +368,8 @@ async def async_setup_entry(
     LOGGER.debug(
         "BUTTON : Adding %s (on %s available)",
         len(entities),
-        sum(len(descriptors) for descriptors in BUTTON_MAPPING.values()) + len(PTZ_BUTTONS),
+        sum(len(descriptors) for descriptors in BUTTON_MAPPING.values())
+        + len(PTZ_BUTTONS),
     )
     async_add_entities(entities)
 
