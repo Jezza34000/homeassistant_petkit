@@ -351,19 +351,18 @@ async def async_setup_entry(
     ]
 
     # Add PTZ buttons for camera devices that support it (T6).
-    for device in devices:
-        if not isinstance(device, Litter):
-            continue
-        for desc in PTZ_BUTTONS:
-            if desc.is_supported(device):
-                entities.append(
-                    PetkitPtzButton(
-                        hass=hass,
-                        coordinator=entry.runtime_data.coordinator,
-                        entity_description=desc,
-                        device=device,
-                    )
-                )
+    entities.extend(
+        PetkitPtzButton(
+            hass=hass,
+            coordinator=entry.runtime_data.coordinator,
+            entity_description=desc,
+            device=device,
+        )
+        for device in devices
+        if isinstance(device, Litter)
+        for desc in PTZ_BUTTONS
+        if desc.is_supported(device)
+    )
 
     LOGGER.debug(
         "BUTTON : Adding %s (on %s available)",
