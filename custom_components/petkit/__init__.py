@@ -62,6 +62,7 @@ PLATFORMS: list[Platform] = [
     Platform.FAN,
 ]
 
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: PetkitConfigEntry,

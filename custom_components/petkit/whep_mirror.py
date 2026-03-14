@@ -152,7 +152,9 @@ class PetkitMirrorRelayManager:
                     f"petkit rebroadcast close downstream {device_id}",
                 )
 
-        sender = peer_connection.addTrack(upstream.relay.subscribe(upstream.video_track))
+        sender = peer_connection.addTrack(
+            upstream.relay.subscribe(upstream.video_track)
+        )
         self._prefer_h264(peer_connection, sender)
 
         await peer_connection.setRemoteDescription(
@@ -238,7 +240,9 @@ class PetkitMirrorRelayManager:
 
         closed_any = False
         for session_id in matching_ids:
-            closed_any = await self.close_downstream(device_id, session_id) or closed_any
+            closed_any = (
+                await self.close_downstream(device_id, session_id) or closed_any
+            )
         return closed_any
 
     async def add_downstream_candidate(
@@ -296,9 +300,7 @@ class PetkitMirrorRelayManager:
                 return existing
             ensure_task = self._upstream_tasks.get(device_id)
             if ensure_task is None:
-                ensure_task = self.hass.async_create_task(
-                    self._create_upstream(camera)
-                )
+                ensure_task = self.hass.async_create_task(self._create_upstream(camera))
                 self._upstream_tasks[device_id] = ensure_task
 
         return await ensure_task
@@ -356,9 +358,7 @@ class PetkitMirrorRelayManager:
                 )
             )
 
-        peer_connection = RTCPeerConnection(
-            RTCConfiguration(iceServers=ice_servers)
-        )
+        peer_connection = RTCPeerConnection(RTCConfiguration(iceServers=ice_servers))
         relay = MediaRelay()
         upstream = MirrorUpstreamSession(
             camera=camera,
@@ -554,7 +554,7 @@ class PetkitMirrorRelayManager:
     @staticmethod
     async def _shutdown_peer(peer_connection: Any) -> None:
         """Close one aiortc peer connection."""
-        with contextlib.suppress(Exception):  # noqa: BLE001
+        with contextlib.suppress(Exception):
             await peer_connection.close()
 
     @staticmethod

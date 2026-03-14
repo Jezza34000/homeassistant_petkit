@@ -131,7 +131,9 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
         self._remove_ice_servers: Callable[[], None] | None = None
         self._mirror_browser_sessions: set[str] = set()
         self._pending_mirror_browser_sessions: set[str] = set()
-        self._pending_mirror_browser_candidates: dict[str, list[RTCIceCandidateInit]] = {}
+        self._pending_mirror_browser_candidates: dict[
+            str, list[RTCIceCandidateInit]
+        ] = {}
         self._go2rtc_manager = get_go2rtc_stream_manager(hass)
 
     @property
@@ -221,7 +223,9 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
         if not self._always_on_stream_enabled():
             return None
 
-        stream_source = await self._go2rtc_manager.async_ensure_stream(str(self.device.id))
+        stream_source = await self._go2rtc_manager.async_ensure_stream(
+            str(self.device.id)
+        )
         if stream_source is None:
             LOGGER.debug(
                 "Rebroadcast stream source unavailable for %s",
@@ -240,8 +244,9 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
 
         if AIORTC_IMPORT_ERROR is None:
             manager = _get_manager(self.hass)
-            use_mirror_first = self._always_on_stream_enabled() or await manager.has_upstream(
-                str(self.device.id)
+            use_mirror_first = (
+                self._always_on_stream_enabled()
+                or await manager.has_upstream(str(self.device.id))
             )
             if use_mirror_first:
                 self._pending_mirror_browser_sessions.add(session_id)
@@ -373,7 +378,9 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
             session_id in self._mirror_browser_sessions
             or session_id in self._pending_mirror_browser_sessions
         ):
-            self.hass.async_create_task(self._async_close_mirror_browser_session(session_id))
+            self.hass.async_create_task(
+                self._async_close_mirror_browser_session(session_id)
+            )
             return
         self.hass.async_create_task(self._async_close_direct_stream())
 
@@ -440,7 +447,9 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
             return
 
         try:
-            await _get_manager(self.hass).close_downstream(str(self.device.id), session_id)
+            await _get_manager(self.hass).close_downstream(
+                str(self.device.id), session_id
+            )
         except Exception as err:  # noqa: BLE001
             LOGGER.debug(
                 "Rebroadcast browser session cleanup error for %s: %s",

@@ -44,7 +44,7 @@ class PetkitGo2RTCStreamManager:
         """Return the go2rtc API base URL."""
         go2rtc_data = self.hass.data.get(GO2RTC_DOMAIN)
         url = getattr(go2rtc_data, "url", None)
-        return url if url else HA_MANAGED_URL
+        return url or HA_MANAGED_URL
 
     def is_managed_available(self) -> bool:
         """Return whether HA-managed go2rtc is active."""

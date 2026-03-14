@@ -62,9 +62,7 @@ def _add_offer_candidates(
 ) -> int:
     """Extract inline ICE candidates from an SDP offer."""
     seen_candidates = {
-        candidate.candidate
-        for candidate in handler.candidates
-        if candidate.candidate
+        candidate.candidate for candidate in handler.candidates if candidate.candidate
     }
     added = 0
     media_index = -1

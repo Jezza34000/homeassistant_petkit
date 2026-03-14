@@ -37,8 +37,8 @@ from homeassistant.helpers.selector import BooleanSelector, BooleanSelectorConfi
 from .const import (
     ALL_TIMEZONES_LST,
     BT_SECTION,
-    CONF_ALWAYS_ON_STREAM,
     CODE_TO_COUNTRY_DICT,
+    CONF_ALWAYS_ON_STREAM,
     CONF_BLE_RELAY_ENABLED,
     CONF_DELETE_AFTER,
     CONF_MEDIA_DL_IMAGE,
