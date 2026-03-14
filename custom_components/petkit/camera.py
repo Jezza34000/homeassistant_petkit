@@ -6,7 +6,6 @@ import asyncio
 from collections.abc import Callable
 from dataclasses import dataclass
 
-import aiofiles
 from pypetkitapi import (
     FEEDER_WITH_CAMERA,
     LITTER_WITH_CAMERA,
@@ -323,17 +322,19 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
         height: int | None = None,
     ) -> bytes | None:
         """Return bytes of camera image.
-        
+
         Implementation strategy:
         1. Try to get the latest event image from device records
         2. If no event image, return default placeholder image
-        
-        Note: WebRTC is a peer-to-peer protocol, the server cannot directly 
-        capture frames from the stream. Capturing frames from WebRTC streams 
+
+        Note: WebRTC is a peer-to-peer protocol, the server cannot directly
+        capture frames from the stream. Capturing frames from WebRTC streams
         requires the aiortc library, which is an additional dependency.
         """
-        LOGGER.debug("async_camera_image called with width=%s, height=%s", width, height)
-        
+        LOGGER.debug(
+            "async_camera_image called with width=%s, height=%s", width, height
+        )
+
         try:
             event_image = await self._get_latest_event_image()
             if event_image:
@@ -348,25 +349,35 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
     async def _get_latest_event_image(self) -> bytes | None:
         """Get the latest event image from device records."""
         try:
-            media_coordinator = self.coordinator.config_entry.runtime_data.coordinator_media
+            media_coordinator = (
+                self.coordinator.config_entry.runtime_data.coordinator_media
+            )
             media_table = media_coordinator.media_table
 
             device_media = media_table.get(self.device.id, [])
 
             if device_media:
                 image_files = [
-                    media for media in device_media
+                    media
+                    for media in device_media
                     if media.media_type == MediaType.IMAGE
                 ]
 
                 if image_files:
                     latest_image = max(image_files, key=lambda m: m.timestamp)
-                    LOGGER.debug("Found latest event image: %s", latest_image.full_file_path)
-                    
+                    LOGGER.debug(
+                        "Found latest event image: %s", latest_image.full_file_path
+                    )
+
                     import aiofiles
-                    async with aiofiles.open(latest_image.full_file_path, "rb") as image_file:
+
+                    async with aiofiles.open(
+                        latest_image.full_file_path, "rb"
+                    ) as image_file:
                         image_data = await image_file.read()
-                    LOGGER.debug("Successfully loaded event image (%d bytes)", len(image_data))
+                    LOGGER.debug(
+                        "Successfully loaded event image (%d bytes)", len(image_data)
+                    )
                     return image_data
         except OSError as err:
             LOGGER.debug("Failed to get event image: %s", err)
