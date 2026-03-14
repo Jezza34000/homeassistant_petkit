@@ -282,6 +282,9 @@
       "urine_measured_ph": {
         "name": "Urine measured pH"
       },
+      "device_id": {
+        "name": "Device ID"
+      },
       "pet_last_urination_date": {
         "name": "Last urination"
       },

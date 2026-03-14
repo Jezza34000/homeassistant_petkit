@@ -334,6 +334,9 @@
       "desiccant_left_days": {
         "default": "mdi:air-filter"
       },
+      "device_id": {
+        "default": "mdi:identifier"
+      },
       "device_status": {
         "default": "mdi:lan-pending",
         "state": {

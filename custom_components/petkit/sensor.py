@@ -13,6 +13,7 @@ from pypetkitapi import (
     D4S,
     D4SH,
     DEVICES_LITTER_BOX,
+    FEEDER_WITH_CAMERA,
     K2,
     K3,
     LITTER_WITH_CAMERA,
@@ -142,6 +143,13 @@ COMMON_ENTITIES = [
                 - datetime.now(timezone.utc)
             ).days,
         ),
+    ),
+    PetKitSensorDesc(
+        key="Device ID",
+        translation_key="device_id",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value=lambda device: device.device_nfo.device_id,
+        only_for_types=[*LITTER_WITH_CAMERA, *FEEDER_WITH_CAMERA],
     ),
 ]
 
