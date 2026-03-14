@@ -27,6 +27,30 @@ When `Always-on Rebroadcast` is enabled:
 - The rebroadcast stream can be reused by other consumers, such as custom WebRTC cards, dashboard views, go2rtc, or other integrations that need a reusable camera stream.
 - Browser viewers and external consumers can share the same upstream Petkit session instead of competing for separate sessions.
 
+### Rebroadcast endpoints
+
+The rebroadcast endpoints are provided by the integration and can be found in the camera entity attributes.
+
+- `whep_mirror_url` is the public WHEP rebroadcast endpoint for external consumers.
+- `whep_internal_url` is the loopback-only internal WHEP endpoint used by HA-managed go2rtc.
+- `stream_source_url` is the local RTSP URL exposed through HA-managed go2rtc.
+
+You can inspect these values from the camera entity in Home Assistant, for example in Developer Tools or from the entity details view.
+
+Important notes:
+
+- `whep_mirror_url` is the URL to use if you want an external go2rtc instance or another external consumer to pull the rebroadcast stream.
+- `whep_internal_url` is not meant for external access. It is localhost-only and is used internally by Home Assistant.
+- `stream_source_url` is mainly for Home Assistant's generic camera stream path. If your HA-managed go2rtc is loopback-only, that RTSP URL is not directly reachable from another machine.
+
+Example external go2rtc source:
+
+```yaml
+streams:
+  petkit_camera:
+    - webrtc:http://HOME_ASSISTANT/api/petkit/whep_mirror/DEVICE_ID?token=LONG_LIVED_ACCESS_TOKEN
+```
+
 Side effects of enabling `Always-on Rebroadcast`:
 
 - Home Assistant keeps one upstream Petkit/Agora stream session prewarmed for the device.
