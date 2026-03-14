@@ -59,6 +59,10 @@ class AgoraWebSocketHandler:
     def __init__(
         self,
         rtc_token_provider: Callable[[], Awaitable[str | None]] | None = None,
+        *,
+        prefer_instant_video: bool = False,
+        subscribe_retry_delay: float = 0.0,
+        subscribe_retry_attempts: int = 0,
     ) -> None:
         """Initialize runtime state."""
         self._websocket: ClientConnection | None = None
@@ -69,14 +73,19 @@ class AgoraWebSocketHandler:
         self.candidates: list[RTCIceCandidateInit] = []
         self._online_users: set[int] = set()
         self._video_streams: dict[int, dict[str, Any]] = {}
+        self._subscribed_video_streams: set[tuple[int, int]] = set()
 
         self._message_loop_task: asyncio.Task[None] | None = None
         self._ping_task: asyncio.Task[None] | None = None
+        self._subscribe_retry_task: asyncio.Task[None] | None = None
 
         self._joined = False
         self._answer_sdp: str | None = None
         self._rtc_token: str | None = None
         self._rtc_token_provider = rtc_token_provider
+        self._prefer_instant_video = prefer_instant_video
+        self._subscribe_retry_delay = subscribe_retry_delay
+        self._subscribe_retry_attempts = subscribe_retry_attempts
 
         self._setup_message_handlers()
 
@@ -122,6 +131,11 @@ class AgoraWebSocketHandler:
             ortc_info.setdefault("iceParameters", {})[
                 "candidates"
             ] = gathered_candidates
+        LOGGER.debug(
+            "Agora join_v3: session=%s gathered_candidates=%d",
+            session_id,
+            len(gathered_candidates),
+        )
 
         gateway_addresses = agora_response.get_gateway_addresses()
         if not gateway_addresses:
@@ -130,6 +144,10 @@ class AgoraWebSocketHandler:
             )
             gateway_addresses = agora_response.addresses
 
+        LOGGER.debug(
+            "Agora join_v3: trying %d gateway addresses",
+            len(gateway_addresses),
+        )
         for gateway in gateway_addresses:
             edge_ip_dashed = gateway.ip.replace(".", "-")
             ws_url = f"wss://{edge_ip_dashed}.edge.agora.io:{gateway.port}"
@@ -168,6 +186,10 @@ class AgoraWebSocketHandler:
                         self._message_loop(websocket)
                     )
                     self._ping_task = asyncio.create_task(self._ping_loop())
+                    if self._subscribe_retry_attempts > 0:
+                        self._subscribe_retry_task = asyncio.create_task(
+                            self._subscribe_retry_loop()
+                        )
                     return answer_sdp
 
                 await websocket.close()
@@ -236,7 +258,7 @@ class AgoraWebSocketHandler:
                     continue
 
                 message_type = response.get("_type", "")
-                LOGGER.debug("WS ← [%s] %s", message_type, response)  # ← AJOUTE
+                LOGGER.debug("WS ← [%s] %s", message_type, response)
 
                 if message_type in self._message_handlers:
                     await self._message_handlers[message_type](response)
@@ -312,6 +334,7 @@ class AgoraWebSocketHandler:
             return None
 
         await self._send_set_client_role(role="host", level=0)
+        await self._register_existing_video_streams(message)
 
         # Inject auth fingerprints if not present in ORTC payload.
         dtls_parameters = ortc.setdefault("dtlsParameters", {})
@@ -402,14 +425,20 @@ class AgoraWebSocketHandler:
         if not isinstance(uid, int) or not is_video:
             return
 
+        LOGGER.debug(
+            "Agora on_add_video_stream: uid=%s ssrc=%s rtx_ssrc=%s",
+            uid,
+            ssrc_id,
+            rtx_ssrc_id,
+        )
         self._video_streams[uid] = {
             "ssrcId": ssrc_id,
             "rtxSsrcId": rtx_ssrc_id,
             "cname": cname,
         }
 
-        if self._websocket and isinstance(ssrc_id, int):
-            await self._send_subscribe(stream_id=uid, ssrc_id=ssrc_id, codec="h264")
+        if isinstance(ssrc_id, int):
+            await self._subscribe_video_stream(uid=uid, ssrc_id=ssrc_id)
 
     async def _send_set_client_role(
         self, role: str = "audience", level: int = 1
@@ -445,6 +474,12 @@ class AgoraWebSocketHandler:
         if not self._websocket:
             return
 
+        LOGGER.debug(
+            "Agora subscribe: stream_id=%s ssrc_id=%s codec=%s",
+            stream_id,
+            ssrc_id,
+            codec,
+        )
         message = {
             "_id": secrets.token_hex(3),
             "_type": "subscribe",
@@ -461,6 +496,100 @@ class AgoraWebSocketHandler:
             },
         }
         await self._websocket.send(json.dumps(message))
+        self._subscribed_video_streams.add((stream_id, ssrc_id))
+
+    async def _subscribe_video_stream(self, uid: int, ssrc_id: int) -> None:
+        """Subscribe once per `(uid, ssrc_id)` pair."""
+        if (uid, ssrc_id) in self._subscribed_video_streams:
+            return
+        await self._send_subscribe(stream_id=uid, ssrc_id=ssrc_id, codec="h264")
+
+    async def _register_existing_video_streams(self, payload: Any) -> None:
+        """Subscribe to any already-published video streams present in join payload."""
+        streams = self._find_existing_video_streams(payload)
+        if streams:
+            LOGGER.debug(
+                "Agora join_v3: found %d existing video streams in join payload",
+                len(streams),
+            )
+
+        for uid, ssrc_id in streams:
+            self._video_streams.setdefault(uid, {"ssrcId": ssrc_id})
+            await self._subscribe_video_stream(uid=uid, ssrc_id=ssrc_id)
+
+    @classmethod
+    def _find_existing_video_streams(cls, payload: Any) -> list[tuple[int, int]]:
+        """Walk a join payload and extract existing video stream descriptors."""
+        found: list[tuple[int, int]] = []
+
+        def _visit(node: Any) -> None:
+            if isinstance(node, dict):
+                uid = node.get("uid")
+                ssrc_id = node.get("ssrcId")
+                has_video_marker = (
+                    node.get("video") is True
+                    or node.get("stream_type") == "video"
+                    or node.get("type") == "video"
+                    or node.get("codec") in {"h264", "h265", "video"}
+                    or node.get("rtxSsrcId") is not None
+                )
+                if (
+                    has_video_marker
+                    and isinstance(uid, int)
+                    and isinstance(ssrc_id, int)
+                ):
+                    found.append((uid, ssrc_id))
+
+                for value in node.values():
+                    _visit(value)
+                return
+
+            if isinstance(node, list):
+                for item in node:
+                    _visit(item)
+
+        _visit(payload)
+
+        deduped: list[tuple[int, int]] = []
+        seen: set[tuple[int, int]] = set()
+        for stream in found:
+            if stream in seen:
+                continue
+            seen.add(stream)
+            deduped.append(stream)
+        return deduped
+
+    async def _subscribe_retry_loop(self) -> None:
+        """Retry subscribe shortly after join for WHEP-style consumers."""
+        try:
+            for attempt in range(self._subscribe_retry_attempts):
+                await asyncio.sleep(self._subscribe_retry_delay)
+                if not self._websocket or self._connection_state != "CONNECTED":
+                    return
+
+                pending = [
+                    (uid, data.get("ssrcId"))
+                    for uid, data in self._video_streams.items()
+                    if isinstance(data.get("ssrcId"), int)
+                ]
+                if not pending:
+                    continue
+
+                LOGGER.debug(
+                    "Agora subscribe retry %d/%d: known_streams=%d",
+                    attempt + 1,
+                    self._subscribe_retry_attempts,
+                    len(pending),
+                )
+                for uid, ssrc_id in pending:
+                    await self._send_subscribe(
+                        stream_id=uid,
+                        ssrc_id=ssrc_id,
+                        codec="h264",
+                    )
+        except asyncio.CancelledError:
+            LOGGER.debug("Agora subscribe retry loop cancelled")
+            raise
 
     def _create_join_message(
         self,
@@ -510,7 +639,7 @@ class AgoraWebSocketHandler:
                         "maxSubscription": 50,
                         "enableUserLicenseCheck": True,
                         "enableRTX": True,
-                        "enableInstantVideo": False,
+                        "enableInstantVideo": self._prefer_instant_video,
                         "enableDataStream2": False,
                         "enableAutFeedback": True,
                         "enableUserAutoRebalanceCheck": True,
@@ -871,6 +1000,12 @@ class AgoraWebSocketHandler:
                 tasks_to_wait.append(self._ping_task)
         self._ping_task = None
 
+        if self._subscribe_retry_task and not self._subscribe_retry_task.done():
+            self._subscribe_retry_task.cancel()
+            if self._subscribe_retry_task is not current_task:
+                tasks_to_wait.append(self._subscribe_retry_task)
+        self._subscribe_retry_task = None
+
         if self._message_loop_task and not self._message_loop_task.done():
             self._message_loop_task.cancel()
             if self._message_loop_task is not current_task:
@@ -887,3 +1022,5 @@ class AgoraWebSocketHandler:
 
         self._joined = False
         self._connection_state = "DISCONNECTED"
+        self._video_streams.clear()
+        self._subscribed_video_streams.clear()

@@ -37,6 +37,11 @@ from .coordinator import (
 )
 from .data import PetkitData
 from .iot_mqtt import PetkitIotMqttListener
+from .whep_mirror import (
+    PetkitInternalWhepMirrorView,
+    PetkitWhepMirrorView,
+    async_cleanup_whep_mirror_sessions,
+)
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -57,12 +62,15 @@ PLATFORMS: list[Platform] = [
     Platform.FAN,
 ]
 
-
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: PetkitConfigEntry,
 ) -> bool:
     """Set up this integration using UI."""
+
+    # Register API views once (idempotent — HA deduplicates by name)
+    hass.http.register_view(PetkitInternalWhepMirrorView())
+    hass.http.register_view(PetkitWhepMirrorView())
 
     country_from_ha = hass.config.country
     tz_from_ha = hass.config.time_zone
@@ -145,6 +153,8 @@ async def async_unload_entry(
     if mqtt_listener is not None:
         await mqtt_listener.async_stop()
 
+    await async_cleanup_whep_mirror_sessions(hass)
+
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
@@ -153,8 +163,7 @@ async def async_reload_entry(
     entry: PetkitConfigEntry,
 ) -> None:
     """Reload config entry."""
-    await async_unload_entry(hass, entry)
-    await async_setup_entry(hass, entry)
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_update_options(hass: HomeAssistant, entry: PetkitConfigEntry) -> None:

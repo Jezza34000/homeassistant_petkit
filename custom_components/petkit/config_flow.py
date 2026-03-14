@@ -37,6 +37,7 @@ from homeassistant.helpers.selector import BooleanSelector, BooleanSelectorConfi
 from .const import (
     ALL_TIMEZONES_LST,
     BT_SECTION,
+    CONF_ALWAYS_ON_STREAM,
     CODE_TO_COUNTRY_DICT,
     CONF_BLE_RELAY_ENABLED,
     CONF_DELETE_AFTER,
@@ -47,6 +48,7 @@ from .const import (
     CONF_SCAN_INTERVAL_BLUETOOTH,
     CONF_SCAN_INTERVAL_MEDIA,
     COUNTRY_TO_CODE_DICT,
+    DEFAULT_ALWAYS_ON_STREAM,
     DEFAULT_BLUETOOTH_RELAY,
     DEFAULT_DELETE_AFTER,
     DEFAULT_DL_IMAGE,
@@ -75,6 +77,13 @@ class PetkitOptionsFlowHandler(OptionsFlow):
             step_id="init",
             data_schema=vol.Schema(
                 {
+                    vol.Required(
+                        CONF_ALWAYS_ON_STREAM,
+                        default=self.config_entry.options.get(
+                            CONF_ALWAYS_ON_STREAM,
+                            DEFAULT_ALWAYS_ON_STREAM,
+                        ),
+                    ): BooleanSelector(BooleanSelectorConfig()),
                     vol.Required(MEDIA_SECTION): section(
                         vol.Schema(
                             {
@@ -228,6 +237,7 @@ class PetkitFlowHandler(ConfigFlow, domain=DOMAIN):
                         title=user_input[CONF_USERNAME],
                         data=user_input,
                         options={
+                            CONF_ALWAYS_ON_STREAM: DEFAULT_ALWAYS_ON_STREAM,
                             MEDIA_SECTION: {
                                 CONF_MEDIA_PATH: DEFAULT_MEDIA_PATH,
                                 CONF_SCAN_INTERVAL_MEDIA: DEFAULT_SCAN_INTERVAL_MEDIA,
