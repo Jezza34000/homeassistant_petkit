@@ -6,7 +6,7 @@ from typing import Any
 
 
 class SDPParser:
-    """Small SDP parser used to build ORTC capabilities for join_v3."""
+    """SDP parser with modular dispatching."""
 
     @staticmethod
     def parse(sdp: str) -> dict[str, Any]:
@@ -14,129 +14,113 @@ class SDPParser:
         parsed: dict[str, Any] = {"media": []}
         current_media: dict[str, Any] | None = None
 
-        for raw_line in sdp.splitlines():
-            line = raw_line.strip()
-            if not line:
+        for line in (ln.strip() for ln in sdp.splitlines() if ln.strip()):
+            if "=" not in line:
                 continue
 
-            parts = line.split("=", 1)
-            if len(parts) != 2:
-                continue
-            line_type, line_value = parts
+            line_type, value = line.split("=", 1)
 
-            if line_type == "v":
-                parsed["version"] = line_value
-            elif line_type == "o":
-                values = line_value.split()
-                if len(values) >= 6:
-                    parsed["origin"] = {
-                        "username": values[0],
-                        "sessionId": values[1],
-                        "sessionVersion": values[2],
-                        "netType": values[3],
-                        "ipVer": values[4],
-                        "address": values[5],
-                    }
-            elif line_type == "s":
-                parsed["name"] = line_value
-            elif line_type == "m":
-                values = line_value.split()
-                current_media = {
-                    "type": values[0],
-                    "port": int(values[1]),
-                    "protocol": values[2],
-                    "payloads": " ".join(values[3:]),
-                    "rtp": [],
-                    "fmtp": [],
-                    "rtcpFb": [],
-                    "ext": [],
-                    "fingerprints": [],
-                    "attributes": {},
-                }
-                parsed["media"].append(current_media)
+            if line_type == "m":
+                current_media = SDPParser._handle_media(parsed, value)
             elif line_type == "a":
-                attribute_parts = line_value.split(":", 1)
-                attribute = attribute_parts[0]
-                value = attribute_parts[1] if len(attribute_parts) > 1 else None
-
-                target = current_media if current_media is not None else parsed
-
-                if attribute == "ice-ufrag":
-                    target["iceUfrag"] = value
-                elif attribute == "ice-pwd":
-                    target["icePwd"] = value
-                elif attribute == "fingerprint" and value:
-                    values = value.split()
-                    if len(values) >= 2:
-                        fingerprint = {
-                            "hash": values[0],
-                            "fingerprint": values[1],
-                        }
-                        target.setdefault("fingerprints", []).append(fingerprint)
-                        target["fingerprint"] = fingerprint
-                elif attribute == "setup":
-                    target["setup"] = value
-                elif attribute == "mid":
-                    target["mid"] = value
-                elif attribute in {"sendrecv", "sendonly", "recvonly", "inactive"}:
-                    target["direction"] = attribute
-                elif attribute == "ice-options":
-                    target["iceOptions"] = value
-                elif attribute == "rtpmap" and value:
-                    values = value.split(None, 1)
-                    payload = int(values[0])
-                    rtp_map = values[1].split("/")
-                    target["rtp"].append(
-                        {
-                            "payload": payload,
-                            "codec": rtp_map[0],
-                            "rate": int(rtp_map[1]) if len(rtp_map) > 1 else 90000,
-                            "encoding": rtp_map[2] if len(rtp_map) > 2 else None,
-                        }
-                    )
-                elif attribute == "fmtp" and value:
-                    values = value.split(None, 1)
-                    target["fmtp"].append(
-                        {
-                            "payload": int(values[0]),
-                            "config": values[1] if len(values) > 1 else "",
-                        }
-                    )
-                elif attribute == "rtcp-fb" and value:
-                    values = value.split()
-                    target["rtcpFb"].append(
-                        {
-                            "payload": int(values[0]),
-                            "type": values[1] if len(values) > 1 else "",
-                            "subtype": (
-                                " ".join(values[2:]) if len(values) > 2 else None
-                            ),
-                        }
-                    )
-                elif attribute == "extmap" and value:
-                    values = value.split()
-                    if len(values) >= 2:
-                        target["ext"].append(
-                            {
-                                "value": int(values[0]),
-                                "uri": values[1],
-                            }
-                        )
-                elif attribute == "group" and value:
-                    parsed.setdefault("groups", []).append(
-                        {
-                            "type": value.split()[0],
-                            "mids": " ".join(value.split()[1:]),
-                        }
-                    )
-                elif attribute == "msid-semantic" and value:
-                    values = value.split()
-                    parsed["msidSemantic"] = {
-                        "semantic": values[0],
-                        "token": values[1] if len(values) > 1 else "",
-                    }
+                SDPParser._handle_attribute(current_media or parsed, parsed, value)
+            else:
+                SDPParser._handle_basic_line(parsed, line_type, value)
 
         return parsed
+
+    @staticmethod
+    def _handle_basic_line(target: dict, line_type: str, value: str) -> None:
+        """Handles simple SDP lines like v, o, s."""
+        match line_type:
+            case "v":
+                target["version"] = value
+            case "s":
+                target["name"] = value
+            case "o":
+                v = value.split()
+                if len(v) >= 6:
+                    target["origin"] = {
+                        "username": v[0],
+                        "sessionId": v[1],
+                        "sessionVersion": v[2],
+                        "netType": v[3],
+                        "ipVer": v[4],
+                        "address": v[5],
+                    }
+
+    @staticmethod
+    def _handle_media(parsed: dict, value: str) -> dict[str, Any]:
+        """Initializes a new media block."""
+        v = value.split()
+        new_media = {
+            "type": v[0],
+            "port": int(v[1]),
+            "protocol": v[2],
+            "payloads": " ".join(v[3:]),
+            "rtp": [],
+            "fmtp": [],
+            "rtcpFb": [],
+            "ext": [],
+            "fingerprints": [],
+            "attributes": {},
+        }
+        parsed["media"].append(new_media)
+        return new_media
+
+    @staticmethod
+    def _handle_attribute(target: dict, global_parsed: dict, line_value: str) -> None:
+        """Dispatches attribute parsing (a=...)."""
+        parts = line_value.split(":", 1)
+        attr = parts[0]
+        val = parts[1] if len(parts) > 1 else None
+
+        if attr in {"sendrecv", "sendonly", "recvonly", "inactive"}:
+            target["direction"] = attr
+            return
+
+        match attr:
+            case "ice-ufrag" | "ice-pwd" | "setup" | "mid" | "ice-options":
+                key = "".join(word.capitalize() for word in attr.split("-"))
+                target[key[0].lower() + key[1:]] = val
+            case "fingerprint" if val:
+                v = val.split()
+                if len(v) >= 2:
+                    fp = {"hash": v[0], "fingerprint": v[1]}
+                    target.setdefault("fingerprints", []).append(fp)
+                    target["fingerprint"] = fp
+            case "rtpmap" if val:
+                v = val.split(None, 1)
+                m = v[1].split("/")
+                target["rtp"].append(
+                    {
+                        "payload": int(v[0]),
+                        "codec": m[0],
+                        "rate": int(m[1]) if len(m) > 1 else 90000,
+                        "encoding": m[2] if len(m) > 2 else None,
+                    }
+                )
+            case "fmtp" if val:
+                v = val.split(None, 1)
+                target["fmtp"].append(
+                    {"payload": int(v[0]), "config": v[1] if len(v) > 1 else ""}
+                )
+            case "extmap" if val:
+                v = val.split()
+                if len(v) >= 2:
+                    ext_id = v[0].split("/", 1)[0]
+                    target["ext"].append({"value": int(ext_id), "uri": v[1]})
+            case "group" if val:
+                v = val.split()
+                global_parsed.setdefault("groups", []).append(
+                    {"type": v[0], "mids": " ".join(v[1:])}
+                )
+            case "msid-semantic" if val:
+                v = val.split()
+                global_parsed["msidSemantic"] = {
+                    "semantic": v[0],
+                    "token": v[1] if len(v) > 1 else "",
+                }
 
 
 def parse_offer_to_ortc(offer_sdp: str) -> dict[str, Any]:
