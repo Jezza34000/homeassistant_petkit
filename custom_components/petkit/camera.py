@@ -332,8 +332,9 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
             return None
 
         manager = _get_manager(self.hass)
-        use_rebroadcast = self._always_on_stream_enabled() or await manager.has_upstream(
-            str(self.device.id)
+        use_rebroadcast = (
+            self._always_on_stream_enabled()
+            or await manager.has_upstream(str(self.device.id))
         )
         if not use_rebroadcast:
             return None
