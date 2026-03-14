@@ -524,21 +524,9 @@ class AgoraWebSocketHandler:
 
         def _visit(node: Any) -> None:
             if isinstance(node, dict):
-                uid = node.get("uid")
-                ssrc_id = node.get("ssrcId")
-                has_video_marker = (
-                    node.get("video") is True
-                    or node.get("stream_type") == "video"
-                    or node.get("type") == "video"
-                    or node.get("codec") in {"h264", "h265", "video"}
-                    or node.get("rtxSsrcId") is not None
-                )
-                if (
-                    has_video_marker
-                    and isinstance(uid, int)
-                    and isinstance(ssrc_id, int)
-                ):
-                    found.append((uid, ssrc_id))
+                stream = cls._extract_existing_video_stream(node)
+                if stream is not None:
+                    found.append(stream)
 
                 for value in node.values():
                     _visit(value)
@@ -558,6 +546,24 @@ class AgoraWebSocketHandler:
             seen.add(stream)
             deduped.append(stream)
         return deduped
+
+    @staticmethod
+    def _extract_existing_video_stream(node: dict[str, Any]) -> tuple[int, int] | None:
+        """Extract one existing video stream descriptor when present."""
+        uid = node.get("uid")
+        ssrc_id = node.get("ssrcId")
+        has_video_marker = (
+            node.get("video") is True
+            or node.get("stream_type") == "video"
+            or node.get("type") == "video"
+            or node.get("codec") in {"h264", "h265", "video"}
+            or node.get("rtxSsrcId") is not None
+        )
+        if not has_video_marker:
+            return None
+        if not isinstance(uid, int) or not isinstance(ssrc_id, int):
+            return None
+        return (uid, ssrc_id)
 
     async def _subscribe_retry_loop(self) -> None:
         """Retry subscribe shortly after join for WHEP-style consumers."""

@@ -104,7 +104,7 @@ def _add_offer_candidates(
 
 async def _get_live_feed_for_webrtc(camera: PetkitWebRTCCamera):
     """Fetch live feed data and wake supported cameras if needed."""
-    live_feed = await camera._get_live_feed()
+    live_feed = await camera.async_get_live_feed()
     if _live_feed_ready_for_webrtc(live_feed):
         return live_feed
 
@@ -118,7 +118,7 @@ async def _get_live_feed_for_webrtc(camera: PetkitWebRTCCamera):
         )
 
     await camera.coordinator.async_request_refresh()
-    live_feed = await camera._get_live_feed()
+    live_feed = await camera.async_get_live_feed()
     if _live_feed_ready_for_webrtc(live_feed):
         return live_feed
 
@@ -151,7 +151,7 @@ async def _get_live_feed_for_webrtc(camera: PetkitWebRTCCamera):
 
     await asyncio.sleep(3)
     await camera.coordinator.async_request_refresh()
-    live_feed = await camera._get_live_feed()
+    live_feed = await camera.async_get_live_feed()
     if _live_feed_ready_for_webrtc(live_feed):
         return live_feed
 

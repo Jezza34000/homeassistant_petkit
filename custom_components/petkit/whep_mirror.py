@@ -92,6 +92,7 @@ class PetkitMirrorRelayManager:
     """Manage internal upstream and downstream relay peers."""
 
     def __init__(self, hass) -> None:
+        """Initialize rebroadcast session bookkeeping."""
         self.hass = hass
         self._lock = asyncio.Lock()
         self._upstreams: dict[str, MirrorUpstreamSession] = {}
@@ -348,15 +349,14 @@ class PetkitMirrorRelayManager:
                 ],
             )
 
-        ice_servers = []
-        for server in agora_response.get_ice_servers(use_all_turn_servers=False):
-            ice_servers.append(
-                AiortcIceServer(
-                    urls=server.urls,
-                    username=server.username,
-                    credential=server.credential,
-                )
+        ice_servers = [
+            AiortcIceServer(
+                urls=server.urls,
+                username=server.username,
+                credential=server.credential,
             )
+            for server in agora_response.get_ice_servers(use_all_turn_servers=False)
+        ]
 
         peer_connection = RTCPeerConnection(RTCConfiguration(iceServers=ice_servers))
         relay = MediaRelay()
@@ -364,7 +364,7 @@ class PetkitMirrorRelayManager:
             camera=camera,
             peer_connection=peer_connection,
             agora_handler=AgoraWebSocketHandler(
-                rtc_token_provider=camera._refresh_rtc_token,
+                rtc_token_provider=camera.async_refresh_rtc_token,
                 prefer_instant_video=True,
                 subscribe_retry_delay=1.0,
                 subscribe_retry_attempts=3,
@@ -418,7 +418,7 @@ class PetkitMirrorRelayManager:
             upstream.agora_handler,
             str(peer_connection.localDescription.sdp),
         )
-        upstream.agora_handler.candidates = camera._filter_candidates(
+        upstream.agora_handler.candidates = camera.filter_agora_candidates(
             upstream.agora_handler.candidates,
             agora_response,
         )
@@ -476,7 +476,7 @@ class PetkitMirrorRelayManager:
                     continue
                 await upstream.agora_rtm.update_tokens(live_feed)
         except asyncio.CancelledError:
-            return
+            raise
 
     async def _handle_downstream_closed(
         self,

@@ -240,37 +240,13 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
         send_message: WebRTCSendMessage,
     ) -> None:
         """Handle browser WebRTC offer and return SDP answer."""
-        from .whep_mirror import AIORTC_IMPORT_ERROR, _get_manager
-
-        if AIORTC_IMPORT_ERROR is None:
-            manager = _get_manager(self.hass)
-            use_mirror_first = (
-                self._always_on_stream_enabled()
-                or await manager.has_upstream(str(self.device.id))
-            )
-            if use_mirror_first:
-                self._pending_mirror_browser_sessions.add(session_id)
-                try:
-                    _, answer_sdp = await manager.create_downstream_offer(
-                        self,
-                        offer_sdp,
-                        session_id=session_id,
-                        kind="browser",
-                    )
-                    await self._flush_pending_mirror_candidates(manager, session_id)
-                except (OSError, RuntimeError, ValueError) as err:
-                    self._pending_mirror_browser_sessions.discard(session_id)
-                    self._pending_mirror_browser_candidates.pop(session_id, None)
-                    LOGGER.warning(
-                        "Rebroadcast browser startup failed for %s, falling back to direct path: %s",
-                        self.device.id,
-                        err,
-                    )
-                else:
-                    self._mirror_browser_sessions.add(session_id)
-                    self._pending_mirror_browser_sessions.discard(session_id)
-                    send_message(WebRTCAnswer(answer_sdp))
-                    return
+        answer_sdp = await self._async_try_rebroadcast_browser_offer(
+            offer_sdp,
+            session_id,
+        )
+        if answer_sdp is not None:
+            send_message(WebRTCAnswer(answer_sdp))
+            return
 
         await self._agora_handler.disconnect()
         self._agora_handler.candidates = []
@@ -343,6 +319,47 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
                     message=str(err),
                 )
             )
+
+    async def _async_try_rebroadcast_browser_offer(
+        self,
+        offer_sdp: str,
+        session_id: str,
+    ) -> str | None:
+        """Try the rebroadcast path first when it is already in use or enabled."""
+        from .whep_mirror import AIORTC_IMPORT_ERROR, _get_manager
+
+        if AIORTC_IMPORT_ERROR is not None:
+            return None
+
+        manager = _get_manager(self.hass)
+        use_rebroadcast = self._always_on_stream_enabled() or await manager.has_upstream(
+            str(self.device.id)
+        )
+        if not use_rebroadcast:
+            return None
+
+        self._pending_mirror_browser_sessions.add(session_id)
+        try:
+            _, answer_sdp = await manager.create_downstream_offer(
+                self,
+                offer_sdp,
+                session_id=session_id,
+                kind="browser",
+            )
+            await self._flush_pending_mirror_candidates(manager, session_id)
+        except (OSError, RuntimeError, ValueError) as err:
+            self._pending_mirror_browser_sessions.discard(session_id)
+            self._pending_mirror_browser_candidates.pop(session_id, None)
+            LOGGER.warning(
+                "Rebroadcast browser startup failed for %s, falling back to direct path: %s",
+                self.device.id,
+                err,
+            )
+            return None
+
+        self._mirror_browser_sessions.add(session_id)
+        self._pending_mirror_browser_sessions.discard(session_id)
+        return answer_sdp
 
     async def async_on_webrtc_candidate(
         self,
@@ -684,6 +701,14 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
             return None
         return live_feed
 
+    async def async_get_live_feed(self) -> LiveFeed | None:
+        """Return the current live feed payload for rebroadcast helpers."""
+        return await self._get_live_feed()
+
+    async def async_refresh_rtc_token(self) -> str | None:
+        """Refresh and return the latest RTC token for rebroadcast helpers."""
+        return await self._refresh_rtc_token()
+
     async def _refresh_agora_context(self, live_feed: LiveFeed) -> None:
         """Fetch Agora gateway + TURN endpoints and cache ICE servers."""
         self._agora_response = None
@@ -740,3 +765,11 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
                 ):
                     filtered.append(candidate)
         return filtered or candidates
+
+    def filter_agora_candidates(
+        self,
+        candidates: list[RTCIceCandidateInit],
+        agora_response: AgoraResponse,
+    ) -> list[RTCIceCandidateInit]:
+        """Filter Agora ICE candidates for rebroadcast helpers."""
+        return self._filter_candidates(candidates, agora_response)

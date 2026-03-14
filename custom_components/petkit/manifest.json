@@ -4,6 +4,9 @@
   "after_dependencies": ["web_rtc", "go2rtc"],
   "codeowners": ["@Jezza34000"],
   "config_flow": true,
+  "dependencies": [
+    "http"
+  ],
   "documentation": "https://github.com/Jezza34000/homeassistant_petkit",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/Jezza34000/homeassistant_petkit/issues",
