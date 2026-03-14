@@ -7,7 +7,14 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from pypetkitapi import FEEDER_WITH_CAMERA, LITTER_WITH_CAMERA, Feeder, Litter, LiveFeed, MediaType
+from pypetkitapi import (
+    FEEDER_WITH_CAMERA,
+    LITTER_WITH_CAMERA,
+    Feeder,
+    Litter,
+    LiveFeed,
+    MediaType,
+)
 from webrtc_models import RTCIceCandidateInit, RTCIceServer
 
 from homeassistant.components.camera import (
