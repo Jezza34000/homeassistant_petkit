@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 
 from pypetkitapi import (
     FEEDER_WITH_CAMERA,
@@ -340,6 +341,9 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
             if event_image:
                 LOGGER.debug("Using event image for device %s", self.device.id)
                 return event_image
+
+            LOGGER.debug("No image available, returning default placeholder for device %s", self.device.id)
+            return await self._get_default_image()
         except OSError as err:
             LOGGER.error("Failed to get camera image: %s", err)
         else:
@@ -381,6 +385,25 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
                     return image_data
         except OSError as err:
             LOGGER.debug("Failed to get event image: %s", err)
+        else:
+            return None
+
+    @staticmethod
+    async def _get_default_image() -> bytes | None:
+        """Get the default placeholder image."""
+        try:
+            default_image_path = Path(__file__).parent / "img" / "play.png"
+
+            if default_image_path.exists():
+                import aiofiles
+
+                async with aiofiles.open(default_image_path, "rb") as image_file:
+                    image_data = await image_file.read()
+                LOGGER.debug("Successfully loaded default camera image (%d bytes)", len(image_data))
+                return image_data
+            LOGGER.warning("Default camera image not found at: %s", default_image_path)
+        except OSError as err:
+            LOGGER.error("Failed to get default image: %s", err)
         else:
             return None
 
