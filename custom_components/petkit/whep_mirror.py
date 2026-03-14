@@ -468,15 +468,12 @@ class PetkitMirrorRelayManager:
 
     async def _refresh_tokens(self, upstream: MirrorUpstreamSession) -> None:
         """Refresh RTM tokens while the upstream session is alive."""
-        try:
-            while True:
-                await asyncio.sleep(TOKEN_REFRESH_INTERVAL_SECONDS)
-                live_feed = await _get_live_feed_for_webrtc(upstream.camera)
-                if live_feed is None:
-                    continue
-                await upstream.agora_rtm.update_tokens(live_feed)
-        except asyncio.CancelledError:
-            raise
+        while True:
+            await asyncio.sleep(TOKEN_REFRESH_INTERVAL_SECONDS)
+            live_feed = await _get_live_feed_for_webrtc(upstream.camera)
+            if live_feed is None:
+                continue
+            await upstream.agora_rtm.update_tokens(live_feed)
 
     async def _handle_downstream_closed(
         self,
