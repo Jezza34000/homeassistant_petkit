@@ -7,8 +7,8 @@
 - **Control** : Control your Petkit devices directly from Home Assistant.
 - **Monitor** : Monitor your devices status, monitor your pet's activity, feeding, drinking, and litter usage.
 - **Bluetooth relay** : Automatically check your fountain over bluetooth relay.
-- **Media** : Access all your media from Petkit devices directly in Home Assistant.
-- **Live Stream:** Watch live video from supported Petkit devices directly in Home Assistant.
+- **Media** : Access media from your Petkit devices directly in the `Media` section.
+- **Live Stream:** Watch live video from devices with camera (⚠ Firefox does not support live stream)
 
 ## 📘 Integration Wiki
 
@@ -16,11 +16,12 @@
 - **[Installation](https://github.com/Jezza34000/homeassistant_petkit/wiki/Installation)** - Complete installation guide
 - **[Migration](https://github.com/Jezza34000/homeassistant_petkit/wiki/Migration)** - Migration from RobertD502 or hasscc integration
 - **[Configuration](https://github.com/Jezza34000/homeassistant_petkit/wiki/Configuration)** - Basic and advanced configuration
+- **[Live stream modes](https://github.com/Jezza34000/homeassistant_petkit/wiki/Live-Stream-Modes)** - Live stream options
 - **[Media Management](https://github.com/Jezza34000/homeassistant_petkit/wiki/Media-Management)** - Photo and video management
 - **[Recommended Cards](https://github.com/Jezza34000/homeassistant_petkit/wiki/Recommended-Cards)** - Custom cards to enhance your dashboard
 - **[Translations](https://github.com/Jezza34000/homeassistant_petkit/wiki/Translations)** - Language support and contribution guide
-  <a href="https://hosted.weblate.org/engage/homeassistant_petkit/"><img src="https://hosted.weblate.org/widget/homeassistant_petkit/homeassistant_petkit/language-badge.svg" alt="Translation status" height="15"></a>
-  <a href="https://hosted.weblate.org/engage/homeassistant_petkit/"><img src="https://hosted.weblate.org/widget/homeassistant_petkit/homeassistant_petkit/status-badge.png" alt="Translation status" height="15"></a>
+  <a href="https://hosted.weblate.org/engage/homeassistant_petkit/"><img src="https://hosted.weblate.org/widget/homeassistant_petkit/homeassistant_petkit/language-badge.svg" alt="Translation status"></a>
+  <a href="https://hosted.weblate.org/engage/homeassistant_petkit/"><img src="https://hosted.weblate.org/widget/homeassistant_petkit/homeassistant_petkit/status-badge.png" alt="Translation status"></a>
 
 - **[Troubleshooting](https://github.com/Jezza34000/homeassistant_petkit/wiki/Troubleshooting)** - Solutions to common problems
 - **[Development](https://github.com/Jezza34000/homeassistant_petkit/wiki/Development)** - Guide for contributors
