@@ -10,6 +10,29 @@
 - **Media** : Access media from your Petkit devices directly in the `Media` section.
 - **Live Stream:** Watch live video from devices with camera (⚠ Firefox does not support live stream)
 
+## Live Stream Modes
+
+By default, Petkit live video stays in the lightweight direct mode.
+
+- The camera can be viewed from Home Assistant's native camera interface.
+- The `Always-on Rebroadcast` option is disabled by default.
+- In this mode, the stream is not exposed as a generic HA stream source for other consumers such as custom WebRTC cards, dashboard cards that expect `stream_source()`, or external tools you want to feed from Home Assistant.
+
+If you want to reuse the stream outside the native HA camera viewer, enable `Always-on Rebroadcast` in the integration options.
+
+When `Always-on Rebroadcast` is enabled:
+
+- The original Petkit camera entity exposes a generic stream source through HA-managed go2rtc.
+- The same camera entity also exposes rebroadcast attributes such as `stream_source_url`, `whep_internal_url`, and `whep_mirror_url`.
+- The rebroadcast stream can be reused by other consumers, such as custom WebRTC cards, dashboard views, go2rtc, or other integrations that need a reusable camera stream.
+- Browser viewers and external consumers can share the same upstream Petkit session instead of competing for separate sessions.
+
+Side effects of enabling `Always-on Rebroadcast`:
+
+- Home Assistant keeps one upstream Petkit/Agora stream session prewarmed for the device.
+- This uses more device, network, and cloud resources than the default direct-view mode.
+- Stream startup is usually faster for additional viewers because the rebroadcast session is already alive.
+
 ## 📘 Integration Wiki
 
 - **[Supported Devices](https://github.com/Jezza34000/homeassistant_petkit/wiki/Supported-Devices)** - Complete list of compatible devices
