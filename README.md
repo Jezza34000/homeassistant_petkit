@@ -42,13 +42,22 @@ Important notes:
 - `whep_mirror_url` is the URL to use if you want an external go2rtc instance or another external consumer to pull the rebroadcast stream.
 - `whep_internal_url` is not meant for external access. It is localhost-only and is used internally by Home Assistant.
 - `stream_source_url` is mainly for Home Assistant's generic camera stream path. If your HA-managed go2rtc is loopback-only, that RTSP URL is not directly reachable from another machine.
+- The old `/api/petkit/whep/...` endpoint is not used here. External consumers should use `/api/petkit/whep_mirror/{device_id}`.
 
-Example external go2rtc source:
+Example external go2rtc source using query-token auth:
 
 ```yaml
 streams:
   petkit_camera:
     - webrtc:http://HOME_ASSISTANT/api/petkit/whep_mirror/DEVICE_ID?token=LONG_LIVED_ACCESS_TOKEN
+```
+
+Example external go2rtc source using Home Assistant bearer auth in a header:
+
+```yaml
+streams:
+  petkit_camera:
+    - webrtc:http://HOME_ASSISTANT/api/petkit/whep_mirror/DEVICE_ID#header=Authorization: Bearer LONG_LIVED_ACCESS_TOKEN
 ```
 
 Side effects of enabling `Always-on Rebroadcast`:
