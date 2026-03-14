@@ -342,7 +342,10 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
                 LOGGER.debug("Using event image for device %s", self.device.id)
                 return event_image
 
-            LOGGER.debug("No image available, returning default placeholder for device %s", self.device.id)
+            LOGGER.debug(
+                "No image available, returning default placeholder for device %s",
+                self.device.id,
+            )
             return await self._get_default_image()
         except OSError as err:
             LOGGER.error("Failed to get camera image: %s", err)
@@ -399,7 +402,10 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
 
                 async with aiofiles.open(default_image_path, "rb") as image_file:
                     image_data = await image_file.read()
-                LOGGER.debug("Successfully loaded default camera image (%d bytes)", len(image_data))
+                LOGGER.debug(
+                    "Successfully loaded default camera image (%d bytes)",
+                    len(image_data),
+                )
                 return image_data
             LOGGER.warning("Default camera image not found at: %s", default_image_path)
         except OSError as err:
