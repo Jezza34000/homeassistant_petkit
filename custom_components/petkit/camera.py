@@ -6,7 +6,14 @@ import asyncio
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from pypetkitapi import FEEDER_WITH_CAMERA, LITTER_WITH_CAMERA, Feeder, Litter, LiveFeed
+from pypetkitapi import (
+    FEEDER_WITH_CAMERA,
+    LITTER_WITH_CAMERA,
+    Feeder,
+    Litter,
+    LiveFeed,
+    MediaType,
+)
 from webrtc_models import RTCIceCandidateInit, RTCIceServer
 
 from homeassistant.components.camera import (
@@ -118,6 +125,10 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
         self.entity_description = entity_description
         self._attr_translation_key = entity_description.translation_key
 
+        # Enable Stream integration to generate still images
+        self._attr_use_stream_for_stills = True
+        self._attr_is_streaming = True
+
         self._agora_rtm = AgoraRTMSignaling(AGORA_APP_ID)
         self._agora_handler = AgoraWebSocketHandler(
             rtc_token_provider=self._refresh_rtc_token
@@ -157,14 +168,6 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
         if live_feed is None:
             return
         await self._refresh_agora_context(live_feed)
-
-    async def async_camera_image(
-        self,
-        width: int | None = None,
-        height: int | None = None,
-    ) -> bytes | None:
-        """WebRTC cameras do not provide still snapshots directly."""
-        return None
 
     async def async_handle_async_webrtc_offer(
         self,
@@ -308,6 +311,78 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
         """Stop RTM live signaling manually from HA controls."""
         await self._async_close_stream(send_stop_override=True)
         LOGGER.debug("Manual stop_live sent for %s", self.device.id)
+
+    async def stream_source(self) -> str | None:
+        """Return a dummy stream source to enable HLS support."""
+        return f"webrtc://{self.device.sn}"
+
+    async def async_camera_image(
+        self,
+        width: int | None = None,
+        height: int | None = None,
+    ) -> bytes | None:
+        """Return bytes of camera image.
+
+        Implementation strategy:
+        1. Try to get the latest event image from device records
+        2. If no event image, return default placeholder image
+
+        Note: WebRTC is a peer-to-peer protocol, the server cannot directly
+        capture frames from the stream. Capturing frames from WebRTC streams
+        requires the aiortc library, which is an additional dependency.
+        """
+        LOGGER.debug(
+            "async_camera_image called with width=%s, height=%s", width, height
+        )
+
+        try:
+            event_image = await self._get_latest_event_image()
+            if event_image:
+                LOGGER.debug("Using event image for device %s", self.device.id)
+                return event_image
+        except OSError as err:
+            LOGGER.error("Failed to get camera image: %s", err)
+        else:
+            LOGGER.debug("No event image available for device %s", self.device.id)
+            return None
+
+    async def _get_latest_event_image(self) -> bytes | None:
+        """Get the latest event image from device records."""
+        try:
+            media_coordinator = (
+                self.coordinator.config_entry.runtime_data.coordinator_media
+            )
+            media_table = media_coordinator.media_table
+
+            device_media = media_table.get(self.device.id, [])
+
+            if device_media:
+                image_files = [
+                    media
+                    for media in device_media
+                    if media.media_type == MediaType.IMAGE
+                ]
+
+                if image_files:
+                    latest_image = max(image_files, key=lambda m: m.timestamp)
+                    LOGGER.debug(
+                        "Found latest event image: %s", latest_image.full_file_path
+                    )
+
+                    import aiofiles
+
+                    async with aiofiles.open(
+                        latest_image.full_file_path, "rb"
+                    ) as image_file:
+                        image_data = await image_file.read()
+                    LOGGER.debug(
+                        "Successfully loaded event image (%d bytes)", len(image_data)
+                    )
+                    return image_data
+        except OSError as err:
+            LOGGER.debug("Failed to get event image: %s", err)
+        else:
+            return None
 
     def _stream_control_mode(self) -> str:
         """Return stream control mode from config entry options."""
