@@ -282,6 +282,9 @@
       "urine_measured_ph": {
         "name": "Urine measured pH"
       },
+      "device_id": {
+        "name": "Device ID"
+      },
       "pet_last_urination_date": {
         "name": "Last urination"
       },
@@ -750,8 +753,12 @@
     "step": {
       "init": {
         "data": {
+          "always_on_stream": "Always-on Rebroadcast",
           "region": "Region",
           "time_zone": "Timezone"
+        },
+        "data_description": {
+          "always_on_stream": "Keep the internal rebroadcast session prewarmed so browser viewing, WHEP clients, and generic stream consumers of this camera can connect quickly. The rebroadcast stream can also be reused by other consumers. This keeps one upstream session alive and uses more device and cloud resources."
         },
         "sections": {
           "bluetooth_options": {

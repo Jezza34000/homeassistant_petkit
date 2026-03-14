@@ -708,6 +708,11 @@
         "name": "照明"
       }
     },
+    "camera": {
+      "camera": {
+        "name": "摄像头视频流"
+      }
+    },
     "text": {
       "manual_feed_dual_h1": {
         "name": "1号粮仓手动出粮"
@@ -724,12 +729,14 @@
     "step": {
       "init": {
         "data": {
+          "always_on_stream": "常开转播流",
           "region": "区域",
           "scan_interval": "默认轮询间隔（秒）",
           "smart_polling": "智能轮询",
           "time_zone": "时区"
         },
         "data_description": {
+          "always_on_stream": "保持内部转播会话处于预热状态，让浏览器观看、WHEP 客户端以及此摄像头的通用流消费者都能更快连接。该转播流也可以被其他消费者复用。这样会持续维持一个上游会话，并占用更多设备和云端资源。",
           "smart_polling": "智能轮询会根据设备的事件/操作自动调整轮询间隔。"
         },
         "sections": {
