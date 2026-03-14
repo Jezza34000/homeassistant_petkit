@@ -9,7 +9,6 @@ from pypetkitapi import Litter
 from pypetkitapi.litter_container import StateLitter
 
 from homeassistant.components.diagnostics import async_redact_data
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceEntry
