@@ -368,12 +368,18 @@
       "food_left": {
         "default": "mdi:food-drumstick"
       },
+      "garbage_bag_box_state": {
+        "default": "mdi:trash-can-outline"
+      },
       "lack_warning": {
         "default": "mdi:alert",
         "state": {
           "no_warning": "mdi:check-circle",
           "warning": "mdi:alert"
         }
+      },
+      "last_bag_replacement_time": {
+        "default": "mdi:package-variant"
       },
       "last_connection": {
         "default": "mdi:bluetooth"
@@ -383,6 +389,9 @@
       },
       "last_feed_event": {
         "default": "mdi:calendar-star"
+      },
+      "last_pack_time": {
+        "default": "mdi:package-variant-closed"
       },
       "last_update": {
         "default": "mdi:clock"
@@ -451,6 +460,9 @@
       "planned_dispensed_hopper_2": {
         "default": "mdi:food-drumstick"
       },
+      "purification_n60_left_days": {
+        "default": "mdi:air-filter"
+      },
       "purified_water": {
         "default": "mdi:water-pump"
       },
@@ -462,6 +474,9 @@
       },
       "rssi": {
         "default": "mdi:wifi"
+      },
+      "sand_tray_left_days": {
+        "default": "mdi:tray-full"
       },
       "spray_deodorant_liquid": {
         "default": "mdi:hydraulic-oil-level"
@@ -504,21 +519,6 @@
       },
       "total_time": {
         "default": "mdi:timer-sand"
-      },
-      "garbage_bag_box_state": {
-        "default": "mdi:trash-can-outline"
-      },
-      "purification_n60_left_days": {
-        "default": "mdi:air-filter"
-      },
-      "last_pack_time": {
-        "default": "mdi:package-variant-closed"
-      },
-      "last_bag_replacement_time": {
-        "default": "mdi:package-variant"
-      },
-      "sand_tray_left_days": {
-        "default": "mdi:tray-full"
       }
     },
     "switch": {
