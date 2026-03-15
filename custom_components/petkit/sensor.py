@@ -463,6 +463,85 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             state_class=SensorStateClass.MEASUREMENT,
             value=lambda device: device.package_used_count,
         ),
+        PetKitSensorDesc(
+            key="Garbage bag box state",
+            translation_key="garbage_bag_box_state",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            device_class=SensorDeviceClass.ENUM,
+            options=[
+                "normal",
+                "running_out",
+                "used_up",
+                "expired",
+                "not_available",
+                "not_installed",
+            ],
+            value=lambda device: {
+                0: "normal",
+                1: "running_out",
+                2: "used_up",
+                3: "expired",
+                4: "not_available",
+                5: "not_installed",
+            }.get(device.state.package_state),
+        ),
+        PetKitSensorDesc(
+            key="Purification N60 left days",
+            translation_key="purification_n60_left_days",
+            state_class=SensorStateClass.MEASUREMENT,
+            native_unit_of_measurement=UnitOfTime.DAYS,
+            value=lambda device: device.state.purification_left_days,
+        ),
+        PetKitSensorDesc(
+            key="Last pack time",
+            translation_key="last_pack_time",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            device_class=SensorDeviceClass.TIMESTAMP,
+            value=lambda device: (
+                datetime.fromtimestamp(
+                    int(device.package_info.package_record), tz=timezone.utc
+                )
+                if device.package_info
+                and device.package_info.package_record
+                and device.package_info.package_record != "-1"
+                and int(device.package_info.package_record) > 0
+                else None
+            ),
+            only_for_types=[T6],
+        ),
+        PetKitSensorDesc(
+            key="Last bag replacement time",
+            translation_key="last_bag_replacement_time",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            device_class=SensorDeviceClass.TIMESTAMP,
+            value=lambda device: (
+                datetime.fromtimestamp(
+                    int(device.package_info.package_changed), tz=timezone.utc
+                )
+                if device.package_info
+                and device.package_info.package_changed
+                and device.package_info.package_changed != "-1"
+                and int(device.package_info.package_changed) > 0
+                else None
+            ),
+            only_for_types=[T6],
+        ),
+        PetKitSensorDesc(
+            key="Litter level camera",
+            translation_key="litter_level",
+            state_class=SensorStateClass.MEASUREMENT,
+            native_unit_of_measurement=PERCENTAGE,
+            value=lambda device: device.state.sand_percent,
+            only_for_types=LITTER_WITH_CAMERA,
+        ),
+        PetKitSensorDesc(
+            key="Sand tray left days",
+            translation_key="sand_tray_left_days",
+            state_class=SensorStateClass.MEASUREMENT,
+            native_unit_of_measurement=UnitOfTime.DAYS,
+            value=lambda device: device.state.sand_tray_left_day,
+            only_for_types=[T7],
+        ),
     ],
     WaterFountain: [
         *COMMON_ENTITIES,

@@ -504,6 +504,21 @@
       },
       "total_time": {
         "default": "mdi:timer-sand"
+      },
+      "garbage_bag_box_state": {
+        "default": "mdi:trash-can-outline"
+      },
+      "purification_n60_left_days": {
+        "default": "mdi:air-filter"
+      },
+      "last_pack_time": {
+        "default": "mdi:package-variant-closed"
+      },
+      "last_bag_replacement_time": {
+        "default": "mdi:package-variant"
+      },
+      "sand_tray_left_days": {
+        "default": "mdi:tray-full"
       }
     },
     "switch": {

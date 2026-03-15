@@ -549,6 +549,29 @@
       },
       "total_time": {
         "name": "Total use"
+      },
+      "garbage_bag_box_state": {
+        "name": "Garbage bag box",
+        "state": {
+          "normal": "Normal",
+          "running_out": "Running out",
+          "used_up": "Used up",
+          "expired": "Expired",
+          "not_available": "Not available",
+          "not_installed": "Not installed"
+        }
+      },
+      "purification_n60_left_days": {
+        "name": "Purification N60 left days"
+      },
+      "last_pack_time": {
+        "name": "Last pack time"
+      },
+      "last_bag_replacement_time": {
+        "name": "Last bag replacement"
+      },
+      "sand_tray_left_days": {
+        "name": "Sand tray left days"
       }
     },
     "switch": {
