@@ -263,10 +263,21 @@
         "name": "Тип наповнювача"
       },
       "working_mode": {
-        "name": "Режим роботи"
+        "name": "Режим роботи",
+        "state": {
+          "normal": "Нормальний",
+          "smart": "Розумний",
+          "standard": "Стандартний",
+          "intermittent": "Переривчастий"
+        }
       },
       "led_brightness": {
-        "name": "Яскравість LED"
+        "name": "Яскравість LED",
+        "state": {
+          "low": "Низька",
+          "normal": "Нормальна",
+          "high": "Висока"
+        }
       },
       "move_detection_sensitivity": {
         "name": "Чутливість виявлення руху"

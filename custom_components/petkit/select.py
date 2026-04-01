@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from pypetkitapi import (
+    CTW3,
     D4H,
     D4SH,
     T7,
@@ -17,13 +18,17 @@ from pypetkitapi import (
     Purifier,
     WaterFountain,
 )
+from pypetkitapi.command import FountainAction
 
 from homeassistant.components.select import SelectEntity, SelectEntityDescription
 from homeassistant.const import EntityCategory
 
 from .const import (
     CLEANING_INTERVAL_OPT,
+    FOUNTAIN_WORKING_MODE,
+    FOUNTAIN_WORKING_MODE_CTW3,
     IA_DETECTION_SENSITIVITY_OPT,
+    LED_BRIGHTNESS,
     LITTER_TYPE_OPT,
     LOGGER,
     POWER_ONLINE_STATE,
@@ -63,6 +68,29 @@ async def _handle_surplus_control(api, device, opt_value):
             DeviceCommand.UPDATE_SETTING,
             {"surplusControl": 1, "surplusStandard": selected_key},
         )
+
+
+async def _handle_fountain_mode(api, device, opt_value):
+    """Change the working mode of a water fountain via BLE."""
+    device_type = getattr(device.device_nfo, "device_type", "").lower()
+    if device_type == CTW3:
+        mode_map = FOUNTAIN_WORKING_MODE_CTW3
+        action_map = {
+            1: FountainAction.MODE_STANDARD,
+            2: FountainAction.MODE_INTERMITTENT,
+        }
+    else:
+        mode_map = FOUNTAIN_WORKING_MODE
+        action_map = {
+            1: FountainAction.MODE_NORMAL,
+            2: FountainAction.MODE_SMART,
+        }
+    mode_int = next((k for k, v in mode_map.items() if v == opt_value), None)
+    if mode_int is None:
+        return
+    action = action_map.get(mode_int)
+    if action:
+        await api.bluetooth_manager.send_ble_command(device.id, action)
 
 
 COMMON_ENTITIES = []
@@ -188,7 +216,45 @@ SELECT_MAPPING: dict[type[PetkitDevices], list[PetKitSelectDesc]] = {
             entity_category=EntityCategory.CONFIG,
         ),
     ],
-    WaterFountain: [*COMMON_ENTITIES],
+    WaterFountain: [
+        *COMMON_ENTITIES,
+        PetKitSelectDesc(
+            key="Working mode",
+            translation_key="working_mode",
+            current_option=lambda device: FOUNTAIN_WORKING_MODE.get(device.mode),
+            options=lambda: list(FOUNTAIN_WORKING_MODE.values()),
+            action=_handle_fountain_mode,
+            entity_category=EntityCategory.CONFIG,
+            ignore_types=[CTW3],
+        ),
+        PetKitSelectDesc(
+            key="Working mode",
+            translation_key="working_mode",
+            current_option=lambda device: FOUNTAIN_WORKING_MODE_CTW3.get(device.mode),
+            options=lambda: list(FOUNTAIN_WORKING_MODE_CTW3.values()),
+            action=_handle_fountain_mode,
+            entity_category=EntityCategory.CONFIG,
+            only_for_types=[CTW3],
+        ),
+        PetKitSelectDesc(
+            key="Led brightness",
+            translation_key="led_brightness",
+            current_option=lambda device: LED_BRIGHTNESS.get(
+                device.settings.lamp_ring_brightness
+            ),
+            options=lambda: list(LED_BRIGHTNESS.values()),
+            action=lambda api, device, opt_value: api.send_api_request(
+                device.id,
+                DeviceCommand.UPDATE_SETTING,
+                {
+                    "lampRingBrightness": next(
+                        k for k, v in LED_BRIGHTNESS.items() if v == opt_value
+                    )
+                },
+            ),
+            entity_category=EntityCategory.CONFIG,
+        ),
+    ],
     Purifier: [*COMMON_ENTITIES],
     Pet: [*COMMON_ENTITIES],
 }

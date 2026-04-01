@@ -110,20 +110,19 @@ MANUAL_FEED_OPT = {
 }
 
 FOUNTAIN_WORKING_MODE_CTW3 = {
-    1: "Standard",
-    2: "Intermittent",
-    3: "Battery",
+    1: "standard",
+    2: "intermittent",
 }
 
 FOUNTAIN_WORKING_MODE = {
-    1: "Normal",
-    2: "Smart",
+    1: "normal",
+    2: "smart",
 }
 
 LED_BRIGHTNESS = {
-    1: "Low",
-    2: "Normal",
-    3: "High",
+    1: "low",
+    2: "normal",
+    3: "high",
 }
 
 # Fan mode
