@@ -37,6 +37,7 @@ from .coordinator import (
 )
 from .data import PetkitData
 from .iot_mqtt import PetkitIotMqttListener
+from .notifications import PetkitNotificationManager
 from .whep_mirror import (
     PetkitInternalWhepMirrorView,
     PetkitWhepMirrorView,
@@ -132,6 +133,13 @@ async def async_setup_entry(
     entry.runtime_data.mqtt_listener = mqtt_listener
     await mqtt_listener.async_start()
 
+    # Notifications
+    notification_manager = PetkitNotificationManager(
+        hass=hass,
+        coordinator=coordinator,
+    )
+    entry.runtime_data.notification_manager = notification_manager
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
@@ -153,6 +161,10 @@ async def async_unload_entry(
     mqtt_listener = getattr(entry.runtime_data, "mqtt_listener", None)
     if mqtt_listener is not None:
         await mqtt_listener.async_stop()
+
+    notification_manager = getattr(entry.runtime_data, "notification_manager", None)
+    if notification_manager is not None:
+        notification_manager.stop()
 
     await async_cleanup_whep_mirror_sessions(hass)
 
