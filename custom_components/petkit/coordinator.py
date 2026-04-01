@@ -174,9 +174,11 @@ class PetkitMediaUpdateCoordinator(DataUpdateCoordinator):
 
         raw = Path(media_options.get(CONF_MEDIA_PATH, DEFAULT_MEDIA_PATH))
         if raw.is_absolute():
-            raw = raw.relative_to(raw.anchor)
-
-        self.media_path = Path("/media") / raw
+            # User supplied a full path (e.g. /config or /config/petkit) — use it as-is.
+            self.media_path = raw
+        else:
+            # Relative name (e.g. "petkit") → store under /media for backward compat.
+            self.media_path = Path("/media") / raw
 
         LOGGER.debug(f"Media path = {self.media_path}")
 

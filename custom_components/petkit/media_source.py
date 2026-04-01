@@ -48,15 +48,17 @@ class PetkitMediaSource(MediaSource):
         super().__init__(DOMAIN)
         self.hass = hass
         self.coordinator = self.get_coordinator()
-        # Normalize like the media coordinator: store under /media/<name>
+        # Normalize like the media coordinator: use absolute paths as-is,
+        # prepend /media for relative names (e.g. "petkit" → /media/petkit).
         raw = Path(
             self.coordinator.config_entry.options.get(MEDIA_SECTION, {}).get(
                 CONF_MEDIA_PATH, DEFAULT_MEDIA_PATH
             )
         )
         if raw.is_absolute():
-            raw = raw.relative_to(raw.anchor)
-        self.media_path = Path(DEFAULT_MEDIA_PATH) / raw
+            self.media_path = raw
+        else:
+            self.media_path = Path(DEFAULT_MEDIA_PATH) / raw
 
     def get_coordinator(self):
         """Retrieve the integration's coordinator."""
@@ -71,8 +73,18 @@ class PetkitMediaSource(MediaSource):
         if not file_path.exists():
             raise ValueError(f"File not found: {file_path}")
         LOGGER.debug(f"Media Source: Resolving media {file_path}")
-        # Convert absolute FS path (/media/...) to URL under /media/local/<relative>
-        rel = file_path.relative_to(Path(DEFAULT_MEDIA_PATH))
+        # Convert absolute FS path to URL under /media/local/<relative>.
+        # This only works for files stored under /media; paths outside /media
+        # (e.g. /config/...) cannot be served via HA's media browser URL.
+        try:
+            rel = file_path.relative_to(Path(DEFAULT_MEDIA_PATH))
+        except ValueError as err:
+            raise ValueError(
+                f"Cannot serve '{file_path}' via the HA media browser: "
+                "only files stored under /media are accessible via the media browser. "
+                "To enable media browsing, set your media path to a directory "
+                "under /media (e.g. /media/petkit)."
+            ) from err
         url_path = (Path(MEDIA_ROOT) / rel).as_posix()
         url = async_process_play_media_url(
             self.hass,
