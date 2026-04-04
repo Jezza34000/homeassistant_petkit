@@ -30,7 +30,9 @@ try:
     # a pure-Python implementation. Suppress it here — it is harmless (streaming
     # continues to work) and would otherwise pollute the HA log on every startup.
     with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=RuntimeWarning, module="google_crc32c")
+        warnings.filterwarnings(
+            "ignore", category=RuntimeWarning, module="google_crc32c"
+        )
         from aiortc import (
             RTCConfiguration,
             RTCIceServer as AiortcIceServer,
