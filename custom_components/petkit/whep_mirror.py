@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 import ipaddress
 import secrets
 from typing import TYPE_CHECKING, Any
+import warnings
 
 from aiohttp import web
 
@@ -24,15 +25,21 @@ from .webrtc_common import (
 )
 
 try:
-    from aiortc import (
-        RTCConfiguration,
-        RTCIceServer as AiortcIceServer,
-        RTCPeerConnection,
-        RTCRtpSender,
-        RTCSessionDescription,
-    )
-    from aiortc.contrib.media import MediaRelay
-    from aiortc.sdp import candidate_from_sdp
+    # google-crc32c (pulled in by aiortc) emits a RuntimeWarning when its native
+    # C extension is unavailable in the HA Docker environment and falls back to
+    # a pure-Python implementation. Suppress it here — it is harmless (streaming
+    # continues to work) and would otherwise pollute the HA log on every startup.
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=RuntimeWarning, module="google_crc32c")
+        from aiortc import (
+            RTCConfiguration,
+            RTCIceServer as AiortcIceServer,
+            RTCPeerConnection,
+            RTCRtpSender,
+            RTCSessionDescription,
+        )
+        from aiortc.contrib.media import MediaRelay
+        from aiortc.sdp import candidate_from_sdp
 except Exception as err:  # noqa: BLE001
     RTCConfiguration = None
     AiortcIceServer = None
