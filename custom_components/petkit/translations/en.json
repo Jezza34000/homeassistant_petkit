@@ -795,6 +795,20 @@
             "description": "These options are only effective if you have a fountain and at least one device that can act as a bluetooth relay (e.g., feeder, litter box). Refer to the Petkit app for more information.",
             "name": "Bluetooth options"
           },
+          "local_ble_options": {
+            "data": {
+              "connection_mode": "Connection mode",
+              "local_ble_fountains": "Fountains",
+              "local_ble_debug_log": "Enable debug log (petkit.log)"
+            },
+            "data_description": {
+              "connection_mode": "Cloud only: all state via Petkit account + relay (default). BLE only: direct Bluetooth, no daily cloud calls. Auto: hybrid — BLE preferred, cloud fallback. Auto requires the device to have been paired in the Petkit app first so the per-device secret can be cached.",
+              "local_ble_fountains": "List of fountains to poll via local BLE. Provide a YAML list where each entry has a `mac` (required, the fountain's Bluetooth address as shown in the Petkit app or your BLE scanner) and an optional `name`. Example:\n```yaml\n- mac: AA:BB:CC:DD:EE:FF\n  name: Living room fountain\n- mac: 11:22:33:44:55:66\n  name: Kitchen fountain\n```",
+              "local_ble_debug_log": "Write detailed BLE debug information to /config/petkit.log. Disable when not needed to reduce disk writes."
+            },
+            "description": "Direct Bluetooth connection to your fountain. Works with local Bluetooth adapters and ESPHome Bluetooth Proxies.",
+            "name": "Local Bluetooth options"
+          },
           "medias_options": {
             "data": {
               "delete_media_after": "Delete media after (days)",
@@ -830,6 +844,13 @@
     }
   },
   "selector": {
+    "petkit_connection_mode": {
+      "options": {
+        "auto": "Auto (hybrid: BLE preferred, cloud fallback)",
+        "ble_only": "BLE only (no daily cloud calls)",
+        "cloud_only": "Cloud only (default)"
+      }
+    },
     "petkit_notification_category": {
       "options": {
         "feeder_error": "Feeder — device error",

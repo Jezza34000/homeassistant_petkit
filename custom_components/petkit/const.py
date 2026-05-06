@@ -21,6 +21,36 @@ CONF_BLE_RELAY_ENABLED = "ble_relay_enabled"
 CONF_SCAN_INTERVAL_BLUETOOTH = "scan_interval_bluetooth"
 CONF_STREAM_CONTROL_MODE = "stream_control_mode"
 
+# Local (direct) BLE — issue #31
+COORDINATOR_LOCAL_BLE = "coordinator_local_ble"
+LOCAL_BLE_SECTION = "local_ble_options"
+CONF_LOCAL_BLE_ENABLED = "local_ble_enabled"  # legacy boolean (pre-mode)
+CONF_LOCAL_BLE_FOUNTAINS = "local_ble_fountains"  # list of {name, mac} dicts
+CONF_LOCAL_BLE_DEBUG = "local_ble_debug_log"
+DEFAULT_LOCAL_BLE_ENABLED = False
+DEFAULT_LOCAL_BLE_DEBUG = False
+DEFAULT_LOCAL_BLE_POLL_INTERVAL = 60
+
+# Connection-mode architecture (Jezza34000 PR #203 design):
+#  - cloud_only : current default, all state via API + relay hub
+#  - ble_only   : direct BLE only, no daily cloud calls
+#  - auto       : hybrid (BLE preferred, cloud fallback). Requires cached
+#                 per-device secret (CMD 86) so cloud relay session survives.
+CONF_CONNECTION_MODE = "connection_mode"
+MODE_CLOUD_ONLY = "cloud_only"
+MODE_BLE_ONLY = "ble_only"
+MODE_AUTO = "auto"
+CONNECTION_MODES = [MODE_CLOUD_ONLY, MODE_BLE_ONLY, MODE_AUTO]
+DEFAULT_CONNECTION_MODE = MODE_CLOUD_ONLY
+
+# Per-device BLE secrets are persisted in entry.data so they survive restarts.
+# Shape: entry.data[CONF_BLE_SECRETS] = {<device_id_str>: <hex_secret_str>}
+CONF_BLE_SECRETS = "ble_secrets"
+
+# Grace window when bluetooth.async_ble_device_from_address returns None
+# (helps proxy contention / device just out of advertising window).
+BLE_CONNECT_GRACE_SECONDS = 15
+
 MEDIA_SECTION = "medias_options"
 CONF_MEDIA_DL_VIDEO = "media_dl_video"
 CONF_MEDIA_DL_IMAGE = "media_dl_image"

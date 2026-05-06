@@ -3,7 +3,7 @@
     "error": {
       "account_exists": "Dieses Konto existiert bereits.",
       "connection": "Verbindung zum Server konnte nicht hergestellt werden.",
-      "unknown": "Ein unbekannter Fehler ist aufgetreten. Bitte \u00fcberpr\u00fcfen Sie die Protokolle."
+      "unknown": "Ein unbekannter Fehler ist aufgetreten. Bitte überprüfen Sie die Protokolle."
     },
     "step": {
       "user": {
@@ -38,25 +38,25 @@
         "name": "Fressen"
       },
       "feeding": {
-        "name": "F\u00fctterung"
+        "name": "Fütterung"
       },
       "food_level": {
         "name": "Futterstand"
       },
       "food_level_1": {
-        "name": "Futterstand Beh\u00e4lter 1"
+        "name": "Futterstand Behälter 1"
       },
       "food_level_2": {
-        "name": "Futterstand Beh\u00e4lter 2"
+        "name": "Futterstand Behälter 2"
       },
       "lack_warning": {
         "name": "Wassermangelwarnung"
       },
       "liquid_empty": {
-        "name": "Desodorierer Fl\u00fcssigkeit leer"
+        "name": "Desodorierer Flüssigkeit leer"
       },
       "liquid_lack": {
-        "name": "Desodorierer Fl\u00fcssigkeitsmangel"
+        "name": "Desodorierer Flüssigkeitsmangel"
       },
       "litter": {
         "name": "Katzenstreu"
@@ -74,7 +74,7 @@
         "name": "Netzstrombetrieb"
       },
       "pura_air_liquid": {
-        "name": "Pura Air Fl\u00fcssigkeit"
+        "name": "Pura Air Flüssigkeit"
       },
       "replace_filter": {
         "name": "Filter ersetzen"
@@ -83,10 +83,10 @@
         "name": "Streumangel"
       },
       "waste_bin": {
-        "name": "Abfallbeh\u00e4lter voll"
+        "name": "Abfallbehälter voll"
       },
       "waste_bin_presence": {
-        "name": "Abfallbeh\u00e4lter vorhanden"
+        "name": "Abfallbehälter vorhanden"
       },
       "water_level": {
         "name": "Wasserstand"
@@ -100,13 +100,13 @@
         "name": "Aktion: Pause"
       },
       "action_reset": {
-        "name": "Aktion: Zur\u00fccksetzen"
+        "name": "Aktion: Zurücksetzen"
       },
       "call_pet": {
         "name": "Haustier rufen"
       },
       "cancel_manual_feed": {
-        "name": "Manuelle F\u00fctterung abbrechen"
+        "name": "Manuelle Fütterung abbrechen"
       },
       "deodorize": {
         "name": "Desodorieren"
@@ -118,13 +118,13 @@
         "name": "Wartung: Beenden"
       },
       "food_replenished": {
-        "name": "Futter nachgef\u00fcllt"
+        "name": "Futter nachgefüllt"
       },
       "reset_desiccant": {
-        "name": "Trockenmittel zur\u00fccksetzen"
+        "name": "Trockenmittel zurücksetzen"
       },
       "reset_odor_eliminator": {
-        "name": "Geruchsneutralisierer zur\u00fccksetzen"
+        "name": "Geruchsneutralisierer zurücksetzen"
       },
       "start_maintenance": {
         "name": "Wartung: Starten"
@@ -143,7 +143,7 @@
         "name": "Letztes Fressereignis"
       },
       "last_feed_event": {
-        "name": "Letztes F\u00fctterungsereignis"
+        "name": "Letztes Fütterungsereignis"
       },
       "last_visit_event": {
         "name": "Letztes Besuchsereignis"
@@ -151,16 +151,16 @@
     },
     "number": {
       "cleaning_delay": {
-        "name": "Reinigungsverz\u00f6gerung"
+        "name": "Reinigungsverzögerung"
       },
       "manual_feed": {
-        "name": "Manuelle F\u00fctterung"
+        "name": "Manuelle Fütterung"
       },
       "min_eating_duration": {
         "name": "Mindestfressdauer"
       },
       "surplus": {
-        "name": "\u00dcberschuss"
+        "name": "Überschuss"
       },
       "volume": {
         "name": "Volumen"
@@ -194,7 +194,7 @@
         "name": "KI-Haustiererkennungsempfindlichkeit"
       },
       "surplus_level": {
-        "name": "\u00dcberschusskontrollstufe"
+        "name": "Überschusskontrollstufe"
       }
     },
     "sensor": {
@@ -223,7 +223,7 @@
         "name": "Verbleibende Tage Trockenmittel"
       },
       "device_status": {
-        "name": "Ger\u00e4testatus"
+        "name": "Gerätestatus"
       },
       "drink_times": {
         "name": "Trinkzeiten"
@@ -247,13 +247,13 @@
         "name": "Verbleibender Filter"
       },
       "food_bowl_percentage": {
-        "name": "F\u00fcllstand Futternapf"
+        "name": "Füllstand Futternapf"
       },
       "food_in_bowl": {
         "name": "Futter im Napf"
       },
       "food_left": {
-        "name": "Futter \u00fcbrig"
+        "name": "Futter übrig"
       },
       "last_update": {
         "name": "Letzte Aktualisierung"
@@ -265,7 +265,7 @@
         "name": "Letztes Ereignis",
         "state": {
           "auto_cleaning_canceled": "Automatische Reinigung abgebrochen",
-          "auto_cleaning_canceled_kitten": "Automatische Reinigung abgebrochen: K\u00e4tzchen",
+          "auto_cleaning_canceled_kitten": "Automatische Reinigung abgebrochen: Kätzchen",
           "auto_cleaning_completed": "Automatische Rein",
           "auto_cleaning_failed_full": "Automatische Reinigung fehlgeschlagen: voll",
           "auto_cleaning_failed_hall_l": "Automatische Reinigung fehlgeschlagen: Hall L",
@@ -274,7 +274,7 @@
           "auto_odor_failed": "Automatische Geruchsbeseitigung fehlgeschlagen",
           "clean_over": "Reinigung abgeschlossen",
           "deodorant_finished": "Desodorierer leer",
-          "deodorant_finished_liquid_lack": "Desodorierer leer: Fl\u00fcssigkeitsmangel",
+          "deodorant_finished_liquid_lack": "Desodorierer leer: Flüssigkeitsmangel",
           "litter_empty_completed": "Streu entleeren abgeschlossen",
           "litter_empty_failed_full": "Streu entleeren fehlgeschlagen: voll",
           "litter_empty_failed_hall_l": "Streu entleeren fehlgeschlagen: Hall L",
@@ -287,21 +287,21 @@
           "manual_cleaning_failed_hall_t": "Manuelle Reinigung fehlgeschlagen: Hall T",
           "manual_cleaning_terminated": "Manuelle Reinigung beendet",
           "manual_odor_completed": "Manuelle Geruchsbeseitigung abgeschlossen",
-          "manual_odor_completed_liquid_lack": "Manuelle Geruchsbeseitigung abgeschlossen: Fl\u00fcssigkeitsmangel",
+          "manual_odor_completed_liquid_lack": "Manuelle Geruchsbeseitigung abgeschlossen: Flüssigkeitsmangel",
           "manual_odor_failed": "Manuelle Geruchsbeseitigung fehlgeschlagen",
           "periodic_cleaning_canceled": "Periodische Reinigung abgebrochen",
-          "periodic_cleaning_canceled_kitten": "Periodische Reinigung abgebrochen: K\u00e4tzchen",
+          "periodic_cleaning_canceled_kitten": "Periodische Reinigung abgebrochen: Kätzchen",
           "periodic_cleaning_completed": "Periodische Reinigung abgeschlossen",
           "periodic_cleaning_terminated": "Periodische Reinigung beendet",
           "periodic_odor_completed": "Periodische Geruchsbeseitigung abgeschlossen",
-          "periodic_odor_completed_liquid_lack": "Periodische Geruchsbeseitigung abgeschlossen: Fl\u00fcssigkeitsmangel",
+          "periodic_odor_completed_liquid_lack": "Periodische Geruchsbeseitigung abgeschlossen: Flüssigkeitsmangel",
           "periodic_odor_failed": "Periodische Geruchsbeseitigung fehlgeschlagen",
-          "reset_completed": "Zur\u00fccksetzen abgeschlossen",
-          "reset_failed_full": "Zur\u00fccksetzen fehlgeschlagen: voll",
-          "reset_failed_hall_l": "Zur\u00fccksetzen fehlgeschlagen: Hall L",
-          "reset_failed_hall_t": "Zur\u00fccksetzen fehlgeschlagen: Hall T",
-          "reset_over": "Zur\u00fccksetzen abgeschlossen",
-          "reset_terminated": "Zur\u00fccksetzen beendet",
+          "reset_completed": "Zurücksetzen abgeschlossen",
+          "reset_failed_full": "Zurücksetzen fehlgeschlagen: voll",
+          "reset_failed_hall_l": "Zurücksetzen fehlgeschlagen: Hall L",
+          "reset_failed_hall_t": "Zurücksetzen fehlgeschlagen: Hall T",
+          "reset_over": "Zurücksetzen abgeschlossen",
+          "reset_terminated": "Zurücksetzen beendet",
           "scheduled_cleaning_failed_full": "Geplante Reinigung fehlgeschlagen: voll",
           "scheduled_cleaning_failed_hall_l": "Geplante Reinigung fehlgeschlagen: Hall L",
           "scheduled_cleaning_failed_hall_t": "Geplante Reinigung fehlgeschlagen: Hall T"
@@ -317,14 +317,14 @@
           "cleaning": "Reinigung",
           "cleaning_paused": "Reinigung pausiert",
           "cleaning_paused_cover": "Reinigung pausiert - Abdeckung",
-          "cleaning_paused_pet_approach": "Reinigung pausiert - Haustier n\u00e4hert sich",
+          "cleaning_paused_pet_approach": "Reinigung pausiert - Haustier nähert sich",
           "cleaning_paused_pet_entered": "Reinigung pausiert - Haustier eingetreten",
           "cleaning_paused_pet_using": "Reinigung pausiert - Haustier benutzt",
           "cleaning_paused_system_error": "Reinigung pausiert - Systemfehler",
           "dumping": "Entleeren",
           "dumping_paused": "Entleeren pausiert",
           "dumping_paused_cover": "Entleeren pausiert - Abdeckung",
-          "dumping_paused_pet_approach": "Entleeren pausiert - Haustier n\u00e4hert sich",
+          "dumping_paused_pet_approach": "Entleeren pausiert - Haustier nähert sich",
           "dumping_paused_pet_entered": "Entleeren pausiert - Haustier eingetreten",
           "dumping_paused_pet_using": "Entleeren pausiert - Haustier benutzt",
           "dumping_paused_system_error": "Entleeren pausiert - Systemfehler",
@@ -333,18 +333,18 @@
           "maintenance": "Wartung",
           "maintenance_paused": "Wartung pausiert",
           "maintenance_paused_cover": "Wartung pausiert - Abdeckung",
-          "maintenance_paused_pet_approach": "Wartung pausiert - Haustier n\u00e4hert sich",
+          "maintenance_paused_pet_approach": "Wartung pausiert - Haustier nähert sich",
           "maintenance_paused_pet_entered": "Wartung pausiert - Haustier eingetreten",
           "maintenance_paused_pet_using": "Wartung pausiert - Haustier benutzt",
           "maintenance_paused_system_error": "Wartung pausiert - Systemfehler",
           "paused": "Pausiert",
           "paused_cover": "Pausiert - Abdeckung",
-          "paused_pet_approach": "Pausiert - Haustier n\u00e4hert sich",
+          "paused_pet_approach": "Pausiert - Haustier nähert sich",
           "paused_pet_entered": "Pausiert - Haustier eingetreten",
           "paused_pet_using": "Pausiert - Haustier benutzt",
           "paused_system_error": "Pausiert - Systemfehler",
-          "resetting": "Zur\u00fccksetzen",
-          "resetting_device": "Ger\u00e4t wird zur\u00fcckgesetzt",
+          "resetting": "Zurücksetzen",
+          "resetting_device": "Gerät wird zurückgesetzt",
           "unknown": "Unbekannt"
         }
       },
@@ -355,10 +355,10 @@
         "name": "Manuell ausgegeben"
       },
       "manual_dispensed_hopper_1": {
-        "name": "Manuell ausgegeben Beh\u00e4lter 1"
+        "name": "Manuell ausgegeben Behälter 1"
       },
       "manual_dispensed_hopper_2": {
-        "name": "Manuell ausgegeben Beh\u00e4lter 2"
+        "name": "Manuell ausgegeben Behälter 2"
       },
       "package_used": {
         "name": "Verwendete Packung"
@@ -379,16 +379,16 @@
         "name": "Geplant ausgegeben"
       },
       "planned_dispensed_hopper_1": {
-        "name": "Geplant ausgegeben Beh\u00e4lter 1"
+        "name": "Geplant ausgegeben Behälter 1"
       },
       "planned_dispensed_hopper_2": {
-        "name": "Geplant ausgegeben Beh\u00e4lter 2"
+        "name": "Geplant ausgegeben Behälter 2"
       },
       "purified_water": {
         "name": "Gereinigtes Wasser"
       },
       "purifier_liquid": {
-        "name": "Reinigerfl\u00fcssigkeit"
+        "name": "Reinigerflüssigkeit"
       },
       "raw_distribution_data": {
         "name": "Rohverteilungsdaten"
@@ -400,7 +400,7 @@
         "name": "Batterie Smart Spray"
       },
       "spray_deodorant_liquid": {
-        "name": "Spray Desodorierer Fl\u00fcssigkeit"
+        "name": "Spray Desodorierer Flüssigkeit"
       },
       "switch": {
         "auto_clean": {
@@ -440,13 +440,13 @@
           "name": "Anzeige"
         },
         "do_not_disturb": {
-          "name": "Nicht st\u00f6ren"
+          "name": "Nicht stören"
         },
         "feed_sound": {
-          "name": "F\u00fctterungsger\u00e4usch"
+          "name": "Fütterungsgeräusch"
         },
         "feed_tone": {
-          "name": "F\u00fctterungston"
+          "name": "Fütterungston"
         },
         "highlight": {
           "name": "Haustierverfolgung hervorheben"
@@ -455,10 +455,10 @@
           "name": "Kontrollleuchte"
         },
         "kitten_mode": {
-          "name": "K\u00e4tzchenmodus"
+          "name": "Kätzchenmodus"
         },
         "lack_liquid_notify": {
-          "name": "Benachrichtigung bei Reinigerfl\u00fcssigkeitsmangel"
+          "name": "Benachrichtigung bei Reinigerflüssigkeitsmangel"
         },
         "lack_sand_notify": {
           "name": "Benachrichtigung bei Streumangel"
@@ -467,7 +467,7 @@
           "name": "Geringes Gewicht"
         },
         "litter_full_notify": {
-          "name": "Benachrichtigung bei vollem Abfallbeh\u00e4lter"
+          "name": "Benachrichtigung bei vollem Abfallbehälter"
         },
         "low_battery_notif": {
           "name": "Benachrichtigung bei niedrigem Batteriestand"
@@ -503,13 +503,13 @@
           "name": "Strom"
         },
         "refill_notif": {
-          "name": "Benachrichtigung bei Nachf\u00fcllbedarf"
+          "name": "Benachrichtigung bei Nachfüllbedarf"
         },
         "shortage_alarm": {
           "name": "Mangelalarm"
         },
         "surplus_control": {
-          "name": "\u00dcberschusskontrolle"
+          "name": "Überschusskontrolle"
         },
         "system_notification": {
           "name": "Systemton"
@@ -524,28 +524,28 @@
           "name": "Abdeckung des Abfalls"
         },
         "work_log_notify": {
-          "name": "Benachrichtigung bei Ausf\u00fchrung geplanter Aufgaben"
+          "name": "Benachrichtigung bei Ausführung geplanter Aufgaben"
         },
         "work_notify": {
-          "name": "Benachrichtigung bei Ger\u00e4tereinigung"
+          "name": "Benachrichtigung bei Gerätereinigung"
         }
       },
       "text": {
         "manual_feed_dual_h1": {
-          "name": "Manuelle F\u00fctterung Beh\u00e4lter 1"
+          "name": "Manuelle Fütterung Behälter 1"
         },
         "manual_feed_dual_h2": {
-          "name": "Manuelle F\u00fctterung Beh\u00e4lter 2"
+          "name": "Manuelle Fütterung Behälter 2"
         },
         "manual_feed_single": {
-          "name": "Manuelle F\u00fctterung"
+          "name": "Manuelle Fütterung"
         }
       },
       "times_dispensed": {
         "name": "Anzahl der Ausgaben"
       },
       "times_eaten": {
-        "name": "Anzahl der Fressvorg\u00e4nge"
+        "name": "Anzahl der Fressvorgänge"
       },
       "times_used": {
         "name": "Anzahl der Benutzungen"
@@ -554,10 +554,10 @@
         "name": "Gesamt ausgegeben"
       },
       "total_dispensed_hopper_1": {
-        "name": "Gesamt ausgegeben Beh\u00e4lter 1"
+        "name": "Gesamt ausgegeben Behälter 1"
       },
       "total_dispensed_hopper_2": {
-        "name": "Gesamt ausgegeben Beh\u00e4lter 2",
+        "name": "Gesamt ausgegeben Behälter 2",
         "total_package": {
           "name": "Gesamtpackung"
         },
@@ -565,14 +565,75 @@
           "name": "Gesamt geplant"
         },
         "total_planned_hopper_1": {
-          "name": "Gesamt geplant Beh\u00e4lter 1"
+          "name": "Gesamt geplant Behälter 1"
         },
         "total_planned_hopper_2": {
-          "name": "Gesamt geplant Beh\u00e4lter 2"
+          "name": "Gesamt geplant Behälter 2"
         },
         "total_time": {
           "name": "Gesamtnutzung"
         }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "always_on_stream": "Dauerhafter Rebroadcast",
+          "region": "Region",
+          "time_zone": "Zeitzone"
+        },
+        "data_description": {
+          "always_on_stream": "Hält die interne Rebroadcast-Sitzung vorgewärmt, damit Browser, WHEP-Clients und Stream-Verbraucher schnell verbinden können. Der Rebroadcast-Stream kann auch von anderen Verbrauchern genutzt werden. Dadurch bleibt eine Upstream-Sitzung aktiv und verbraucht mehr Geräte- und Cloud-Ressourcen."
+        },
+        "sections": {
+          "bluetooth_options": {
+            "data": {
+              "ble_relay_enabled": "Bluetooth-Relay aktivieren",
+              "scan_interval_bluetooth": "Bluetooth-Aktualisierungsintervall (Minuten)"
+            },
+            "data_description": {
+              "ble_relay_enabled": "Wenn deaktiviert, werden Brunnenaktualisierungen nur ausgeführt, wenn das Gerät über die App aktualisiert wird."
+            },
+            "description": "Diese Optionen sind nur wirksam, wenn Sie einen Brunnen und mindestens ein Gerät haben, das als Bluetooth-Relay fungieren kann (z.B. Futterautomat, Katzenklo). Weitere Informationen finden Sie in der Petkit-App.",
+            "name": "Bluetooth-Optionen"
+          },
+          "local_ble_options": {
+            "data": {
+              "local_ble_enabled": "Lokales Bluetooth aktivieren",
+              "local_ble_fountains": "Brunnen (Liste von {{\"mac\": \"XX:XX:XX:XX:XX:XX\", \"name\": \"Mein Brunnen\"}})",
+              "local_ble_debug_log": "Debug-Protokoll aktivieren (petkit.log)"
+            },
+            "data_description": {
+              "local_ble_enabled": "Verbindet sich direkt über Bluetooth mit Ihrem Brunnen (lokaler Adapter oder ESPHome Bluetooth-Proxy). Kein Petkit-Konto-Relay-Gerät erforderlich.",
+              "local_ble_fountains": "Liste der Brunnen, die über lokales BLE abgefragt werden. Jeder Eintrag muss einen 'mac'-Schlüssel und optional einen 'name'-Schlüssel enthalten.",
+              "local_ble_debug_log": "Schreibt detaillierte BLE-Debug-Informationen in /config/petkit.log. Deaktivieren wenn nicht benötigt, um Schreibvorgänge zu reduzieren."
+            },
+            "description": "Direkte Bluetooth-Verbindung zu Ihrem Brunnen. Funktioniert mit lokalen Bluetooth-Adaptern und ESPHome Bluetooth-Proxys.",
+            "name": "Lokale Bluetooth-Optionen"
+          },
+          "medias_options": {
+            "data": {
+              "delete_media_after": "Medien löschen nach (Tagen)",
+              "media_dl_image": "Bilder abrufen",
+              "media_dl_video": "Videos abrufen",
+              "media_ev_type": "Ereignistyp für Download",
+              "media_path": "Medienpfad",
+              "scan_interval_media": "Medien-Aktualisierungsintervall (Minuten)"
+            },
+            "data_description": {
+              "delete_media_after": "Heruntergeladene Medien nach der angegebenen Anzahl von Tagen löschen. (0 = niemals löschen)",
+              "media_dl_image": "Alle Bilder von Ihren Geräten herunterladen, gefiltert nach den unten ausgewählten Ereignissen (kein aktives Care+-Abonnement erforderlich).",
+              "media_dl_video": "Alle Videos von Ihren Geräten herunterladen, gefiltert nach den unten ausgewählten Ereignissen. (erfordert ein aktives Care+-Abonnement)",
+              "media_path": "Pfad, in dem die Medien gespeichert werden. Wenn nicht angegeben, werden die Medien im Ordner /media von Home Assistant gespeichert.",
+              "scan_interval_media": "Intervall für das Herunterladen neuer Medien (Bilder und Videos) von Petkits Servern."
+            },
+            "description": "Diese Optionen sind nur wirksam, wenn Sie mindestens ein Gerät haben (z.B. Futterautomat, Katzenklo), das Bilder und Videos aufnehmen kann.",
+            "name": "Medienoptionen"
+          }
+        },
+        "title": "Petkit-Integrationskonfiguration"
       }
     }
   }

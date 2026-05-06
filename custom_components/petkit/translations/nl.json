@@ -795,6 +795,20 @@
             "description": "Deze opties zijn alleen effectief als u een fontein heeft en ten minste één apparaat dat als bluetooth-relay kan fungeren (bijv. voederautomaat, kattenbak). Raadpleeg de Petkit-app voor meer informatie.",
             "name": "Bluetooth-opties"
           },
+          "local_ble_options": {
+            "data": {
+              "connection_mode": "Verbindingsmodus",
+              "local_ble_fountains": "Fonteinen",
+              "local_ble_debug_log": "Debug log inschakelen (petkit.log)"
+            },
+            "data_description": {
+              "connection_mode": "Cloud only: alle status via Petkit-account + relay (standaard). BLE only: directe Bluetooth, geen dagelijkse cloud-aanroepen. Auto: hybride — BLE wordt voorkeur, cloud als fallback. Auto vereist dat het apparaat eerst is gekoppeld in de Petkit-app zodat het apparaat-geheim kan worden gecached.",
+              "local_ble_fountains": "Lijst met fonteinen die via lokaal BLE worden gepolld. Geef een YAML-lijst op waarbij elk item een `mac` (verplicht, het Bluetooth-adres van de fontein zoals getoond in de Petkit-app of uw BLE-scanner) en optioneel een `name` bevat. Voorbeeld:\n```yaml\n- mac: AA:BB:CC:DD:EE:FF\n  name: Fontein woonkamer\n- mac: 11:22:33:44:55:66\n  name: Fontein keuken\n```",
+              "local_ble_debug_log": "Schrijf gedetailleerde BLE-debug-informatie naar /config/petkit.log. Schakel uit als het niet nodig is om schrijfbewerkingen te verminderen."
+            },
+            "description": "Directe Bluetooth-verbinding met uw fontein. Werkt met lokale Bluetooth-adapters en ESPHome Bluetooth-proxy's.",
+            "name": "Lokale Bluetooth-opties"
+          },
           "medias_options": {
             "data": {
               "delete_media_after": "Media verwijderen na (dagen)",
@@ -830,6 +844,13 @@
     }
   },
   "selector": {
+    "petkit_connection_mode": {
+      "options": {
+        "auto": "Auto (hybride: BLE voorkeur, cloud als fallback)",
+        "ble_only": "Alleen BLE (geen dagelijkse cloud-aanroepen)",
+        "cloud_only": "Alleen cloud (standaard)"
+      }
+    },
     "petkit_notification_category": {
       "options": {
         "feeder_error": "Voederautomaat — apparaatfout",

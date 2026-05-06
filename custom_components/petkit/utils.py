@@ -1,10 +1,61 @@
 """Util functions for the Petkit integration."""
 
+from __future__ import annotations
+
+from collections.abc import Mapping
 from datetime import datetime
+from typing import Any
 
 from pypetkitapi import LitterRecord, RecordsItems, WorkState
 
-from .const import EVENT_MAPPING, LOGGER
+from .const import (
+    CONF_CONNECTION_MODE,
+    CONF_LOCAL_BLE_ENABLED,
+    DEFAULT_CONNECTION_MODE,
+    DEFAULT_LOCAL_BLE_ENABLED,
+    EVENT_MAPPING,
+    LOCAL_BLE_SECTION,
+    LOGGER,
+    MODE_AUTO,
+    MODE_BLE_ONLY,
+    MODE_CLOUD_ONLY,
+)
+
+
+def normalize_mac(value: Any) -> str:
+    """Normalize a BLE MAC address for case-/separator-insensitive compare.
+
+    Returns lowercase hex with all ``:`` and ``-`` separators removed.
+    Empty / None inputs return an empty string. The caller must guard
+    against empty results before using the value as a lookup key.
+    """
+    if not value:
+        return ""
+    return str(value).lower().replace(":", "").replace("-", "")
+
+
+def resolve_connection_mode(options: Mapping[str, Any] | None) -> str:
+    """Return the active connection mode for an entry's options payload.
+
+    Falls back to the legacy boolean ``CONF_LOCAL_BLE_ENABLED`` for entries
+    that have not yet been migrated to ``CONF_CONNECTION_MODE``:
+
+    * ``True`` -> :data:`MODE_AUTO` (matches Jezza34000's hybrid intent)
+    * ``False`` -> :data:`MODE_CLOUD_ONLY`
+    """
+    section = (options or {}).get(LOCAL_BLE_SECTION, {}) or {}
+    mode = section.get(CONF_CONNECTION_MODE)
+    if mode in (MODE_CLOUD_ONLY, MODE_BLE_ONLY, MODE_AUTO):
+        return mode
+    enabled = section.get(CONF_LOCAL_BLE_ENABLED, DEFAULT_LOCAL_BLE_ENABLED)
+    if enabled:
+        return MODE_AUTO
+    return DEFAULT_CONNECTION_MODE
+
+
+def is_local_ble_active(options: Mapping[str, Any] | None) -> bool:
+    """Return True when the resolved connection mode uses local BLE."""
+    return resolve_connection_mode(options) in (MODE_BLE_ONLY, MODE_AUTO)
 
 
 def map_work_state(work_state: WorkState | None) -> str:

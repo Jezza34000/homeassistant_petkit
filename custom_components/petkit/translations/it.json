@@ -1,9 +1,9 @@
 {
   "config": {
     "error": {
-      "account_exists": "Questo account esiste gi\u00e0.",
+      "account_exists": "Questo account esiste già.",
       "connection": "Impossibile connettersi al server.",
-      "unknown": "Si \u00e8 verificato un errore sconosciuto, controlla i log."
+      "unknown": "Si è verificato un errore sconosciuto, controlla i log."
     },
     "step": {
       "user": {
@@ -171,16 +171,16 @@
         "name": "Intervallo anti-ripetizione pulizia"
       },
       "eat_detection_sensitivity": {
-        "name": "Sensibilit\u00e0 rilevamento IA pasto"
+        "name": "Sensibilità rilevamento IA pasto"
       },
       "litter_type": {
         "name": "Tipo lettiera"
       },
       "move_detection_sensitivity": {
-        "name": "Sensibilit\u00e0 rilevamento movimento"
+        "name": "Sensibilità rilevamento movimento"
       },
       "pet_detection_sensitivity": {
-        "name": "Sensibilit\u00e0 rilevamento IA animale"
+        "name": "Sensibilità rilevamento IA animale"
       },
       "surplus_level": {
         "name": "Livello controllo surplus"
@@ -191,7 +191,7 @@
         "name": "Aria purificata"
       },
       "amount_eaten": {
-        "name": "Quantit\u00e0 mangiata"
+        "name": "Quantità mangiata"
       },
       "average_time": {
         "name": "Uso medio"
@@ -478,7 +478,7 @@
         "name": "Luce indicatore"
       },
       "kitten_mode": {
-        "name": "Modalit\u00e0 gattino"
+        "name": "Modalità gattino"
       },
       "lack_liquid_notify": {
         "name": "Notifica mancanza liquido purificante"
@@ -547,7 +547,7 @@
         "name": "Copertura rifiuti"
       },
       "work_log_notify": {
-        "name": "Notifica esecuzione attivit\u00e0 programmate"
+        "name": "Notifica esecuzione attività programmate"
       },
       "work_notify": {
         "name": "Notifica pulizia dispositivo"
@@ -567,12 +567,62 @@
   },
   "options": {
     "step": {
-      "petkit_options": {
+      "init": {
         "data": {
-          "polling_interval": "Intervallo di polling (secondi)",
+          "always_on_stream": "Ritrasmissione sempre attiva",
           "region": "Regione",
-          "timezone": "Fuso orario"
-        }
+          "time_zone": "Fuso orario"
+        },
+        "data_description": {
+          "always_on_stream": "Mantiene la sessione di ritrasmissione interna preriscaldata in modo che i browser, i client WHEP e i consumatori di stream possano connettersi rapidamente. Lo stream di ritrasmissione può essere riutilizzato anche da altri consumatori. Mantiene attiva una sessione upstream e utilizza più risorse del dispositivo e del cloud."
+        },
+        "sections": {
+          "bluetooth_options": {
+            "data": {
+              "ble_relay_enabled": "Abilita relay Bluetooth",
+              "scan_interval_bluetooth": "Intervallo di aggiornamento Bluetooth (minuti)"
+            },
+            "data_description": {
+              "ble_relay_enabled": "Se disabilitato, gli aggiornamenti della fontana avverranno solo quando il dispositivo viene aggiornato tramite l'app."
+            },
+            "description": "Queste opzioni sono efficaci solo se si dispone di una fontana e di almeno un dispositivo che può fungere da relay Bluetooth (ad es. distributore, lettiera). Per maggiori informazioni consultare l'app Petkit.",
+            "name": "Opzioni Bluetooth"
+          },
+          "local_ble_options": {
+            "data": {
+              "local_ble_enabled": "Abilita Bluetooth locale",
+              "local_ble_fountains": "Fontane (elenco di {{\"mac\": \"XX:XX:XX:XX:XX:XX\", \"name\": \"La Mia Fontana\"}})",
+              "local_ble_debug_log": "Abilita registro di debug (petkit.log)"
+            },
+            "data_description": {
+              "local_ble_enabled": "Si connette direttamente alla fontana tramite Bluetooth (adattatore locale o proxy Bluetooth ESPHome). Non richiede un dispositivo relay dell'account Petkit.",
+              "local_ble_fountains": "Elenco delle fontane da interrogare tramite BLE locale. Ogni voce deve contenere una chiave 'mac' e opzionalmente una chiave 'name'.",
+              "local_ble_debug_log": "Scrive informazioni di debug BLE dettagliate in /config/petkit.log. Disabilitare quando non necessario per ridurre le scritture su disco."
+            },
+            "description": "Connessione Bluetooth diretta alla fontana. Funziona con adattatori Bluetooth locali e proxy Bluetooth ESPHome.",
+            "name": "Opzioni Bluetooth locale"
+          },
+          "medias_options": {
+            "data": {
+              "delete_media_after": "Elimina media dopo (giorni)",
+              "media_dl_image": "Scarica immagini",
+              "media_dl_video": "Scarica video",
+              "media_ev_type": "Tipo di evento per il download",
+              "media_path": "Percorso media",
+              "scan_interval_media": "Intervallo di aggiornamento media (minuti)"
+            },
+            "data_description": {
+              "delete_media_after": "Elimina i media scaricati dopo il numero di giorni specificato. (0 = non eliminare mai)",
+              "media_dl_image": "Scarica tutte le immagini dai tuoi dispositivi, filtrate per gli eventi selezionati di seguito (nessun abbonamento Care+ attivo richiesto).",
+              "media_dl_video": "Scarica tutti i video dai tuoi dispositivi, filtrati per gli eventi selezionati di seguito. (richiede un abbonamento Care+ attivo)",
+              "media_path": "Percorso in cui verranno archiviati i media. Se non specificato, i media verranno archiviati nella cartella /media di Home Assistant.",
+              "scan_interval_media": "Intervallo per il download di nuovi media (immagini e video) dai server Petkit."
+            },
+            "description": "Queste opzioni sono efficaci solo se si dispone di almeno un dispositivo (ad es. distributore, lettiera) in grado di acquisire immagini e video.",
+            "name": "Opzioni media"
+          }
+        },
+        "title": "Configurazione integrazione Petkit"
       }
     }
   }

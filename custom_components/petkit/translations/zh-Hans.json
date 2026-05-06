@@ -776,12 +776,12 @@
     "step": {
       "init": {
         "data": {
-          "always_on_stream": "常开转播流",
-          "region": "区域",
+          "always_on_stream": "持续重播",
+          "region": "地区",
           "time_zone": "时区"
         },
         "data_description": {
-          "always_on_stream": "保持内部转播会话处于预热状态，让浏览器观看、WHEP 客户端以及此摄像头的通用流消费者都能更快连接。该转播流也可以被其他消费者复用。这样会持续维持一个上游会话，并占用更多设备和云端资源。"
+          "always_on_stream": "保持内部重播会话预热状态，以便浏览器、WHEP 客户端和通用流媒体消费者能够快速连接。重播流还可被其他消费者复用。这会保持一个上游会话活跃，并使用更多设备和云资源。"
         },
         "sections": {
           "bluetooth_options": {
@@ -790,32 +790,46 @@
               "scan_interval_bluetooth": "蓝牙刷新间隔（分钟）"
             },
             "data_description": {
-              "ble_relay_enabled": "禁用后，只有在通过应用程序刷新设备时才会进行饮水机数据更新。"
+              "ble_relay_enabled": "如果禁用，饮水机更新仅在通过应用刷新设备时发生。"
             },
-            "description": "这些选项只有在您有饮水机和至少一个可用作蓝牙中继的设备（如喂食器、猫砂盆）时才有效。有关详细信息请参阅小佩应用程序。",
+            "description": "仅当您拥有饮水机且至少有一台可充当蓝牙中继的设备（如喂食器、猫砂盆）时，这些选项才有效。请参阅 Petkit 应用了解更多信息。",
             "name": "蓝牙选项"
+          },
+          "local_ble_options": {
+            "data": {
+              "local_ble_enabled": "启用本地蓝牙",
+              "local_ble_fountains": "饮水机（列表格式 {{\"mac\": \"XX:XX:XX:XX:XX:XX\", \"name\": \"我的饮水机\"}}）",
+              "local_ble_debug_log": "启用调试日志 (petkit.log)"
+            },
+            "data_description": {
+              "local_ble_enabled": "通过蓝牙直接连接到饮水机（本地适配器或 ESPHome 蓝牙代理）。无需 Petkit 账户中继设备。",
+              "local_ble_fountains": "通过本地 BLE 轮询的饮水机列表。每个条目必须包含 'mac' 键，可选包含 'name' 键。",
+              "local_ble_debug_log": "将详细的 BLE 调试信息写入 /config/petkit.log。不需要时请禁用以减少磁盘写入。"
+            },
+            "description": "直接通过蓝牙连接到饮水机。支持本地蓝牙适配器和 ESPHome 蓝牙代理。",
+            "name": "本地蓝牙选项"
           },
           "medias_options": {
             "data": {
-              "delete_media_after": "在指定时间之后删除媒体（天数）",
+              "delete_media_after": "删除媒体后（天）",
               "media_dl_image": "获取图片",
               "media_dl_video": "获取视频",
-              "media_ev_type": "要下载的事件类型",
+              "media_ev_type": "下载的事件类型",
               "media_path": "媒体路径",
               "scan_interval_media": "媒体刷新间隔（分钟）"
             },
             "data_description": {
-              "delete_media_after": "在指定天数后删除下载的媒体。(0 = 永不删除）",
-              "media_dl_image": "从您的设备下载所有图片，按以下选定的事件进行筛选。（无需 Care+ 订阅）",
-              "media_dl_video": "从您的设备下载所有视频，按以下选定的事件进行筛选。（需要激活 Care+ 订阅）",
-              "media_path": "媒体存储的路径。如果未指定，媒体将存储在 Home Assistant 的 /media 文件夹中。",
-              "scan_interval_media": "从小佩服务器下载新媒体（图片和视频）的时间间隔。"
+              "delete_media_after": "在指定天数后删除已下载的媒体。（0 = 永不删除）",
+              "media_dl_image": "从您的设备下载所有图片，按以下所选事件过滤（无需有效的 Care+ 订阅）。",
+              "media_dl_video": "从您的设备下载所有视频，按以下所选事件过滤。（需要有效的 Care+ 订阅）",
+              "media_path": "媒体文件存储路径。如未指定，媒体将存储在 Home Assistant 的 /media 文件夹中。",
+              "scan_interval_media": "从 Petkit 服务器下载新媒体（图片和视频）的间隔时间。"
             },
-            "description": "这些选项只有在您至少有一个能够捕捉图像和视频的设备（如喂食器、猫砂盆）时才有效。",
+            "description": "仅当您至少有一台能够拍摄图片和视频的设备（如喂食器、猫砂盆）时，这些选项才有效。",
             "name": "媒体选项"
           }
         },
-        "title": "小佩集成配置"
+        "title": "Petkit 集成配置"
       }
     }
   }

@@ -331,3 +331,175 @@ class PetkitBluetoothUpdateCoordinator(DataUpdateCoordinator):
             return True
         LOGGER.debug("Bluetooth connection for device id = %s failed", device_id)
         return False
+
+
+class PetkitLocalBleCoordinator(DataUpdateCoordinator):
+    """Coordinator for direct (local) BLE communication with PetKit fountains.
+
+    Polls each configured fountain over direct Bluetooth at a fixed interval.
+    Updates the WaterFountain entity data in the main data coordinator so that
+    existing entities automatically reflect BLE-sourced state without needing
+    separate BLE-specific entities.
+    """
+
+    def __init__(
+        self,
+        hass,
+        logger,
+        name,
+        update_interval,
+        config_entry,
+        data_coordinator: PetkitDataUpdateCoordinator,
+    ):
+        """Initialize the local BLE coordinator."""
+
+        super().__init__(
+            hass,
+            logger,
+            name=name,
+            update_interval=update_interval,
+            config_entry=config_entry,
+        )
+        self.config = config_entry
+        self.data_coordinator = data_coordinator
+
+    async def _async_update_data(self) -> dict[str, Any]:
+        """Poll all configured local BLE fountains and update entity data."""
+        from .const import (
+            BLE_CONNECT_GRACE_SECONDS,
+            CONF_BLE_SECRETS,
+            CONF_LOCAL_BLE_DEBUG,
+            CONF_LOCAL_BLE_FOUNTAINS,
+            DEFAULT_LOCAL_BLE_DEBUG,
+            LOCAL_BLE_SECTION,
+        )
+        from .fountain_ble import FountainBleClient, LocalFountainBleProtocol
+        from .utils import is_local_ble_active, normalize_mac
+
+        if not is_local_ble_active(self.config.options):
+            LOGGER.debug("Local BLE is disabled by configuration (cloud_only mode)")
+            return {}
+
+        ble_section = self.config.options.get(LOCAL_BLE_SECTION, {})
+        debug_log: bool = ble_section.get(CONF_LOCAL_BLE_DEBUG, DEFAULT_LOCAL_BLE_DEBUG)
+        fountains: list[dict] = ble_section.get(CONF_LOCAL_BLE_FOUNTAINS, [])
+        # Per-device BLE secret cache (Jezza34000 PR #203 design 2026-05-02).
+        secrets_cache: dict[str, str] = dict(self.config.data.get(CONF_BLE_SECRETS, {}))
+        results: dict[str, Any] = {}
+
+        def _make_persist_cb(self_ref: PetkitLocalBleCoordinator) -> Any:
+            async def _persist(mac: str, secret_hex: str) -> None:
+                key = normalize_mac(mac) or mac
+                if secrets_cache.get(key) == secret_hex:
+                    return
+                secrets_cache[key] = secret_hex
+                new_data = {
+                    **self_ref.config.data,
+                    CONF_BLE_SECRETS: dict(secrets_cache),
+                }
+                self_ref.hass.config_entries.async_update_entry(
+                    self_ref.config, data=new_data
+                )
+
+            return _persist
+
+        persist_cb = _make_persist_cb(self)
+
+        for fountain_cfg in fountains:
+            mac: str = fountain_cfg.get("mac", "")
+            name: str = fountain_cfg.get("name", mac)
+            if not mac:
+                continue
+            cached_hex = secrets_cache.get(normalize_mac(mac) or mac)
+            cached_secret: list[int] | None = None
+            if cached_hex:
+                try:
+                    cached_secret = list(bytes.fromhex(cached_hex))
+                    if len(cached_secret) != 8:
+                        cached_secret = None
+                except ValueError:
+                    cached_secret = None
+            try:
+                client = FountainBleClient(
+                    self.hass,
+                    mac,
+                    name,
+                    debug_log=debug_log,
+                    cached_secret=cached_secret,
+                    secret_persist_cb=persist_cb,
+                    connect_grace_seconds=BLE_CONNECT_GRACE_SECONDS,
+                )
+                status = await client.async_get_status()
+                if status is None:
+                    LOGGER.warning("No BLE status received from %s (%s)", name, mac)
+                    continue
+                self._apply_ble_update_to_entities(
+                    mac, name, status, results, LocalFountainBleProtocol
+                )
+            except Exception as err:  # noqa: BLE001
+                LOGGER.error("Local BLE poll failed for %s (%s): %s", name, mac, err)
+
+        if results:
+            # Notify all entities subscribed to the main data coordinator so
+            # they pick up the in-place BLE changes without waiting for the
+            # next cloud poll.
+            self.data_coordinator.async_update_listeners()
+
+        return results
+
+    def _apply_ble_update_to_entities(
+        self,
+        mac: str,
+        name: str,
+        status: dict[str, Any],
+        results: dict[str, Any],
+        protocol_cls: Any,
+    ) -> None:
+        """Find the matching WaterFountain entity and apply BLE status to it.
+
+        MAC compare is case- and separator-insensitive: the user-typed value
+        in options (e.g. ``A4:C1:38:99:18:D4``) must match the canonical
+        device representation (``a4c1389918d4``). (fredrik-lindseth, PR #203
+        follow-up #2.)
+        """
+        from pypetkitapi import WaterFountain
+
+        from .utils import normalize_mac
+
+        target = normalize_mac(mac)
+        if not target:
+            return
+
+        for device in self.config.runtime_data.client.petkit_entities.values():
+            if not isinstance(device, WaterFountain):
+                continue
+            for attr in ("ble_mac", "mac"):
+                dev_mac = normalize_mac(getattr(device, attr, None))
+                if dev_mac and dev_mac == target:
+                    protocol_cls.update_water_fountain(device, status)
+                    results[mac] = status
+                    LOGGER.debug("Local BLE update applied for %s (%s)", name, mac)
+                    self._bump_last_ble_connection(device)
+                    return
+
+        # No matched entity — store raw status anyway
+        results[mac] = status
+
+    def _bump_last_ble_connection(self, device: Any) -> None:
+        """Mirror successful local-BLE poll into the cloud-relay coordinator.
+
+        ``sensor.last_ble_connection`` reads ``coordinator_bluetooth.data``,
+        which only the cloud-relay coordinator writes. Bumping the same dict
+        from the local-BLE path keeps that sensor accurate regardless of
+        which path delivered the latest update. (fredrik-lindseth, PR #203
+        follow-up #3.)
+        """
+        runtime = getattr(self.config, "runtime_data", None)
+        cb_coord = getattr(runtime, "coordinator_bluetooth", None) if runtime else None
+        if cb_coord is None:
+            return
+        ts_dict = getattr(cb_coord, "last_update_timestamps", None)
+        if ts_dict is None:
+            return
+        ts_dict[device.id] = datetime.now(timezone.utc)
+        cb_coord.async_set_updated_data(ts_dict)

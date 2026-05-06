@@ -23,27 +23,37 @@ from homeassistant.loader import async_get_loaded_integration
 
 from .const import (
     BT_SECTION,
+    CONF_BLE_SECRETS,
+    CONF_CONNECTION_MODE,
     CONF_ENABLED_NOTIFICATIONS,
+    CONF_LOCAL_BLE_ENABLED,
     CONF_SCAN_INTERVAL_BLUETOOTH,
     CONF_SCAN_INTERVAL_MEDIA,
     COORDINATOR,
     COORDINATOR_BLUETOOTH,
+    COORDINATOR_LOCAL_BLE,
     COORDINATOR_MEDIA,
+    DEFAULT_CONNECTION_MODE,
     DEFAULT_ENABLED_NOTIFICATIONS,
+    DEFAULT_LOCAL_BLE_POLL_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    LOCAL_BLE_SECTION,
     LOGGER,
     MEDIA_SECTION,
+    MODE_AUTO,
     NOTIFICATION_SECTION,
 )
 from .coordinator import (
     PetkitBluetoothUpdateCoordinator,
     PetkitDataUpdateCoordinator,
+    PetkitLocalBleCoordinator,
     PetkitMediaUpdateCoordinator,
 )
 from .data import PetkitData
 from .iot_mqtt import PetkitIotMqttListener
 from .notifications import PetkitNotificationManager
+from .utils import is_local_ble_active
 from .whep_proxy import (
     PetkitDirectWhepProxySessionView,
     PetkitDirectWhepProxyView,
@@ -222,6 +232,20 @@ async def async_setup_entry(
         config_entry=entry,
         data_coordinator=coordinator,
     )
+
+    # Local (direct) BLE coordinator — only created when user has enabled
+    # local BLE via the new connection_mode option (or legacy boolean).
+    local_ble_enabled = is_local_ble_active(entry.options)
+    coordinator_local_ble: PetkitLocalBleCoordinator | None = None
+    if local_ble_enabled:
+        coordinator_local_ble = PetkitLocalBleCoordinator(
+            hass=hass,
+            logger=LOGGER,
+            name=f"{DOMAIN}.local_ble",
+            update_interval=timedelta(seconds=DEFAULT_LOCAL_BLE_POLL_INTERVAL),
+            config_entry=entry,
+            data_coordinator=coordinator,
+        )
     entry.runtime_data = PetkitData(
         client=PetKitClient(
             username=entry.data[CONF_USERNAME],
@@ -239,6 +263,14 @@ async def async_setup_entry(
     await coordinator.async_config_entry_first_refresh()
     await coordinator_media.async_config_entry_first_refresh()
     await coordinator_bluetooth.async_config_entry_first_refresh()
+    if local_ble_enabled and coordinator_local_ble is not None:
+        await coordinator_local_ble.async_config_entry_first_refresh()
+        # PetkitLocalBleCoordinator pushes through the main coordinator's
+        # async_update_listeners(); it has no entities subscribed directly.
+        # HA only schedules subsequent refreshes while the listener list is
+        # non-empty, so we attach a no-op listener to keep polling alive.
+        # (fredrik-lindseth, PR #203 follow-up #1.)
+        entry.async_on_unload(coordinator_local_ble.async_add_listener(lambda: None))
 
     # MQTT
 
@@ -270,8 +302,9 @@ async def async_setup_entry(
         hass.data[DOMAIN] = {}
 
     hass.data[DOMAIN][COORDINATOR] = coordinator
-    hass.data[DOMAIN][COORDINATOR_MEDIA] = coordinator
-    hass.data[DOMAIN][COORDINATOR_BLUETOOTH] = coordinator
+    hass.data[DOMAIN][COORDINATOR_MEDIA] = coordinator_media
+    hass.data[DOMAIN][COORDINATOR_BLUETOOTH] = coordinator_bluetooth
+    hass.data[DOMAIN][COORDINATOR_LOCAL_BLE] = coordinator_local_ble
 
     # Register services (idempotent — only registers once per domain)
     if not hass.services.has_service(DOMAIN, SERVICE_SET_FEEDING_SCHEDULE):
@@ -298,6 +331,16 @@ async def async_unload_entry(
     mqtt_listener = getattr(entry.runtime_data, "mqtt_listener", None)
     if mqtt_listener is not None:
         await mqtt_listener.async_stop()
+
+    # Tear down the local BLE coordinator so toggling local BLE in options
+    # takes effect without a full HA restart (fredrik-lindseth, PR #203
+    # follow-up #4). Without this, the old coordinator keeps polling its
+    # scheduled refresh while async_setup_entry creates a new one.
+    domain_data = hass.data.get(DOMAIN, {})
+    local_ble_coord = domain_data.get(COORDINATOR_LOCAL_BLE)
+    if local_ble_coord is not None:
+        await local_ble_coord.async_shutdown()
+        domain_data[COORDINATOR_LOCAL_BLE] = None
 
     await async_cleanup_whep_proxy_sessions(hass)
 
@@ -333,6 +376,30 @@ async def async_migrate_entry(hass: HomeAssistant, entry: PetkitConfigEntry) -> 
         )
         new_options[NOTIFICATION_SECTION] = section
         hass.config_entries.async_update_entry(entry, options=new_options, version=8)
+
+    if entry.version < 9:
+        # PR #203: replace the legacy local_ble_enabled boolean with the new
+        # connection_mode select (cloud_only / ble_only / auto). Per
+        # Jezza34000's design comment (2026-05-02), the boolean's previous
+        # "True" semantics map to "auto" (hybrid: BLE preferred, cloud
+        # fallback) so existing setups keep working without manual edits.
+        # Also seed an empty per-device BLE secret cache in entry.data; it is
+        # populated lazily on the first successful CMD 86 handshake.
+        new_options = dict(entry.options)
+        ble_section = dict(new_options.get(LOCAL_BLE_SECTION, {}))
+        if CONF_CONNECTION_MODE not in ble_section:
+            legacy_enabled = ble_section.pop(CONF_LOCAL_BLE_ENABLED, False)
+            ble_section[CONF_CONNECTION_MODE] = (
+                MODE_AUTO if legacy_enabled else DEFAULT_CONNECTION_MODE
+            )
+        new_options[LOCAL_BLE_SECTION] = ble_section
+
+        new_data = dict(entry.data)
+        new_data.setdefault(CONF_BLE_SECRETS, {})
+
+        hass.config_entries.async_update_entry(
+            entry, data=new_data, options=new_options, version=9
+        )
 
     return True
 
