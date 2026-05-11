@@ -35,6 +35,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.selector import BooleanSelector, BooleanSelectorConfig
 
 from .const import (
+    ADVANCED_POLLING_SECTION,
     ADVANCED_SECTION,
     ALL_TIMEZONES_LST,
     BT_SECTION,
@@ -47,7 +48,10 @@ from .const import (
     CONF_MEDIA_EV_TYPE,
     CONF_MEDIA_PATH,
     CONF_SCAN_INTERVAL_BLUETOOTH,
+    CONF_SCAN_INTERVAL_DEFAULT,
     CONF_SCAN_INTERVAL_MEDIA,
+    CONF_SCAN_INTERVAL_SLOW,
+    CONF_SMART_POLLING_BOOST_DURATION,
     COUNTRY_TO_CODE_DICT,
     DEFAULT_BLUETOOTH_RELAY,
     DEFAULT_DELETE_AFTER,
@@ -56,13 +60,16 @@ from .const import (
     DEFAULT_ENABLED_NOTIFICATIONS,
     DEFAULT_EVENTS,
     DEFAULT_MEDIA_PATH,
+    DEFAULT_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL_BLUETOOTH,
     DEFAULT_SCAN_INTERVAL_MEDIA,
+    DEFAULT_SMART_POLLING_BOOST_DURATION,
     DOMAIN,
     LOGGER,
     MEDIA_SECTION,
     NOTIFICATION_CATEGORIES,
     NOTIFICATION_SECTION,
+    SCAN_INTERVAL_SLOW,
 )
 
 
@@ -188,6 +195,37 @@ class PetkitOptionsFlowHandler(OptionsFlow):
                         ),
                         {"collapsed": False},
                     ),
+                    vol.Required(ADVANCED_POLLING_SECTION): section(
+                        vol.Schema(
+                            {
+                                vol.Required(
+                                    CONF_SCAN_INTERVAL_SLOW,
+                                    default=self.config_entry.options.get(
+                                        ADVANCED_POLLING_SECTION, {}
+                                    ).get(CONF_SCAN_INTERVAL_SLOW, SCAN_INTERVAL_SLOW),
+                                ): vol.All(int, vol.Range(min=5, max=600)),
+                                vol.Required(
+                                    CONF_SCAN_INTERVAL_DEFAULT,
+                                    default=self.config_entry.options.get(
+                                        ADVANCED_POLLING_SECTION, {}
+                                    ).get(
+                                        CONF_SCAN_INTERVAL_DEFAULT,
+                                        DEFAULT_SCAN_INTERVAL,
+                                    ),
+                                ): vol.All(int, vol.Range(min=5, max=600)),
+                                vol.Required(
+                                    CONF_SMART_POLLING_BOOST_DURATION,
+                                    default=self.config_entry.options.get(
+                                        ADVANCED_POLLING_SECTION, {}
+                                    ).get(
+                                        CONF_SMART_POLLING_BOOST_DURATION,
+                                        DEFAULT_SMART_POLLING_BOOST_DURATION,
+                                    ),
+                                ): vol.All(int, vol.Range(min=5, max=300)),
+                            }
+                        ),
+                        {"collapsed": True},
+                    ),
                 }
             ),
         )
@@ -196,7 +234,7 @@ class PetkitOptionsFlowHandler(OptionsFlow):
 class PetkitFlowHandler(ConfigFlow, domain=DOMAIN):
     """Config flow for Petkit Smart Devices."""
 
-    VERSION = 8
+    VERSION = 9
 
     @staticmethod
     @callback
@@ -311,6 +349,13 @@ class PetkitFlowHandler(ConfigFlow, domain=DOMAIN):
                             NOTIFICATION_SECTION: {
                                 CONF_ENABLED_NOTIFICATIONS: list(
                                     DEFAULT_ENABLED_NOTIFICATIONS
+                                ),
+                            },
+                            ADVANCED_POLLING_SECTION: {
+                                CONF_SCAN_INTERVAL_SLOW: SCAN_INTERVAL_SLOW,
+                                CONF_SCAN_INTERVAL_DEFAULT: DEFAULT_SCAN_INTERVAL,
+                                CONF_SMART_POLLING_BOOST_DURATION: (
+                                    DEFAULT_SMART_POLLING_BOOST_DURATION
                                 ),
                             },
                         },
