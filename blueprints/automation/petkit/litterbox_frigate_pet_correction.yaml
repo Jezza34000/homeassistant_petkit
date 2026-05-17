@@ -11,8 +11,9 @@ blueprint:
     1. Setup frigate detection for cats, and train sub-labels for each cat, see
     [frigate custom object classification documentation](https://docs.frigate.video/configuration/custom_classification/object_classification).
 
-    **Note that the Frigate sub-label must exactly match (case-sensitive)
-    the name provided in the cat name to ID mapping.**
+    **Note that the Frigate sub-label should exactly match (case-sensitive)
+    the name provided in the cat name to ID mapping.** If you have existing sub-labels,
+    you can map them to the cat names in the optional frigate mapping.
 
     2. Create a text helper: `Settings -> Devices & Services -> Helpers ->
     Create Helper -> Text`.
@@ -97,6 +98,19 @@ blueprint:
             ```
           selector:
             object:
+        frigate_mapping:
+          name: Frigate mapping
+          description: |
+            An optional mapping of case-sensitive Frigate sub_labels to PetKit cat names.
+            Useful if your Frigate labels differ from the names in the ID mapping.
+
+            ```
+            Cat_mittens: Mittens
+            Cat_whiskers: Whiskers
+            ```
+          selector:
+            object:
+          default: {}
 
     notification:
       name: Notification
@@ -160,6 +174,7 @@ variables:
   name_helper: !input cat_name_helper
   time_helper: !input cat_timestamp_helper
   names: !input cat_id_mapping
+  frigate_mapping: !input frigate_mapping
 
   # litterbox
   delta: !input time_delta
@@ -201,7 +216,10 @@ actions:
             id: frigate_event
           # frigate saw a cat in our mapping, sanity check
           - condition: template
-            value_template: "{{ trigger.payload_json['after']['sub_label'] is not none and trigger.payload_json['after']['sub_label'][0] in names.keys() }}"
+            value_template: >-
+              {% set raw_label = trigger.payload_json['after']['sub_label'][0] if trigger.payload_json['after']['sub_label'] is not none else '' %}
+              {% set mapped_label = frigate_mapping[raw_label] if frigate_mapping is mapping and raw_label in frigate_mapping else raw_label %}
+              {{ mapped_label in names.keys() }}
           # detection was on the configured camera
           - condition: template
             value_template: "{{ camera == '' or trigger.payload_json['after']['camera'] == camera }}"
@@ -210,7 +228,10 @@ actions:
             target:
               entity_id: !input cat_name_helper
             data:
-              value: "{{ trigger.payload_json['after']['sub_label'][0] }}"
+              value: >-
+                {% set raw_label = trigger.payload_json['after']['sub_label'][0] if trigger.payload_json['after']['sub_label'] is not none else '' %}
+                {% set mapped_label = frigate_mapping[raw_label] if frigate_mapping is mapping and raw_label in frigate_mapping else raw_label %}
+                {{ mapped_label }}
           - action: input_datetime.set_datetime
             target:
               entity_id: !input cat_timestamp_helper
