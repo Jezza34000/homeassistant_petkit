@@ -201,7 +201,7 @@ actions:
             id: frigate_event
           # frigate saw a cat in our mapping, sanity check
           - condition: template
-            value_template: "{{ trigger.payload_json['after']['sub_label'] in names.keys() }}"
+            value_template: "{{ trigger.payload_json['after']['sub_label'] is not none and trigger.payload_json['after']['sub_label'][0] in names.keys() }}"
           # detection was on the configured camera
           - condition: template
             value_template: "{{ camera == '' or trigger.payload_json['after']['camera'] == camera }}"
@@ -210,7 +210,7 @@ actions:
             target:
               entity_id: !input cat_name_helper
             data:
-              value: "{{ trigger.payload_json['after']['sub_label'] }}"
+              value: "{{ trigger.payload_json['after']['sub_label'][0] }}"
           - action: input_datetime.set_datetime
             target:
               entity_id: !input cat_timestamp_helper
