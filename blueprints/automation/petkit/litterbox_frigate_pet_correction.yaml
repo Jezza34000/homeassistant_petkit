@@ -72,9 +72,16 @@ blueprint:
       icon: mdi:toilet
       collapsed: false
       input:
-        litterbox:
+        litterbox_records:
           name: Litterbox device records history sensor
           description: The device records history sensor entity for the litterbox.
+          selector:
+            entity:
+              domain: sensor
+              integration: petkit
+        litterbox_events:
+          name: Litterbox last event sensor
+          description: The device last event sensor entity for the litterbox.
           selector:
             entity:
               domain: sensor
@@ -90,6 +97,7 @@ blueprint:
             ```
           selector:
             object:
+
     notification:
       name: Notification
       icon: mdi:bell
@@ -155,8 +163,9 @@ variables:
 
   # litterbox
   delta: !input time_delta
+  records_sensor: !input litterbox_records
   latest_record: >
-    {% set records = trigger.to_state.attributes.records | default([]) if trigger.platform == 'state' else [] %}
+    {% set records = state_attr(records_sensor, 'records') | default([]) if trigger.platform == 'state' else [] %}
     {{ records | selectattr('eventType', 'eq', 10) | first if records | length > 0 else none }}
 
   # notification
@@ -168,9 +177,14 @@ variables:
 
 triggers:
   - trigger: state
-    entity_id: !input litterbox
-    attribute: records
-    id: record_update
+    entity_id: !input litterbox_events
+    to:
+      - "pet_out"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 3
+    id: event_update
 
   - trigger: mqtt
     topic: frigate/events
@@ -203,10 +217,10 @@ actions:
             data:
               timestamp: "{{ now().timestamp() }}"
 
-      # petkit device records updated
+      # pet left litter box
       - conditions:
           - condition: trigger
-            id: record_update
+            id: event_update
           # there is a usage record
           - condition: template
             value_template: "{{ latest_record is not none }}"
