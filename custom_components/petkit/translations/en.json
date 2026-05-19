@@ -587,6 +587,9 @@
       },
       "sand_tray_left_days": {
         "name": "Sand tray left days"
+      },
+      "device_records_history": {
+        "name": "Device records history"
       }
     },
     "switch": {

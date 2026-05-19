@@ -513,6 +513,9 @@
             },
             "supply_voltage": {
                 "name": "Tension alimentation"
+            },
+            "device_records_history": {
+                "name": "Historique des enregistrements de l'appareil"
             }
         },
         "switch": {
