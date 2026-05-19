@@ -23,6 +23,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.loader import async_get_loaded_integration
 
 from .const import (
+    ADVANCED_POLLING_SECTION,
     BT_SECTION,
     CONF_BLE_RELAY_ENABLED,
     CONF_DELETE_AFTER,
@@ -32,7 +33,10 @@ from .const import (
     CONF_MEDIA_EV_TYPE,
     CONF_MEDIA_PATH,
     CONF_SCAN_INTERVAL_BLUETOOTH,
+    CONF_SCAN_INTERVAL_DEFAULT,
     CONF_SCAN_INTERVAL_MEDIA,
+    CONF_SCAN_INTERVAL_SLOW,
+    CONF_SMART_POLLING_BOOST_DURATION,
     COORDINATOR,
     COORDINATOR_BLUETOOTH,
     COORDINATOR_MEDIA,
@@ -46,10 +50,12 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL_BLUETOOTH,
     DEFAULT_SCAN_INTERVAL_MEDIA,
+    DEFAULT_SMART_POLLING_BOOST_DURATION,
     DOMAIN,
     LOGGER,
     MEDIA_SECTION,
     NOTIFICATION_SECTION,
+    SCAN_INTERVAL_SLOW,
 )
 from .coordinator import (
     PetkitBluetoothUpdateCoordinator,
@@ -384,6 +390,17 @@ async def async_migrate_entry(hass: HomeAssistant, entry: PetkitConfigEntry) -> 
         )
         new_options[NOTIFICATION_SECTION] = section
         hass.config_entries.async_update_entry(entry, options=new_options, version=8)
+
+    if entry.version < 9:
+        new_options = dict(entry.options)
+        polling_section = dict(new_options.get(ADVANCED_POLLING_SECTION, {}))
+        polling_section.setdefault(CONF_SCAN_INTERVAL_SLOW, SCAN_INTERVAL_SLOW)
+        polling_section.setdefault(CONF_SCAN_INTERVAL_DEFAULT, DEFAULT_SCAN_INTERVAL)
+        polling_section.setdefault(
+            CONF_SMART_POLLING_BOOST_DURATION, DEFAULT_SMART_POLLING_BOOST_DURATION
+        )
+        new_options[ADVANCED_POLLING_SECTION] = polling_section
+        hass.config_entries.async_update_entry(entry, options=new_options, version=9)
 
     return True
 
