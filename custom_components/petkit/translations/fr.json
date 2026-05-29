@@ -1,674 +1,861 @@
 {
-    "config": {
-        "error": {
-            "account_exists": "Ce compte existe déjà.",
-            "connection": "Impossible de se connecter au serveur.",
-            "unknown": "Une erreur inconnue s'est produite, veuillez vérifier les logs."
-        },
-        "step": {
-            "user": {
-                "data": {
-                    "password": "Mot de passe",
-                    "region": "Région",
-                    "timezone": "Fuseau horaire",
-                    "username": "Nom d'utilisateur/Identifiant",
-                    "time_zone": "Fuseau horaire"
-                },
-                "description": "Veuillez saisir les identifiants de votre compte PetKit. N'utilisez surtout pas le même compte que celui utilisé dans l'application PetKit sur votre smartphone. Consultez la documentation pour plus d'informations.",
-                "data_description": {
-                    "region": "Ce champ est automatiquement rempli en fonction de la configuration de votre Home Assistant. Si vous utilisez une autre région, veuillez la sélectionner dans la liste.",
-                    "time_zone": "Ce champ est automatiquement rempli en fonction de la configuration de votre Home Assistant. Si votre fuseau horaire est différent, veuillez le sélectionner dans la liste.",
-                    "username": "Saisissez l'adresse e-mail ou l'identifiant de votre compte PetKit si vous êtes un utilisateur chinois."
-                }
-            }
-        }
+  "config": {
+    "error": {
+      "account_exists": "Ce compte existe déjà.",
+      "connection": "Impossible de se connecter au serveur.",
+      "unknown": "Une erreur inconnue s'est produite, veuillez vérifier les logs.",
+      "invalid_auth": "E-mail ou mot de passe invalide.",
+      "invalid_region": "Aucun compte avec cet e-mail. Avez-vous sélectionné la bonne région ?",
+      "cannot_connect": "Impossible de se connecter aux serveurs Petkit.",
+      "session_error": "Erreur de session, veuillez réessayer.",
+      "server_busy": "Serveur occupé, veuillez réessayer."
     },
-    "entity": {
-        "binary_sensor": {
-            "battery": {
-                "name": "Batterie"
-            },
-            "battery_installed": {
-                "name": "Batterie installée"
-            },
-            "camera_status": {
-                "name": "État de la caméra"
-            },
-            "care_plus_subscription": {
-                "name": "Abonnement Care+"
-            },
-            "deodorizer": {
-                "name": "Désodorisant"
-            },
-            "eating": {
-                "name": "En train de manger"
-            },
-            "feeding": {
-                "name": "Alimentation"
-            },
-            "food_level": {
-                "name": "Niveau de nourriture"
-            },
-            "food_level_1": {
-                "name": "Niveau nourriture réservoir 1"
-            },
-            "food_level_2": {
-                "name": "Niveau nourriture réservoir 2"
-            },
-            "lack_warning": {
-                "name": "Alerte manque d'eau"
-            },
-            "liquid_empty": {
-                "name": "Liquide désodorisant vide"
-            },
-            "liquid_lack": {
-                "name": "Manque de liquide désodorisant"
-            },
-            "litter": {
-                "name": "Litière"
-            },
-            "low_battery": {
-                "name": "Batterie faible"
-            },
-            "low_power": {
-                "name": "Alimentation"
-            },
-            "manually_paused": {
-                "name": "Mis en pause manuellement"
-            },
-            "on_ac_power": {
-                "name": "Sur alimentation secteur"
-            },
-            "pura_air_liquid": {
-                "name": "Liquide Pura Air"
-            },
-            "replace_filter": {
-                "name": "Remplacer le filtre"
-            },
-            "sand_lack": {
-                "name": "Manque de litière"
-            },
-            "waste_bin": {
-                "name": "Bac à déchets plein"
-            },
-            "waste_bin_presence": {
-                "name": "Présence bac à déchets"
-            },
-            "water_level": {
-                "name": "Niveau d'eau"
-            },
-            "weight_error": {
-                "name": "Erreur de poids"
-            },
-            "deodorization_running": {
-                "name": "Déodorisation"
-            },
-            "n60_deodorize_presence": {
-                "name": "Module déodorisant N60"
-            },
-            "light": {
-                "name": "Lumière"
-            },
-            "spray": {
-                "name": "Désodorisant"
-            },
-            "yowling_detected": {
-                "name": "Hurlement détecté"
-            },
-            "abnormal_ph_detected": {
-                "name": "pH anormal détecté"
-            },
-            "soft_stool_detected": {
-                "name": "Selles molles détectées"
-            },
-            "pet_error": {
-                "name": "Problème du a l'animal"
-            },
-            "do_not_disturb_state": {
-                "name": "Ne pas déranger"
-            },
-            "pump_running": {
-                "name": "Pompe"
-            },
-            "pet_detected": {
-                "name": "L'animal boit"
-            },
-            "toilet_occupied": {
-                "name": "Toilette occupée"
-            }
+    "step": {
+      "user": {
+        "data": {
+          "password": "Mot de passe",
+          "username": "Nom d'utilisateur"
         },
-        "button": {
-            "action_continue": {
-                "name": "Action : Continuer"
-            },
-            "action_pause": {
-                "name": "Action : Pause"
-            },
-            "action_reset": {
-                "name": "Action : Réinitialiser"
-            },
-            "call_pet": {
-                "name": "Appeler animal"
-            },
-            "cancel_manual_feed": {
-                "name": "Annuler alimentation manuelle"
-            },
-            "deodorize": {
-                "name": "Désodoriser"
-            },
-            "dump_litter": {
-                "name": "Vider la litière"
-            },
-            "exit_maintenance": {
-                "name": "Maintenance : Quitter"
-            },
-            "food_replenished": {
-                "name": "Nourriture réapprovisionnée"
-            },
-            "reset_desiccant": {
-                "name": "Réinitialiser déshydratant"
-            },
-            "reset_odor_eliminator": {
-                "name": "Réinitialiser éliminateur d'odeurs"
-            },
-            "start_maintenance": {
-                "name": "Maintenance : Démarrer"
-            },
-            "start_scoop": {
-                "name": "Nettoyer"
-            },
-            "reset_n50_odor_eliminator": {
-                "name": "Réinitialiser éliminateur odeurs N50"
-            },
-            "reset_n60_odor_eliminator": {
-                "name": "Réinitialiser éliminateur odeurs N60"
-            },
-            "level_litter": {
-                "name": "Niveler litière"
-            },
-            "reset_filter": {
-                "name": "Réinitialiser filtre"
-            }
+        "data_description": {
+          "username": "{username_hint}"
         },
-        "fan": {
-            "air_purifier_fan": {
-                "name": "Purificateur d'air"
-            }
-        },
-        "image": {
-            "last_eat_event": {
-                "name": "Dernier repas"
-            },
-            "last_feed_event": {
-                "name": "Dernière distribution"
-            },
-            "last_visit_event": {
-                "name": "Dernière visite"
-            },
-            "last_toileting_event": {
-                "name": "Dernier usage"
-            },
-            "dish_before": {
-                "name": "Gamelle avant"
-            },
-            "dish_after": {
-                "name": "Gamelle après"
-            },
-            "waste_check": {
-                "name": "Vérification des déchets"
-            }
-        },
-        "number": {
-            "cleaning_delay": {
-                "name": "Délai de nettoyage"
-            },
-            "manual_feed": {
-                "name": "Distribution manuelle"
-            },
-            "min_eating_duration": {
-                "name": "Durée minimale de repas"
-            },
-            "surplus": {
-                "name": "Niveau surplus"
-            },
-            "volume": {
-                "name": "Volume"
-            }
-        },
-        "select": {
-            "avoid_repeat_cleaning_interval": {
-                "name": "Intervalle anti-répétition nettoyage"
-            },
-            "eat_detection_sensitivity": {
-                "name": "Sensibilité détection IA repas"
-            },
-            "litter_type": {
-                "name": "Type de litière"
-            },
-            "move_detection_sensitivity": {
-                "name": "Sensibilité détection mouvement"
-            },
-            "pet_detection_sensitivity": {
-                "name": "Sensibilité détection IA animal"
-            },
-            "surplus_level": {
-                "name": "Niveau contrôle surplus"
-            },
-            "working_mode": {
-                "name": "Mode de travail"
-            },
-            "led_brightness": {
-                "name": "Luminosité LED"
-            }
-        },
-        "sensor": {
-            "air_purified": {
-                "name": "Air purifié"
-            },
-            "amount_eaten": {
-                "name": "Quantité mangée"
-            },
-            "average_time": {
-                "name": "Utilisation moyenne"
-            },
-            "avg_eating_time": {
-                "name": "Temps moyen de repas"
-            },
-            "battery_level": {
-                "name": "Niveau de batterie"
-            },
-            "deodorant_left_days": {
-                "name": "Jours restants désodorisant"
-            },
-            "deodorizer_level": {
-                "name": "Niveau désodorisant"
-            },
-            "desiccant_left_days": {
-                "name": "Jours restants déshydratant"
-            },
-            "device_status": {
-                "name": "État de l'appareil"
-            },
-            "drink_times": {
-                "name": "Nombre de boissons"
-            },
-            "end_date_care_plus_subscription": {
-                "name": "Fin abonnement Care+"
-            },
-            "error": {
-                "name": "Erreur"
-            },
-            "error_message": {
-                "name": "Erreur",
-                "state": {
-                    "no_error": "Pas d'erreur"
-                }
-            },
-            "feeder_error": {
-                "name": "Erreur distributeur"
-            },
-            "filter_percent": {
-                "name": "Filtre restant"
-            },
-            "food_bowl_percentage": {
-                "name": "Remplissage gamelle"
-            },
-            "food_in_bowl": {
-                "name": "Nourriture dans la gamelle"
-            },
-            "food_left": {
-                "name": "Nourriture restante"
-            },
-            "last_update": {
-                "name": "Dernière mise à jour"
-            },
-            "last_used_by": {
-                "name": "Dernière utilisation par"
-            },
-            "litter_last_event": {
-                "name": "Dernier événement",
-                "state": {
-                    "auto_cleaning_canceled": "Nettoyage automatique annulé",
-                    "auto_cleaning_canceled_kitten": "Nettoyage automatique annulé : chaton",
-                    "auto_cleaning_completed": "Nettoyage automatique terminé",
-                    "auto_cleaning_failed_full": "Nettoyage automatique échoué : plein",
-                    "auto_cleaning_failed_hall_l": "Nettoyage automatique échoué : hall L",
-                    "auto_cleaning_failed_hall_t": "Nettoyage automatique échoué : hall T",
-                    "auto_cleaning_terminated": "Nettoyage automatique interrompu",
-                    "auto_odor_failed": "Désodorisation automatique échouée",
-                    "clean_over": "Nettoyage terminé",
-                    "deodorant_finished": "Désodorisant terminé",
-                    "deodorant_finished_liquid_lack": "Désodorisant terminé : manque liquide",
-                    "litter_empty_completed": "Vidage litière terminé",
-                    "litter_empty_failed_full": "Vidage litière échoué : plein",
-                    "litter_empty_failed_hall_l": "Vidage litière échoué : hall L",
-                    "litter_empty_failed_hall_t": "Vidage litière échoué : hall T",
-                    "litter_empty_terminated": "Vidage litière interrompu",
-                    "manual_cleaning_canceled": "Nettoyage manuel annulé",
-                    "manual_cleaning_completed": "Nettoyage manuel terminé",
-                    "manual_cleaning_failed_full": "Nettoyage manuel échoué : plein",
-                    "manual_cleaning_failed_hall_l": "Nettoyage manuel échoué : hall L",
-                    "manual_cleaning_failed_hall_t": "Nettoyage manuel échoué : hall T",
-                    "manual_cleaning_terminated": "Nettoyage manuel interrompu",
-                    "manual_odor_completed": "Désodorisation manuelle terminée",
-                    "manual_odor_completed_liquid_lack": "Désodorisation manuelle terminée : manque liquide",
-                    "manual_odor_failed": "Désodorisation manuelle échouée",
-                    "periodic_cleaning_canceled": "Nettoyage périodique annulé",
-                    "periodic_cleaning_canceled_kitten": "Nettoyage périodique annulé : chaton",
-                    "periodic_cleaning_completed": "Nettoyage périodique terminé",
-                    "periodic_cleaning_terminated": "Nettoyage périodique interrompu",
-                    "periodic_odor_completed": "Désodorisation périodique terminée",
-                    "periodic_odor_completed_liquid_lack": "Désodorisation périodique terminée : manque liquide",
-                    "periodic_odor_failed": "Désodorisation périodique échouée",
-                    "reset_completed": "Réinitialisation terminée",
-                    "reset_failed_full": "Réinitialisation échouée : plein",
-                    "reset_failed_hall_l": "Réinitialisation échouée : hall L",
-                    "reset_failed_hall_t": "Réinitialisation échouée : hall T",
-                    "reset_over": "Réinitialisation",
-                    "reset_terminated": "Réinitialisation interrompue",
-                    "scheduled_cleaning_failed_full": "Nettoyage programmé échoué : plein",
-                    "scheduled_cleaning_failed_hall_l": "Nettoyage programmé échoué : hall L",
-                    "scheduled_cleaning_failed_hall_t": "Nettoyage programmé échoué : hall T"
-                }
-            },
-            "litter_level": {
-                "name": "Niveau litière"
-            },
-            "litter_state": {
-                "name": "État",
-                "state": {
-                    "calibrating": "Calibration",
-                    "cleaning": "Nettoyage",
-                    "cleaning_paused": "Nettoyage en pause",
-                    "cleaning_paused_cover": "Nettoyage en pause - Couvercle",
-                    "cleaning_paused_pet_approach": "Nettoyage en pause - Animal en approche",
-                    "cleaning_paused_pet_entered": "Nettoyage en pause - Animal entré",
-                    "cleaning_paused_pet_using": "Nettoyage en pause - Animal utilise",
-                    "cleaning_paused_system_error": "Nettoyage en pause - Erreur système",
-                    "dumping": "Vidage",
-                    "dumping_paused": "Vidage en pause",
-                    "dumping_paused_cover": "Vidage en pause - Couvercle",
-                    "dumping_paused_pet_approach": "Vidage en pause - Animal en approche",
-                    "dumping_paused_pet_entered": "Vidage en pause - Animal entré",
-                    "dumping_paused_pet_using": "Vidage en pause - Animal utilise",
-                    "dumping_paused_system_error": "Vidage en pause - Erreur système",
-                    "idle": "Inactif",
-                    "leveling": "Nivellement",
-                    "maintenance": "Maintenance",
-                    "maintenance_paused": "Maintenance en pause",
-                    "maintenance_paused_cover": "Maintenance en pause - Couvercle",
-                    "maintenance_paused_pet_approach": "Maintenance en pause - Animal en approche",
-                    "maintenance_paused_pet_entered": "Maintenance en pause - Animal entré",
-                    "maintenance_paused_pet_using": "Maintenance en pause - Animal utilise",
-                    "maintenance_paused_system_error": "Maintenance en pause - Erreur système",
-                    "paused": "En pause",
-                    "paused_cover": "En pause - Couvercle",
-                    "paused_pet_approach": "En pause - Animal en approche",
-                    "paused_pet_entered": "En pause - Animal entré",
-                    "paused_pet_using": "En pause - Animal utilise",
-                    "paused_system_error": "En pause - Erreur système",
-                    "resetting": "Réinitialisation en cours",
-                    "resetting_device": "Réinitialisation appareil",
-                    "unknown": "Inconnu"
-                }
-            },
-            "litter_weight": {
-                "name": "Poids litière"
-            },
-            "manual_dispensed": {
-                "name": "Distribué manuellement"
-            },
-            "manual_dispensed_hopper_1": {
-                "name": "Distribution manuelle réservoir 1"
-            },
-            "manual_dispensed_hopper_2": {
-                "name": "Distribution manuelle réservoir 2"
-            },
-            "package_used": {
-                "name": "Emballages utilisés"
-            },
-            "pet_last_device_used": {
-                "name": "Dernière litière utilisée"
-            },
-            "pet_last_use_date": {
-                "name": "Date dernière utilisation"
-            },
-            "pet_last_use_duration": {
-                "name": "Durée dernière utilisation"
-            },
-            "pet_last_weight_measurement": {
-                "name": "Dernière mesure de poids"
-            },
-            "planned_dispensed": {
-                "name": "Distribution programmée"
-            },
-            "planned_dispensed_hopper_1": {
-                "name": "Distribution programmée réservoir 1"
-            },
-            "planned_dispensed_hopper_2": {
-                "name": "Distribution programmée réservoir 2"
-            },
-            "purified_water": {
-                "name": "Eau purifiée"
-            },
-            "purifier_liquid": {
-                "name": "Liquide purificateur"
-            },
-            "raw_distribution_data": {
-                "name": "Données brutes de distribution"
-            },
-            "rssi": {
-                "name": "RSSI"
-            },
-            "smart_spray_battery": {
-                "name": "Batterie spray intelligent"
-            },
-            "spray_deodorant_liquid": {
-                "name": "Liquide désodorisant spray"
-            },
-            "times_dispensed": {
-                "name": "Nombre de distributions"
-            },
-            "times_eaten": {
-                "name": "Nombre de repas"
-            },
-            "times_used": {
-                "name": "Nombre d'utilisations"
-            },
-            "total_dispensed": {
-                "name": "Total distribué"
-            },
-            "total_dispensed_hopper_1": {
-                "name": "Total distribué réservoir 1"
-            },
-            "total_dispensed_hopper_2": {
-                "name": "Total distribué réservoir 2"
-            },
-            "total_package": {
-                "name": "Total emballages"
-            },
-            "total_planned": {
-                "name": "Total programmé"
-            },
-            "total_planned_hopper_1": {
-                "name": "Total programmé réservoir 1"
-            },
-            "total_planned_hopper_2": {
-                "name": "Total programmé réservoir 2"
-            },
-            "total_time": {
-                "name": "Utilisation totale"
-            },
-            "urine_measured_ph": {
-                "name": "pH urinaire mesuré"
-            },
-            "pet_last_urination_date": {
-                "name": "Dernière miction"
-            },
-            "pet_last_defecation_date": {
-                "name": "Dernière défécation"
-            },
-            "battery_voltage": {
-                "name": "Tension batterie"
-            },
-            "supply_voltage": {
-                "name": "Tension alimentation"
-            }
-        },
-        "switch": {
-            "auto_clean": {
-                "name": "Nettoyage automatique"
-            },
-            "auto_odor": {
-                "name": "Désodorisation automatique"
-            },
-            "avoid_repeat_clean": {
-                "name": "Éviter nettoyage répété"
-            },
-            "camera": {
-                "name": "Caméra"
-            },
-            "child_lock": {
-                "name": "Verrouillage enfant"
-            },
-            "cont_rotation": {
-                "name": "Rotation continue"
-            },
-            "deep_cleaning": {
-                "name": "Nettoyage profond"
-            },
-            "deep_deodor": {
-                "name": "Désodorisation profonde"
-            },
-            "deodorant_notify": {
-                "name": "Notif. remplacement désodorisant"
-            },
-            "desiccant_notif": {
-                "name": "Notif. changement déshydratant"
-            },
-            "dispensing_notif": {
-                "name": "Notif. distribution"
-            },
-            "display": {
-                "name": "Affichage"
-            },
-            "do_not_disturb": {
-                "name": "Ne pas déranger"
-            },
-            "feed_sound": {
-                "name": "Son distribution"
-            },
-            "feed_tone": {
-                "name": "Tonalité distribution"
-            },
-            "highlight": {
-                "name": "Surlignage suivi animal"
-            },
-            "indicator_light": {
-                "name": "Voyant lumineux"
-            },
-            "kitten_mode": {
-                "name": "Mode chaton"
-            },
-            "lack_liquid_notify": {
-                "name": "Notif. manque liquide purificateur"
-            },
-            "lack_sand_notify": {
-                "name": "Notif. manque litière"
-            },
-            "light_weight": {
-                "name": "Poids léger"
-            },
-            "litter_full_notify": {
-                "name": "Notif. bac à déchets plein"
-            },
-            "low_battery_notif": {
-                "name": "Notif. batterie faible"
-            },
-            "microphone": {
-                "name": "Microphone"
-            },
-            "move_notif": {
-                "name": "Notif. mouvement"
-            },
-            "night_vision": {
-                "name": "Vision nocturne"
-            },
-            "periodic_cleaning": {
-                "name": "Nettoyage périodique"
-            },
-            "periodic_odor": {
-                "name": "Désodorisation périodique"
-            },
-            "pet_eat_notif": {
-                "name": "Notif. repas animal"
-            },
-            "pet_in_notify": {
-                "name": "Notif. toilette animal"
-            },
-            "pet_tracking": {
-                "name": "Suivi animal"
-            },
-            "pet_visit_notif": {
-                "name": "Notif. visite animal"
-            },
-            "power": {
-                "name": "Alimentation"
-            },
-            "refill_notif": {
-                "name": "Notif. remplissage nécessaire"
-            },
-            "shortage_alarm": {
-                "name": "Alarme pénurie"
-            },
-            "surplus_control": {
-                "name": "Contrôle surplus"
-            },
-            "system_notification": {
-                "name": "Son système"
-            },
-            "video_timestamp": {
-                "name": "Afficher horodatage"
-            },
-            "voice_dispense": {
-                "name": "Distribution vocale"
-            },
-            "waste_covering": {
-                "name": "Recouvrement déchets"
-            },
-            "work_log_notify": {
-                "name": "Notif. exécution tâches programmées"
-            },
-            "work_notify": {
-                "name": "Notif. nettoyage appareil"
-            }
-        },
-        "light": {
-            "light": {
-                "name": "Lumière"
-            }
-        },
-        "text": {
-            "manual_feed_dual_h1": {
-                "name": "Distribution manuelle réservoir 1"
-            },
-            "manual_feed_dual_h2": {
-                "name": "Distribution manuelle réservoir 2"
-            },
-            "manual_feed_single": {
-                "name": "Distribution manuelle"
-            }
+        "description": "Entrez le compte PetKit que Home Assistant utilisera pour communiquer avec le cloud PetKit.\n\n**Important :** il doit s'agir d'un compte PetKit *différent* de celui que vous utilisez pour vous connecter à l'application mobile. PetKit ne permet qu'une seule session active par compte. Vous connecter ici avec votre compte principal vous déconnectera de l'application (et vice versa).\n\n**Configuration :**\n1. Créez un second compte PetKit (avec un e-mail différent).\n2. Dans l'application mobile PetKit, connecté avec votre compte principal, ouvrez la **Gestion de famille** (Family Management) et créez une famille.\n3. Invitez le second compte en tant que membre de la famille et acceptez l'invitation.\n4. Entrez les identifiants du second compte ci-dessous.\n\nGuide complet : [Wiki de configuration]({wiki_url}).",
+        "sections": {
+          "advanced_options": {
+            "data": {
+              "region": "Région",
+              "time_zone": "Fuseau horaire"
+            },
+            "data_description": {
+              "region": "Détectée automatiquement depuis Home Assistant. À modifier uniquement si votre compte PetKit est enregistré sur un serveur régional différent.",
+              "time_zone": "Détecté automatiquement depuis Home Assistant. À modifier si nécessaire."
+            },
+            "description": "La région et le fuseau horaire sont détectés automatiquement par Home Assistant. Ne développez cette section que si vous devez les modifier.",
+            "name": "Options avancées"
+          }
         }
-    },
-    "options": {
-        "step": {
-            "petkit_options": {
-                "data": {
-                    "polling_interval": "Intervalle de sondage (secondes)",
-                    "region": "Région",
-                    "timezone": "Fuseau horaire"
-                }
-            }
-        }
+      }
     }
+  },
+  "entity": {
+    "binary_sensor": {
+      "yowling_detected": {
+        "name": "Hurlement détecté"
+      },
+      "abnormal_ph_detected": {
+        "name": "pH anormal détecté"
+      },
+      "soft_stool_detected": {
+        "name": "Selles molles détectées"
+      },
+      "battery": {
+        "name": "Batterie"
+      },
+      "weight_error": {
+        "name": "Erreur de poids"
+      },
+      "pet_error": {
+        "name": "Problème dû à l'animal"
+      },
+      "light": {
+        "name": "Lumière"
+      },
+      "spray": {
+        "name": "Désodorisant"
+      },
+      "battery_installed": {
+        "name": "Batterie installée"
+      },
+      "camera_status": {
+        "name": "État de la caméra"
+      },
+      "n60_deodorize_presence": {
+        "name": "État du module déodorisant N60"
+      },
+      "care_plus_subscription": {
+        "name": "Abonnement Care+"
+      },
+      "deodorizer": {
+        "name": "Désodorisant"
+      },
+      "deodorization_running": {
+        "name": "Déodorisation"
+      },
+      "do_not_disturb_state": {
+        "name": "Ne pas déranger"
+      },
+      "eating": {
+        "name": "En train de manger"
+      },
+      "feeding": {
+        "name": "Alimentation"
+      },
+      "food_level": {
+        "name": "Niveau de nourriture"
+      },
+      "food_level_1": {
+        "name": "Niveau nourriture réservoir 1"
+      },
+      "food_level_2": {
+        "name": "Niveau nourriture réservoir 2"
+      },
+      "frequent_use": {
+        "name": "Détection d'utilisation fréquente"
+      },
+      "lack_warning": {
+        "name": "Alerte manque d'eau"
+      },
+      "pet_detected": {
+        "name": "L'animal boit"
+      },
+      "pump_running": {
+        "name": "Pompe"
+      },
+      "liquid_lack": {
+        "name": "Niveau de liquide"
+      },
+      "litter": {
+        "name": "Litière"
+      },
+      "low_battery": {
+        "name": "Batterie faible"
+      },
+      "low_power": {
+        "name": "Alimentation"
+      },
+      "manually_paused": {
+        "name": "Mis en pause manuellement"
+      },
+      "on_ac_power": {
+        "name": "Sur alimentation secteur"
+      },
+      "pura_air_liquid": {
+        "name": "Liquide Pura Air"
+      },
+      "replace_filter": {
+        "name": "Remplacer le filtre"
+      },
+      "sand_lack": {
+        "name": "Manque de litière"
+      },
+      "toilet_occupied": {
+        "name": "Toilette occupée"
+      },
+      "waste_bin": {
+        "name": "Bac à déchets plein"
+      },
+      "waste_bin_presence": {
+        "name": "Présence bac à déchets"
+      },
+      "water_level": {
+        "name": "Niveau d'eau"
+      }
+    },
+    "button": {
+      "action_continue": {
+        "name": "Action : Continuer"
+      },
+      "action_pause": {
+        "name": "Action : Pause"
+      },
+      "pause": {
+        "name": "Pause"
+      },
+      "resume": {
+        "name": "Reprendre"
+      },
+      "action_reset": {
+        "name": "Action : Réinitialiser"
+      },
+      "call_pet": {
+        "name": "Appeler l'animal"
+      },
+      "play_sound": {
+        "name": "Jouer le son"
+      },
+      "cancel_manual_feed": {
+        "name": "Annuler l'alimentation manuelle"
+      },
+      "deodorize": {
+        "name": "Désodoriser"
+      },
+      "dump_litter": {
+        "name": "Vider la litière"
+      },
+      "exit_maintenance": {
+        "name": "Maintenance : Quitter"
+      },
+      "food_replenished": {
+        "name": "Nourriture réapprovisionnée"
+      },
+      "reset_desiccant": {
+        "name": "Réinitialiser le déshydratant"
+      },
+      "reset_n50_odor_eliminator": {
+        "name": "Réinitialiser l'éliminateur d'odeurs N50"
+      },
+      "reset_n60_odor_eliminator": {
+        "name": "Réinitialiser l'éliminateur d'odeurs N60"
+      },
+      "start_maintenance": {
+        "name": "Maintenance : Commencer"
+      },
+      "start_scoop": {
+        "name": "Nettoyer"
+      },
+      "level_litter": {
+        "name": "Niveler la litière"
+      },
+      "reset_filter": {
+        "name": "Réinitialiser le filtre"
+      },
+      "ptz_left": {
+        "name": "PTZ Gauche"
+      },
+      "ptz_right": {
+        "name": "PTZ Droite"
+      },
+      "ptz_stop": {
+        "name": "PTZ Arrêt"
+      },
+      "ptz_flip": {
+        "name": "PTZ Retourner l'image"
+      }
+    },
+    "fan": {
+      "air_purifier_fan": {
+        "name": "Purificateur d'air"
+      }
+    },
+    "image": {
+      "last_eat_event": {
+        "name": "Dernier repas"
+      },
+      "last_feed_event": {
+        "name": "Dernière distribution de nourriture"
+      },
+      "last_toileting_event": {
+        "name": "Dernière utilisation de la litière"
+      },
+      "last_visit_event": {
+        "name": "Dernière visite"
+      },
+      "dish_before": {
+        "name": "Gamelle avant"
+      },
+      "dish_after": {
+        "name": "Gamelle après"
+      },
+      "waste_check": {
+        "name": "Vérification des déchets"
+      }
+    },
+    "number": {
+      "cleaning_delay": {
+        "name": "Délai de nettoyage"
+      },
+      "manual_feed": {
+        "name": "Alimentation manuelle"
+      },
+      "min_eating_duration": {
+        "name": "Durée minimale de repas"
+      },
+      "surplus": {
+        "name": "Surplus"
+      },
+      "volume": {
+        "name": "Volume"
+      }
+    },
+    "select": {
+      "avoid_repeat_cleaning_interval": {
+        "name": "Intervalle pour éviter les nettoyages répétés"
+      },
+      "eat_detection_sensitivity": {
+        "name": "Sensibilité IA de détection des repas"
+      },
+      "litter_type": {
+        "name": "Type de litière"
+      },
+      "working_mode": {
+        "name": "Mode de fonctionnement"
+      },
+      "led_brightness": {
+        "name": "Luminosité des LED"
+      },
+      "move_detection_sensitivity": {
+        "name": "Sensibilité de détection des mouvements"
+      },
+      "pet_detection_sensitivity": {
+        "name": "Sensibilité IA de détection de l'animal"
+      },
+      "surplus_level": {
+        "name": "Niveau de contrôle du surplus"
+      }
+    },
+    "sensor": {
+      "urine_measured_ph": {
+        "name": "pH de l'urine mesuré"
+      },
+      "device_id": {
+        "name": "Identifiant de l'appareil"
+      },
+      "pet_last_urination_date": {
+        "name": "Dernière miction"
+      },
+      "pet_last_defecation_date": {
+        "name": "Dernière défécation"
+      },
+      "air_purified": {
+        "name": "Air purifié"
+      },
+      "amount_eaten": {
+        "name": "Quantité mangée"
+      },
+      "battery_voltage": {
+        "name": "Tension de la batterie"
+      },
+      "supply_voltage": {
+        "name": "Tension d'alimentation"
+      },
+      "average_time": {
+        "name": "Utilisation moyenne"
+      },
+      "avg_eating_time": {
+        "name": "Temps de repas moyen"
+      },
+      "battery_level": {
+        "name": "Niveau de la batterie"
+      },
+      "odor_eliminator_n50_left_days": {
+        "name": "Jours restants éliminateur d'odeurs N50"
+      },
+      "odor_eliminator_n60_left_days": {
+        "name": "Jours restants éliminateur d'odeurs N60"
+      },
+      "deodorizer_level": {
+        "name": "Niveau du désodorisant"
+      },
+      "desiccant_left_days": {
+        "name": "Jours restants déshydratant"
+      },
+      "device_status": {
+        "name": "État de l'appareil"
+      },
+      "drink_times": {
+        "name": "Nombre de fois qu'il a bu"
+      },
+      "end_date_care_plus_subscription": {
+        "name": "Jours restants Care+"
+      },
+      "error": {
+        "name": "Erreur"
+      },
+      "battery": {
+        "name": "Batterie"
+      },
+      "error_message": {
+        "name": "Erreur",
+        "state": {
+          "no_error": "Aucune erreur"
+        }
+      },
+      "feeder_error": {
+        "name": "Erreur du distributeur"
+      },
+      "filter_percent": {
+        "name": "Filtre restant"
+      },
+      "food_bowl_percentage": {
+        "name": "Remplissage de la gamelle"
+      },
+      "food_in_bowl": {
+        "name": "Nourriture dans la gamelle"
+      },
+      "food_left": {
+        "name": "Nourriture restante"
+      },
+      "last_connection": {
+        "name": "Dernière connexion BLE"
+      },
+      "last_update": {
+        "name": "Dernière mise à jour"
+      },
+      "last_used_by": {
+        "name": "Dernière utilisation par"
+      },
+      "litter_last_event": {
+        "name": "Dernier événement",
+        "state": {
+          "auto_cleaning_canceled": "Nettoyage automatique annulé",
+          "auto_cleaning_canceled_kitten": "Nettoyage automatique annulé : chaton",
+          "auto_cleaning_completed": "Nettoyage automatique terminé",
+          "auto_cleaning_failed_full": "Nettoyage automatique échoué : plein",
+          "auto_cleaning_failed_hall_l": "Nettoyage automatique échoué : hall L",
+          "auto_cleaning_failed_hall_t": "Nettoyage automatique échoué : hall T",
+          "auto_cleaning_terminated": "Nettoyage automatique interrompu",
+          "auto_odor_failed": "Désodorisation automatique échouée",
+          "clean_over": "Propre",
+          "deodorant_finished": "Désodorisation terminée",
+          "deodorant_finished_liquid_lack": "Désodorisation terminée : manque de liquide",
+          "light_over": "Lumière",
+          "litter_empty_completed": "Vidage de la litière terminé",
+          "litter_empty_failed_full": "Vidage de la litière échoué : plein",
+          "litter_empty_failed_hall_l": "Vidage de la litière échoué : hall L",
+          "litter_empty_failed_hall_t": "Vidage de la litière échoué : hall T",
+          "litter_empty_terminated": "Vidage de la litière interrompu",
+          "manual_cleaning_canceled": "Nettoyage manuel annulé",
+          "manual_cleaning_completed": "Nettoyage manuel terminé",
+          "manual_cleaning_failed_full": "Nettoyage manuel échoué : plein",
+          "manual_cleaning_failed_hall_l": "Nettoyage manuel échoué : hall L",
+          "manual_cleaning_failed_hall_t": "Nettoyage manuel échoué : hall T",
+          "manual_cleaning_terminated": "Nettoyage manuel interrompu",
+          "manual_odor_completed": "Désodorisation manuelle terminée",
+          "manual_odor_completed_liquid_lack": "Désodorisation manuelle terminée : manque de liquide",
+          "manual_odor_failed": "Désodorisation manuelle échouée",
+          "periodic_cleaning_canceled": "Nettoyage périodique annulé",
+          "periodic_cleaning_canceled_kitten": "Nettoyage périodique annulé : chaton",
+          "periodic_cleaning_completed": "Nettoyage périodique terminé",
+          "periodic_cleaning_terminated": "Nettoyage périodique interrompu",
+          "periodic_odor_completed": "Désodorisation périodique terminée",
+          "periodic_odor_completed_liquid_lack": "Désodorisation périodique terminée : manque de liquide",
+          "periodic_odor_failed": "Désodorisation périodique échouée",
+          "pet_detect": "Animal détecté",
+          "pet_out": "Animal sorti",
+          "reset_completed": "Réinitialisation terminée",
+          "reset_failed_full": "Réinitialisation échouée : plein",
+          "reset_failed_hall_l": "Réinitialisation échouée : hall L",
+          "reset_failed_hall_t": "Réinitialisation échouée : hall T",
+          "reset_over": "Réinitialisation",
+          "reset_terminated": "Réinitialisation interrompue",
+          "scheduled_cleaning_failed_full": "Nettoyage programmé échoué : plein",
+          "scheduled_cleaning_failed_hall_l": "Nettoyage programmé échoué : hall L",
+          "scheduled_cleaning_failed_hall_t": "Nettoyage programmé échoué : hall T",
+          "spray_over": "Désodoriser"
+        }
+      },
+      "litter_level": {
+        "name": "Niveau de litière"
+      },
+      "litter_state": {
+        "name": "État",
+        "state": {
+          "calibrating": "Calibrage en cours",
+          "cleaning": "Nettoyage en cours",
+          "cleaning_paused": "Nettoyage en pause",
+          "cleaning_paused_cover": "Nettoyage en pause - Couvercle",
+          "cleaning_paused_pet_approach": "Nettoyage en pause - Approche de l'animal",
+          "cleaning_paused_pet_entered": "Nettoyage en pause - Animal entré",
+          "cleaning_paused_pet_using": "Nettoyage en pause - Animal à l'intérieur",
+          "cleaning_paused_system_error": "Nettoyage en pause - Erreur système",
+          "dumping": "Vidage en cours",
+          "dumping_paused": "Vidage en pause",
+          "dumping_paused_cover": "Vidage en pause - Couvercle",
+          "dumping_paused_pet_approach": "Vidage en pause - Approche de l'animal",
+          "dumping_paused_pet_entered": "Vidage en pause - Animal entré",
+          "dumping_paused_pet_using": "Vidage en pause - Animal à l'intérieur",
+          "dumping_paused_system_error": "Vidage en pause - Erreur système",
+          "idle": "Inactif",
+          "leveling": "Nivellement en cours",
+          "maintenance": "Maintenance",
+          "maintenance_paused": "Maintenance en pause",
+          "maintenance_paused_cover": "Maintenance en pause - Couvercle",
+          "maintenance_paused_pet_approach": "Maintenance en pause - Approche de l'animal",
+          "maintenance_paused_pet_entered": "Maintenance en pause - Animal entré",
+          "maintenance_paused_pet_using": "Maintenance en pause - Animal à l'intérieur",
+          "maintenance_paused_system_error": "Maintenance en pause - Erreur système",
+          "paused": "En pause",
+          "paused_cover": "En pause - Couvercle",
+          "paused_pet_approach": "En pause - Approche de l'animal",
+          "paused_pet_entered": "En pause - Animal entré",
+          "paused_pet_using": "En pause - Animal à l'intérieur",
+          "paused_system_error": "En pause - Erreur système",
+          "resetting": "Réinitialisation en cours",
+          "resetting_device": "Réinitialisation de l'appareil",
+          "unknown": "Inconnu"
+        }
+      },
+      "litter_weight": {
+        "name": "Poids de la litière"
+      },
+      "manual_dispensed": {
+        "name": "Distribution manuelle effectuée"
+      },
+      "manual_dispensed_hopper_1": {
+        "name": "Distribué manuellement réservoir 1"
+      },
+      "manual_dispensed_hopper_2": {
+        "name": "Distribué manuellement réservoir 2"
+      },
+      "package_used": {
+        "name": "Paquet utilisé"
+      },
+      "pet_last_device_used": {
+        "name": "Dernière litière utilisée"
+      },
+      "pet_last_use_date": {
+        "name": "Date de dernière utilisation"
+      },
+      "connection_state": {
+        "name": "État de la connexion"
+      },
+      "pet_last_use_duration": {
+        "name": "Durée de dernière utilisation"
+      },
+      "pet_last_weight_measurement": {
+        "name": "Dernière mesure de poids"
+      },
+      "planned_dispensed": {
+        "name": "Distribution planifiée effectuée"
+      },
+      "planned_dispensed_hopper_1": {
+        "name": "Planifié réservoir 1"
+      },
+      "planned_dispensed_hopper_2": {
+        "name": "Planifié réservoir 2"
+      },
+      "purified_water": {
+        "name": "Eau purifiée"
+      },
+      "purifier_liquid": {
+        "name": "Niveau de liquide"
+      },
+      "raw_distribution_data": {
+        "name": "Données brutes de distribution"
+      },
+      "rssi": {
+        "name": "RSSI"
+      },
+      "spray_times": {
+        "name": "Nombre de pulvérisations"
+      },
+      "spray_deodorant_liquid": {
+        "name": "Liquide spray déodorant"
+      },
+      "times_dispensed": {
+        "name": "Nombre de distributions"
+      },
+      "times_eaten": {
+        "name": "Nombre de repas"
+      },
+      "times_used": {
+        "name": "Nombre d'utilisations"
+      },
+      "total_dispensed": {
+        "name": "Total distribué"
+      },
+      "total_dispensed_hopper_1": {
+        "name": "Total distribué réservoir 1"
+      },
+      "total_dispensed_hopper_2": {
+        "name": "Total distribué réservoir 2"
+      },
+      "total_package": {
+        "name": "Total paquet"
+      },
+      "total_planned": {
+        "name": "Total planifié"
+      },
+      "total_planned_hopper_1": {
+        "name": "Total planifié réservoir 1"
+      },
+      "total_planned_hopper_2": {
+        "name": "Total planifié réservoir 2"
+      },
+      "total_time": {
+        "name": "Utilisation totale"
+      },
+      "garbage_bag_box_state": {
+        "name": "Boîte de sacs poubelle",
+        "state": {
+          "normal": "Normal",
+          "running_out": "Presque vide",
+          "used_up": "Épuisé",
+          "expired": "Expiré",
+          "not_available": "Non disponible",
+          "not_installed": "Non installé"
+        }
+      },
+      "purification_n60_left_days": {
+        "name": "Jours restants purification N60"
+      },
+      "last_pack_time": {
+        "name": "Dernier emballage"
+      },
+      "last_bag_replacement_time": {
+        "name": "Dernier remplacement de sac"
+      },
+      "sand_tray_left_days": {
+        "name": "Jours restants plateau de litière"
+      }
+    },
+    "switch": {
+      "soft_stool": {
+        "name": "Détection IA des selles molles"
+      },
+      "soft_stool_stop_cleaning": {
+        "name": "Arrêter le nettoyage si des selles molles sont détectées"
+      },
+      "auto_clean": {
+        "name": "Nettoyage automatique"
+      },
+      "auto_deodor": {
+        "name": "Désodorisation automatique"
+      },
+      "avoid_repeat_clean": {
+        "name": "Éviter les nettoyages répétés"
+      },
+      "camera": {
+        "name": "Caméra"
+      },
+      "child_lock": {
+        "name": "Sécurité enfant"
+      },
+      "cont_rotation": {
+        "name": "Rotation continue"
+      },
+      "deep_cleaning": {
+        "name": "Nettoyage en profondeur"
+      },
+      "deep_deodor": {
+        "name": "Désodorisation en profondeur"
+      },
+      "deodorant_n50_notify": {
+        "name": "Notif si remplacement N50 nécessaire"
+      },
+      "deodorant_n60_notify": {
+        "name": "Notif si remplacement N60 nécessaire"
+      },
+      "desiccant_notif": {
+        "name": "Notif si changement déshydratant nécessaire"
+      },
+      "dispensing_notif": {
+        "name": "Notif lors de la distribution"
+      },
+      "display": {
+        "name": "Affichage"
+      },
+      "do_not_disturb": {
+        "name": "Ne pas déranger"
+      },
+      "feed_sound": {
+        "name": "Son du repas"
+      },
+      "feed_tone": {
+        "name": "Bip du repas"
+      },
+      "highlight": {
+        "name": "Mise en évidence du suivi de l'animal"
+      },
+      "indicator_light": {
+        "name": "Voyant lumineux"
+      },
+      "camera_light": {
+        "name": "Voyant de la caméra"
+      },
+      "kitten_mode": {
+        "name": "Mode chaton"
+      },
+      "lack_liquid_notify": {
+        "name": "Notif si manque de liquide de purification"
+      },
+      "pet_toileting_notif": {
+        "name": "Notif quand l'animal est à la litière"
+      },
+      "lack_sand_notify": {
+        "name": "Notif si manque de litière"
+      },
+      "light": {
+        "name": "Lumière"
+      },
+      "light_assist": {
+        "name": "Lumière pendant le nettoyage"
+      },
+      "light_weight": {
+        "name": "Poids léger"
+      },
+      "litter_full_notify": {
+        "name": "Notif si bac à déchets plein"
+      },
+      "low_battery_notif": {
+        "name": "Notif si batterie faible"
+      },
+      "microphone": {
+        "name": "Microphone"
+      },
+      "move_notif": {
+        "name": "Notif en cas de mouvement"
+      },
+      "night_vision": {
+        "name": "Vision nocturne"
+      },
+      "periodic_cleaning": {
+        "name": "Nettoyage périodique"
+      },
+      "periodic_deodorizing": {
+        "name": "Désodorisation périodique"
+      },
+      "pet_eat_notif": {
+        "name": "Notif quand l'animal mange"
+      },
+      "pet_in_notify": {
+        "name": "Notif quand l'animal entre"
+      },
+      "pet_tracking": {
+        "name": "Suivi de l'animal"
+      },
+      "pet_visit_notif": {
+        "name": "Notif lors d'une visite de l'animal"
+      },
+      "power": {
+        "name": "Alimentation"
+      },
+      "proximity_sensor": {
+        "name": "Mode capteur"
+      },
+      "refill_notif": {
+        "name": "Notif si remplissage nécessaire"
+      },
+      "sand_saving": {
+        "name": "Économie de litière"
+      },
+      "shortage_alarm": {
+        "name": "Alarme de pénurie"
+      },
+      "surplus_control": {
+        "name": "Contrôle du surplus"
+      },
+      "system_notification": {
+        "name": "Son système"
+      },
+      "video_timestamp": {
+        "name": "Afficher l'horodatage"
+      },
+      "voice_dispense": {
+        "name": "Distribution vocale"
+      },
+      "waste_covering": {
+        "name": "Couverture des déchets"
+      },
+      "work_log_notify": {
+        "name": "Notif lors de l'exécution des tâches programmées"
+      },
+      "toilet_light": {
+        "name": "Lumière pendant la litière"
+      },
+      "privacy_mode": {
+        "name": "Mode confidentialité"
+      },
+      "work_notify": {
+        "name": "Notif pendant le nettoyage de l'appareil"
+      },
+      "privacy_camera_off": {
+        "name": "Confidentialité : caméra éteinte"
+      },
+      "privacy_camera_inward": {
+        "name": "Confidentialité : caméra vers l'intérieur"
+      },
+      "privacy_microphone_off": {
+        "name": "Confidentialité : microphone éteint"
+      },
+      "ai_ph_detection": {
+        "name": "Détection IA du pH"
+      },
+      "ai_yowling": {
+        "name": "Détection IA des hurlements"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "Lumière"
+      }
+    },
+    "camera": {
+      "camera": {
+        "name": "Flux caméra"
+      }
+    },
+    "text": {
+      "manual_feed_dual_h1": {
+        "name": "Alimentation manuelle réservoir 1"
+      },
+      "manual_feed_dual_h2": {
+        "name": "Alimentation manuelle réservoir 2"
+      },
+      "manual_feed_single": {
+        "name": "Alimentation manuelle"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "always_on_stream": "Rediffusion permanente",
+          "region": "Région",
+          "time_zone": "Fuseau horaire"
+        },
+        "data_description": {
+          "always_on_stream": "Garde la session de rediffusion interne préchargée afin que l'affichage sur navigateur, les clients WHEP et les consommateurs génériques de flux vidéo de cette caméra puissent se connecter rapidement. Ce flux peut également être réutilisé par d'autres appareils. Cela maintient une session active en amont et consomme plus de ressources locales et cloud."
+        },
+        "sections": {
+          "bluetooth_options": {
+            "data": {
+              "ble_relay_enabled": "Activer le relais Bluetooth",
+              "scan_interval_bluetooth": "Intervalle de rafraîchissement Bluetooth (minutes)"
+            },
+            "data_description": {
+              "ble_relay_enabled": "Si désactivé, les mises à jour de la fontaine ne se feront que lorsque l'appareil sera rafraîchi via l'application."
+            },
+            "description": "Ces options ne sont effectives que si vous possédez une fontaine et au moins un appareil pouvant faire office de relais Bluetooth (ex: distributeur, litière). Consultez l'application Petkit pour plus d'informations.",
+            "name": "Options Bluetooth"
+          },
+          "medias_options": {
+            "data": {
+              "delete_media_after": "Supprimer les médias après (jours)",
+              "media_dl_image": "Récupérer les images",
+              "media_dl_video": "Récupérer les vidéos",
+              "media_ev_type": "Type d'événement pour le téléchargement",
+              "media_path": "Chemin des médias",
+              "scan_interval_media": "Intervalle de rafraîchissement des médias (minutes)"
+            },
+            "data_description": {
+              "delete_media_after": "Supprime les médias téléchargés après le nombre de jours spécifié. (0 = ne jamais supprimer)",
+              "media_dl_image": "Télécharge toutes les images de vos appareils, filtrées selon les événements sélectionnés ci-dessous (aucun abonnement Care+ actif requis).",
+              "media_dl_video": "Télécharge toutes les vidéos de vos appareils, filtrées selon les événements sélectionnés ci-dessous. (nécessite un abonnement Care+ actif)",
+              "media_path": "Chemin où seront stockés les médias. Si non spécifié, ils seront stockés dans le dossier /media de Home Assistant.",
+              "scan_interval_media": "Intervalle pour télécharger les nouveaux médias (images et vidéos) depuis les serveurs de Petkit."
+            },
+            "description": "Ces options ne s'appliquent que si vous possédez au moins un appareil (ex: distributeur, litière) capable de capturer des images et des vidéos.",
+            "name": "Options des médias"
+          },
+          "notifications_options": {
+            "data": {
+              "enabled_notifications": "Notifications activées"
+            },
+            "data_description": {
+              "enabled_notifications": "Sélectionnez les événements PetKit qui doivent déclencher une notification persistante dans Home Assistant. Décochez une catégorie pour la rendre silencieuse. Ces catégories sont indépendantes des commutateurs de notification de l'appareil configurés dans l'application Petkit."
+            },
+            "description": "Contrôlez quels événements des appareils PetKit déclenchent une notification persistante dans Home Assistant, indépendamment des paramètres de l'application Petkit.",
+            "name": "Notifications"
+          }
+        },
+        "title": "Configuration de l'intégration Petkit"
+      }
+    }
+  },
+  "selector": {
+    "petkit_notification_category": {
+      "options": {
+        "feeder_error": "Distributeur — erreur de l'appareil",
+        "feeder_food_low": "Distributeur — niveau de nourriture faible",
+        "fountain_filter": "Fontaine à eau — le filtre doit être remplacé",
+        "fountain_water_low": "Fontaine à eau — niveau d'eau faible",
+        "litter_box_full": "Litière — bac à déchets plein",
+        "litter_error": "Litière — erreur de l'appareil",
+        "litter_event": "Litière — événements de nettoyage / visites de l'animal",
+        "litter_sand_low": "Litière — niveau de litière faible"
+      }
+    }
+  }
 }
