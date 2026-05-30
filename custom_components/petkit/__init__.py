@@ -6,7 +6,7 @@ from datetime import timedelta
 from typing import TYPE_CHECKING
 
 from pypetkitapi import Feeder, PetKitClient
-from pypetkitapi.command import FeederCommand, LitterCommand, PetCommand
+from pypetkitapi.command import FeederCommand, PetCommand
 import voluptuous as vol
 
 from homeassistant.const import (
