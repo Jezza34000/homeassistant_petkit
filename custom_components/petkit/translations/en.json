@@ -152,6 +152,15 @@
       }
     },
     "button": {
+      "refill": {
+        "name": "Refill"
+      },
+      "drain": {
+        "name": "Drain"
+      },
+      "drain_and_flush": {
+        "name": "Drain and flush"
+      },
       "action_continue": {
         "name": "Action : Continue"
       },
@@ -291,6 +300,15 @@
       },
       "surplus_level": {
         "name": "Surplus control level"
+      },
+      "auto_drain_flush": {
+        "name": "Auto drain and flush"
+      },
+      "auto_drain_refill": {
+        "name": "Auto dran and refill"
+      },
+      "flow": {
+        "name": "Flow"
       }
     },
     "sensor": {
@@ -599,6 +617,9 @@
       "auto_clean": {
         "name": "Auto clean"
       },
+      "auto_refill": {
+        "name": "Auto refill"
+      },
       "auto_deodor": {
         "name": "Auto deodorizing"
       },
@@ -712,6 +733,9 @@
       },
       "proximity_sensor": {
         "name": "Sensor mode"
+      },
+      "filter_left_days": {
+        "name": "Filter left days"
       },
       "refill_notif": {
         "name": "Notif on refill need"

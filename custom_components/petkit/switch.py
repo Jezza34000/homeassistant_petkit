@@ -848,6 +848,18 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
                 device.id, FountainAction.POWER_OFF
             ),
         ),
+        PetKitSwitchDesc(
+            key="Auto refill",
+            translation_key="auto_refill",
+            value=lambda device: device.settings.add_water_switch,
+            entity_category=EntityCategory.CONFIG,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"addWaterSwitch": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"addWaterSwitch": 0}
+            ),
+        ),
     ],
     Purifier: [
         *COMMON_ENTITIES,

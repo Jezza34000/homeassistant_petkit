@@ -646,6 +646,13 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
                 else None
             ),
         ),
+        PetKitSensorDesc(
+            key="Filter left days",
+            translation_key="filter_left_days",
+            state_class=SensorStateClass.MEASUREMENT,
+            native_unit_of_measurement=UnitOfTime.DAYS,
+            value=lambda device: device.state.filter_left_days,
+        ),
     ],
     Purifier: [
         *COMMON_ENTITIES,

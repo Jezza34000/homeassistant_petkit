@@ -141,6 +141,21 @@ FOUNTAIN_WORKING_MODE_CTW3 = {
     3: "Battery",
 }
 
+FOUNTAIN_WORKING_MODE_W7H = {
+    0: "Do not flow",
+    1: "Continuous",
+    2: "Intermittent",
+    3: "Motion activated",
+}
+
+FOUNTAIN_DRAIN_REFILL_CYCLE = {0: "Disabled"} | {
+    i: f"Every {i} day{'s' if i > 1 else ''}" for i in range(1, 8)
+}
+
+FOUNTAIN_DRAIN_FLUSH_CYCLE = {0: "Disabled"} | {
+    i: f"Every {i} day{'s' if i > 1 else ''}" for i in range(1, 8)
+}
+
 FOUNTAIN_WORKING_MODE = {
     1: "Normal",
     2: "Smart",
