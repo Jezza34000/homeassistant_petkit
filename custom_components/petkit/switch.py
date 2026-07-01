@@ -9,6 +9,7 @@ from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
 from pypetkitapi import (
+    CTW3,
     DEVICES_LITTER_BOX,
     FEEDER_MINI,
     LITTER_WITH_CAMERA,
@@ -46,9 +47,11 @@ class PetKitSwitchDesc(PetKitDescSensorBase, SwitchEntityDescription):
     set_value: Callable[[Any, Any, Any], Any] | None = None
 
 
+INDICATOR_LIGHT = "Indicator light"
+
 COMMON_ENTITIES = [
     PetKitSwitchDesc(
-        key="Indicator light",
+        key=INDICATOR_LIGHT,
         translation_key="indicator_light",
         value=lambda device: device.settings.light_mode,
         entity_category=EntityCategory.CONFIG,
@@ -74,7 +77,7 @@ COMMON_ENTITIES = [
         only_for_types=DEVICES_LITTER_BOX,
     ),
     PetKitSwitchDesc(
-        key="Indicator light",
+        key=INDICATOR_LIGHT,
         translation_key="indicator_light",
         value=lambda device: device.settings.light_mode,
         entity_category=EntityCategory.CONFIG,
@@ -833,6 +836,32 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
     ],
     WaterFountain: [
         *COMMON_ENTITIES,
+        PetKitSwitchDesc(
+            key=INDICATOR_LIGHT,
+            translation_key="indicator_light",
+            value=lambda device: device.settings.lamp_ring_switch,
+            entity_category=EntityCategory.CONFIG,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"lampRingSwitch": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"lampRingSwitch": 0}
+            ),
+            ignore_types=[CTW3],
+        ),
+        PetKitSwitchDesc(
+            key="Do not disturb",
+            translation_key="do_not_disturb",
+            value=lambda device: device.settings.no_disturbing_switch,
+            entity_category=EntityCategory.CONFIG,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"noDisturbingSwitch": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"noDisturbingSwitch": 0}
+            ),
+            ignore_types=[CTW3],
+        ),
         PetKitSwitchDesc(
             key="Power",
             translation_key="power",
