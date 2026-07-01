@@ -18,6 +18,11 @@ CONF_SCAN_INTERVAL_MEDIA = "scan_interval_media"
 
 ADVANCED_SECTION = "advanced_options"
 
+ADVANCED_POLLING_SECTION = "advanced_polling_options"
+CONF_SCAN_INTERVAL_SLOW = "scan_interval_slow"
+CONF_SCAN_INTERVAL_DEFAULT = "scan_interval_default"
+CONF_SMART_POLLING_BOOST_DURATION = "smart_polling_boost_duration"
+
 BT_SECTION = "bluetooth_options"
 CONF_BLE_RELAY_ENABLED = "ble_relay_enabled"
 CONF_SCAN_INTERVAL_BLUETOOTH = "scan_interval_bluetooth"
@@ -81,6 +86,10 @@ MEDIA_ROOT = "/media/local"
 # Update interval
 SCAN_INTERVAL_FAST = 5
 SCAN_INTERVAL_SLOW = 190
+
+# Default smart polling boost duration in seconds. The previous behaviour was
+# 3 ticks at SCAN_INTERVAL_FAST (5 sec), so the equivalent default is 15 sec.
+DEFAULT_SMART_POLLING_BOOST_DURATION = 15
 
 # Messages constants
 NO_ERROR = "No error"

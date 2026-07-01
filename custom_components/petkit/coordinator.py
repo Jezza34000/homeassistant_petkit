@@ -33,6 +33,7 @@ from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
+    ADVANCED_POLLING_SECTION,
     BT_SECTION,
     CONF_BLE_RELAY_ENABLED,
     CONF_DELETE_AFTER,
@@ -40,6 +41,9 @@ from .const import (
     CONF_MEDIA_DL_VIDEO,
     CONF_MEDIA_EV_TYPE,
     CONF_MEDIA_PATH,
+    CONF_SCAN_INTERVAL_DEFAULT,
+    CONF_SCAN_INTERVAL_SLOW,
+    CONF_SMART_POLLING_BOOST_DURATION,
     DEFAULT_BLUETOOTH_RELAY,
     DEFAULT_DELETE_AFTER,
     DEFAULT_DL_IMAGE,
@@ -47,6 +51,7 @@ from .const import (
     DEFAULT_EVENTS,
     DEFAULT_MEDIA_PATH,
     DEFAULT_SCAN_INTERVAL,
+    DEFAULT_SMART_POLLING_BOOST_DURATION,
     DOMAIN,
     LOGGER,
     MEDIA_SECTION,
@@ -73,21 +78,52 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
         self.current_devices = set()
         self.fast_poll_tic = 0
         self.mqtt_connected = False
+        self._reload_polling_options()
 
-    def enable_smart_polling(self, nb_tic: int) -> None:
-        """Enable smart polling."""
+    def _reload_polling_options(self) -> None:
+        """Read polling intervals from the config entry options.
+
+        Falls back to historical defaults when the section is missing so
+        existing entries (and tests that build entries without options)
+        keep working without an explicit migration step.
+        """
+        polling_options = self.config_entry.options.get(ADVANCED_POLLING_SECTION, {})
+        self.scan_interval_slow = polling_options.get(
+            CONF_SCAN_INTERVAL_SLOW, SCAN_INTERVAL_SLOW
+        )
+        self.scan_interval_default = polling_options.get(
+            CONF_SCAN_INTERVAL_DEFAULT, DEFAULT_SCAN_INTERVAL
+        )
+        self.smart_polling_boost_duration = polling_options.get(
+            CONF_SMART_POLLING_BOOST_DURATION, DEFAULT_SMART_POLLING_BOOST_DURATION
+        )
+
+    def enable_smart_polling(self, boost_duration: int | None = None) -> None:
+        """Enable smart polling for the configured boost duration.
+
+        Args:
+            boost_duration: Override duration in seconds. When ``None`` (the
+                default), the coordinator uses the user-configured value from
+                ``advanced_polling_options.smart_polling_boost_duration``.
+
+        """
         if self.fast_poll_tic > 0:
             LOGGER.debug(
                 "Fast poll tic already enabled for %s tics", self.fast_poll_tic
             )
             return
 
+        if boost_duration is None:
+            boost_duration = self.smart_polling_boost_duration
+
+        nb_tic = max(1, boost_duration // SCAN_INTERVAL_FAST)
         self.update_interval = timedelta(seconds=SCAN_INTERVAL_FAST)
         self.fast_poll_tic = nb_tic
         LOGGER.debug(
-            "Fast poll tic enabled for %s tics (at %ssec interval)",
+            "Fast poll tic enabled for %s tics (at %ssec interval, ~%ss total)",
             nb_tic,
             SCAN_INTERVAL_FAST,
+            nb_tic * SCAN_INTERVAL_FAST,
         )
 
     async def _update_smart_polling(self) -> None:
@@ -97,7 +133,9 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
             LOGGER.debug("Fast poll tic remaining: %s", self.fast_poll_tic)
         else:
             base_interval = (
-                SCAN_INTERVAL_SLOW if self.mqtt_connected else DEFAULT_SCAN_INTERVAL
+                self.scan_interval_slow
+                if self.mqtt_connected
+                else self.scan_interval_default
             )
 
             if self.update_interval != timedelta(seconds=base_interval):

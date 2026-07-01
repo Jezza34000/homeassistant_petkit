@@ -431,7 +431,7 @@ class PetkitButton(PetkitEntity, ButtonEntity):
     async def async_press(self) -> None:
         """Handle the button press."""
         LOGGER.debug("Button pressed: %s", self.entity_description.key)
-        self.coordinator.enable_smart_polling(3)
+        self.coordinator.enable_smart_polling()
         await self.entity_description.action(
             self.coordinator.config_entry.runtime_data.client, self.device
         )
