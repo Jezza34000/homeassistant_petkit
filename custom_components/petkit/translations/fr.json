@@ -315,6 +315,9 @@
       "battery_voltage": {
         "name": "Tension de la batterie"
       },
+      "device_records_history": {
+        "name": "Historique des enregistrements de l'appareil"
+      },
       "supply_voltage": {
         "name": "Tension d'alimentation"
       },

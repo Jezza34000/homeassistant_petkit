@@ -1,0 +1,277 @@
+blueprint:
+  name: "Petkit litter box: Auto-correct litter box records via Frigate"
+  description: >
+    Updates the pet usage for a litterbox based on frigate sub-label detections of cats,
+    assuming that there is a camera that can see the litterbox.
+    Sends the update to the Petkit API to correct pet usage records.
+
+
+    **Setup**
+
+    1. Setup frigate detection for cats, and train sub-labels for each cat, see
+    [frigate custom object classification documentation](https://docs.frigate.video/configuration/custom_classification/object_classification).
+
+    **Note that the Frigate sub-label should exactly match (case-sensitive)
+    the name provided in the cat name to ID mapping.** If you have existing sub-labels,
+    you can map them to the cat names in the optional frigate mapping.
+
+    2. Create a text helper: `Settings -> Devices & Services -> Helpers ->
+    Create Helper -> Text`.
+
+    Suggested name: `Last cat seen on camera`.
+
+    3. Create a date/time helper: `Settings -> Devices & Services -> Helpers
+    -> Create Helper -> Date and/or time`.
+
+    Suggested name: `Time cat seen on camera`.
+
+    4. Import this blueprint, then create an automation from it. Pick your litterbox
+    entity and the helpers you just created.
+  author: "sovanyio"
+  homeassistant:
+    min_version: 2024.6.0
+  domain: automation
+  source_url: https://github.com/Jezza34000/homeassistant_petkit/blob/main/blueprints/automation/petkit/litterbox_frigate_pet_correction.yaml
+  input:
+    helpers:
+      name: Settings
+      icon: mdi:cogs
+      collapsed: false
+      input:
+        cat_name_helper:
+          name: Cat name helper
+          description: The helper entity that stores the cat's name.
+          selector:
+            entity:
+              domain: input_text
+        cat_timestamp_helper:
+          name: Cat timestamp helper
+          description: The helper entity that stores the cat's timestamp.
+          selector:
+            entity:
+              domain: input_datetime
+        time_delta:
+          name: Time delta
+          description: Maximum time difference between frigate detection and petkit record in seconds.
+          default: 300
+          selector:
+            number:
+              min: 0
+              step: 1
+    frigate:
+      name: Frigate configuration
+      icon: mdi:cctv
+      collapsed: false
+      input:
+        target_camera:
+          name: Camera name
+          description: "The Frigate camera name (e.g., litter_cam)."
+          selector:
+            text:
+    petkit:
+      name: Litter box configuration
+      icon: mdi:toilet
+      collapsed: false
+      input:
+        litterbox_records:
+          name: Litterbox device records history sensor
+          description: The device records history sensor entity for the litterbox.
+          selector:
+            entity:
+              domain: sensor
+              integration: petkit
+        litterbox_events:
+          name: Litterbox last event sensor
+          description: The device last event sensor entity for the litterbox.
+          selector:
+            entity:
+              domain: sensor
+              integration: petkit
+        cat_id_mapping:
+          name: Cat name to ID mapping
+          description: |
+            A mapping of case-sensitive cat names (frigate sub_label) to cat IDs (petkit id).
+
+            ```
+            Mittens: 1234567890
+            Whiskers: 0987654321
+            ```
+          selector:
+            object:
+        frigate_mapping:
+          name: Frigate mapping
+          description: |
+            An optional mapping of case-sensitive Frigate sub_labels to PetKit cat names.
+            Useful if your Frigate labels differ from the names in the ID mapping.
+
+            ```
+            Cat_mittens: Mittens
+            Cat_whiskers: Whiskers
+            ```
+          selector:
+            object:
+          default: {}
+
+    notification:
+      name: Notification
+      icon: mdi:bell
+      collapsed: false
+      input:
+        notify_service_name:
+          name: Notification service name
+          description: |
+            Enter the notification service name for your device, without the 'notify.' prefix.
+
+            For example, if you have a device called "My Phone", the
+            notification service is "notify.mobile_app_my_phone".
+            Enter 'mobile_app_my_phone' in this field.
+          selector:
+            text:
+        notify_title:
+          name: Notification title
+          description: Supports same variables as message.
+          selector:
+            text:
+          default: Petkit Correction 🐈
+        notify_message:
+          name: Notification message
+          description: |
+            Relevant variables available:
+
+            - Latest usage record
+
+              ```
+              latest_record:
+                avatar: remote url of image saved on petkit app
+                content:
+                  petWeight: weight in grams
+                  timeIn: time cat entered litterbox
+                  timeOut: time cat left litterbox
+                petName: pet's name in petkit app
+              ```
+            - Frigate's classification sub-label
+
+              `frigate_cat_name`
+          selector:
+            text:
+              multiline: true
+          default: |
+            PetKit identified the cat as {{ latest_record.petName |
+            default('Unknown') }},  but Frigate confirmed it was {{ frigate_cat_name }}. 
+
+            The record has been updated.
+        notify_data:
+          name: Notification data for companion app
+          description: |
+            Additional data for notifications, channels, urgency, etc. See
+            [companion app notification docs](https://companion.home-assistant.io/docs/notifications/notifications-basic/).
+          selector:
+            object:
+          default: {}
+
+variables:
+  # shared
+  name_helper: !input cat_name_helper
+  time_helper: !input cat_timestamp_helper
+  names: !input cat_id_mapping
+  frigate_mapping: !input frigate_mapping
+
+  # litterbox
+  delta: !input time_delta
+  records_sensor: !input litterbox_records
+  latest_record: >
+    {% set records = state_attr(records_sensor, 'records') | default([]) if trigger.platform == 'state' else [] %}
+    {{ records | selectattr('eventType', 'eq', 10) | first if records | length > 0 else none }}
+
+  # notification
+  notify_service_name: !input notify_service_name
+
+  # frigate
+  camera: !input target_camera
+  frigate_cat_name: "{{ states(name_helper) }}"
+
+triggers:
+  - trigger: state
+    entity_id: !input litterbox_events
+    to:
+      - "pet_out"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 3
+    id: event_update
+
+  - trigger: mqtt
+    topic: frigate/events
+    value_template: "{{ value_json['after']['label'] }}"
+    # Only trigger if the label is exactly "cat"
+    payload: "cat"
+    id: frigate_event
+
+actions:
+  - choose:
+      # frigate saw a cat
+      - conditions:
+          - condition: trigger
+            id: frigate_event
+          # frigate saw a cat in our mapping, sanity check
+          - condition: template
+            value_template: >-
+              {% set raw_label = trigger.payload_json['after']['sub_label'][0] if trigger.payload_json['after']['sub_label'] is not none else '' %}
+              {% set mapped_label = frigate_mapping[raw_label] if frigate_mapping is mapping and raw_label in frigate_mapping else raw_label %}
+              {{ mapped_label in names.keys() }}
+          # detection was on the configured camera
+          - condition: template
+            value_template: "{{ camera == '' or trigger.payload_json['after']['camera'] == camera }}"
+        sequence:
+          - action: input_text.set_value
+            target:
+              entity_id: !input cat_name_helper
+            data:
+              value: >-
+                {% set raw_label = trigger.payload_json['after']['sub_label'][0] if trigger.payload_json['after']['sub_label'] is not none else '' %}
+                {% set mapped_label = frigate_mapping[raw_label] if frigate_mapping is mapping and raw_label in frigate_mapping else raw_label %}
+                {{ mapped_label }}
+          - action: input_datetime.set_datetime
+            target:
+              entity_id: !input cat_timestamp_helper
+            data:
+              timestamp: "{{ now().timestamp() }}"
+
+      # pet left litter box
+      - conditions:
+          - condition: trigger
+            id: event_update
+          # there is a usage record
+          - condition: template
+            value_template: "{{ latest_record is not none }}"
+          # frigate's last detection is in our mapping, sanity check
+          - condition: template
+            value_template: "{{ frigate_cat_name in names.keys() }}"
+          # the pet in the latest record is not the same as frigate's last detection
+          - condition: template
+            value_template: "{{ latest_record.petId | string != names.get(frigate_cat_name) | string }}"
+          # frigate's last detection was within the configured time window
+          - condition: template
+            value_template: "{{ (latest_record.content.timeOut - as_timestamp(states(time_helper))) | abs < delta }}"
+        sequence:
+          # make the correction
+          - action: petkit.update_litter_box_usage_record
+            data:
+              device_id: "{{ latest_record.deviceId }}"
+              old_pet_id: "{{ latest_record.petId }}"
+              new_pet_id: "{{ names.get(frigate_cat_name) }}"
+              time_out: "{{ latest_record.content.timeOut }}"
+
+          # send the notification, if configured
+          - if:
+              - condition: template
+                value_template: "{{ notify_service_name | length > 0 }}"
+            then:
+              - action: "notify.{{ notify_service_name }}"
+                data:
+                  title: !input notify_title
+                  message: !input notify_message
+                  data: !input notify_data
+
+mode: parallel

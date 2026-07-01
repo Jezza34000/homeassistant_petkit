@@ -573,6 +573,9 @@
         "total_time": {
           "name": "Gesamtnutzung"
         }
+      },
+      "device_records_history": {
+        "name": "Gerätedatensatzverlauf"
       }
     }
   }

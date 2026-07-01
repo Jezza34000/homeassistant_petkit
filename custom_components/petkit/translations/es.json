@@ -580,6 +580,9 @@
             },
             "sand_tray_left_days": {
                 "name": "Días restantes de la bandeja"
+            },
+            "device_records_history": {
+                "name": "Historial de registros del dispositivo"
             }
         },
         "switch": {

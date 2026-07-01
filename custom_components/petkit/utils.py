@@ -1,6 +1,7 @@
 """Util functions for the Petkit integration."""
 
 from datetime import datetime
+import json
 
 from pypetkitapi import LitterRecord, RecordsItems, WorkState
 
@@ -346,3 +347,34 @@ def get_dispense_status(
         status = "pending"
 
     return source, status, plan_amount1, plan_amount2, disp_amount1, disp_amount2
+
+
+def get_device_records_history(device) -> dict[str, any] | None:
+    """Get the full device records history as a dictionary.
+
+    This includes subContent for each record, making it suitable for a
+    Home Assistant sensor attribute.
+    """
+    records = getattr(device, "device_records", None)
+    if not records:
+        return None
+
+    # pypetkitapi uses Pydantic. Use json serialization to ensure basic types
+    serialized_records = []
+    for record in records:
+        try:
+            if hasattr(record, "model_dump_json"):
+                serialized_records.append(
+                    json.loads(record.model_dump_json(by_alias=True, exclude_none=True))
+                )
+            elif hasattr(record, "json"):
+                serialized_records.append(
+                    json.loads(record.json(by_alias=True, exclude_none=True))
+                )
+            else:
+                # Fallback if not a pydantic model
+                serialized_records.append(vars(record))
+        except (TypeError, ValueError) as e:
+            LOGGER.error("Failed to serialize litter record: %s", e)
+
+    return {"records": serialized_records[::-1]}
