@@ -23,6 +23,7 @@ from pypetkitapi import (
     T6,
     T7,
     W5,
+    W7H,
     BluetoothState,
     Feeder,
     Litter,
@@ -652,6 +653,59 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             state_class=SensorStateClass.MEASUREMENT,
             native_unit_of_measurement=UnitOfTime.DAYS,
             value=lambda device: device.state.filter_left_days,
+        ),
+        PetKitSensorDesc(
+            key="Heater real temperature",
+            translation_key="heater_real_temp",
+            state_class=SensorStateClass.MEASUREMENT,
+            device_class=SensorDeviceClass.TEMPERATURE,
+            native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+            value=lambda device: round(device.state.heat_real_temp / 10, 1),
+            only_for_types=[W7H],
+        ),
+        PetKitSensorDesc(
+            key="Drink count",
+            translation_key="drink_count",
+            state_class=SensorStateClass.TOTAL_INCREASING,
+            value=lambda device: device.drink_count,
+        ),
+        PetKitSensorDesc(
+            key="Drink time avg",
+            translation_key="drink_time_avg",
+            state_class=SensorStateClass.MEASUREMENT,
+            native_unit_of_measurement=UnitOfTime.SECONDS,
+            value=lambda device: device.drink_time_avg,
+        ),
+        PetKitSensorDesc(
+            key="Next flush",
+            translation_key="next_flush_time",
+            device_class=SensorDeviceClass.TIMESTAMP,
+            value=lambda device: (
+                datetime.strptime(device.next_flush_time, "%Y/%m/%d %H:%M")
+                if device.next_flush_time
+                else None
+            ),
+        ),
+        PetKitSensorDesc(
+            key="Next water change",
+            translation_key="next_water_change_time",
+            device_class=SensorDeviceClass.TIMESTAMP,
+            value=lambda device: (
+                datetime.strptime(device.next_water_change_time, "%Y/%m/%d %H:%M")
+                if device.next_water_change_time
+                else None
+            ),
+        ),
+        PetKitSensorDesc(
+            key="Last drink time",
+            translation_key="drink_time",
+            device_class=SensorDeviceClass.TIMESTAMP,
+            value=lambda device: (
+                datetime.fromtimestamp(device.state.drink_time, tz=UTC)
+                if device.state.drink_time
+                else None
+            ),
+            entity_category=EntityCategory.DIAGNOSTIC,
         ),
     ],
     Purifier: [

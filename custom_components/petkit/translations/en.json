@@ -51,6 +51,27 @@
       "battery": {
         "name": "Battery"
       },
+      "water_pump_running": {
+        "name": "Water pump running"
+      },
+      "clean_water_tank_empty": {
+        "name": "Clean water tank empty"
+      },
+      "waste_water_tank_full": {
+        "name": "Waste water tank full"
+      },
+      "add_water_state": {
+        "name": "Adding water"
+      },
+      "flush_state": {
+        "name": "Flushing"
+      },
+      "disinfect_state": {
+        "name": "Disinfecting"
+      },
+      "stg_full_state": {
+        "name": "Water storage full"
+      },
       "weight_error": {
         "name": "Weight error"
       },
@@ -263,6 +284,18 @@
       "cleaning_delay": {
         "name": "Cleaning delay"
       },
+      "heater_temp": {
+        "name": "Heater temperature"
+      },
+      "fountain_time": {
+        "name": "Fountain run time"
+      },
+      "sleep_time": {
+        "name": "Sleep time"
+      },
+      "pet_notify_interval": {
+        "name": "Pet notify interval"
+      },
       "manual_feed": {
         "name": "Manual feed"
       },
@@ -320,6 +353,24 @@
       },
       "pet_last_urination_date": {
         "name": "Last urination"
+      },
+      "heater_real_temp": {
+        "name": "Heater temperature"
+      },
+      "drink_count": {
+        "name": "Drink count"
+      },
+      "drink_time_avg": {
+        "name": "Average drink time"
+      },
+      "next_flush_time": {
+        "name": "Next flush"
+      },
+      "next_water_change_time": {
+        "name": "Next water change"
+      },
+      "drink_time": {
+        "name": "Last drink time"
       },
       "pet_last_defecation_date": {
         "name": "Last defecation"
@@ -619,6 +670,21 @@
       },
       "auto_refill": {
         "name": "Auto refill"
+      },
+      "heater_switch": {
+        "name": "Heater"
+      },
+      "auto_water_change": {
+        "name": "Auto water change"
+      },
+      "auto_flush": {
+        "name": "Auto flush"
+      },
+      "pet_detection": {
+        "name": "Pet detection"
+      },
+      "drink_detection": {
+        "name": "Drink detection"
       },
       "auto_deodor": {
         "name": "Auto deodorizing"

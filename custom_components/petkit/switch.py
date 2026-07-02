@@ -860,6 +860,42 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
                 device.id, DeviceCommand.UPDATE_SETTING, {"addWaterSwitch": 0}
             ),
         ),
+        PetKitSwitchDesc(
+            key="Pet detection",
+            translation_key="pet_detection",
+            entity_category=EntityCategory.CONFIG,
+            value=lambda device: device.settings.pet_detection,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"petDetection": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"petDetection": 0}
+            ),
+        ),
+        PetKitSwitchDesc(
+            key="Drink detection",
+            translation_key="drink_detection",
+            entity_category=EntityCategory.CONFIG,
+            value=lambda device: device.settings.drink_detection,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"drinkDetection": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"drinkDetection": 0}
+            ),
+        ),
+        PetKitSwitchDesc(
+            key="Heater",
+            translation_key="heater_switch",
+            entity_category=EntityCategory.CONFIG,
+            value=lambda device: device.settings.heater_switch,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"heaterSwitch": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"heaterSwitch": 0}
+            ),
+        ),
     ],
     Purifier: [
         *COMMON_ENTITIES,

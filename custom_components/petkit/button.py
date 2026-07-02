@@ -333,6 +333,15 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
             ),
             only_for_types=[W7H],
         ),
+        PetKitButtonDesc(
+            key="Reset filter",
+            translation_key="reset_filter",
+            action=lambda api, device: api.send_api_request(
+                device.id,
+                FountainCommand.RESET_FILTER,
+            ),
+            only_for_types=[W7H],
+        ),
     ],
     Purifier: [*COMMON_ENTITIES],
     Pet: [*COMMON_ENTITIES],

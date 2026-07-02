@@ -15,6 +15,7 @@ from pypetkitapi import (
     T5,
     T6,
     T7,
+    W7H,
     DeviceCommand,
     Feeder,
     FeederCommand,
@@ -32,7 +33,12 @@ from homeassistant.components.number import (
     NumberEntityDescription,
     NumberMode,
 )
-from homeassistant.const import EntityCategory, UnitOfMass, UnitOfTime
+from homeassistant.const import (
+    EntityCategory,
+    UnitOfMass,
+    UnitOfTemperature,
+    UnitOfTime,
+)
 
 from .const import LOGGER, POWER_ONLINE_STATE
 from .entity import PetKitDescSensorBase, PetkitEntity
@@ -153,7 +159,68 @@ NUMBER_MAPPING: dict[type[PetkitDevices], list[PetKitNumberDesc]] = {
             only_for_types=[T7],
         ),
     ],
-    WaterFountain: [*COMMON_ENTITIES],
+    WaterFountain: [
+        *COMMON_ENTITIES,
+        PetKitNumberDesc(
+            key="Heater temperature",
+            translation_key="heater_temp",
+            entity_category=EntityCategory.CONFIG,
+            native_min_value=20,
+            native_max_value=30,
+            native_step=1,
+            native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+            mode=NumberMode.SLIDER,
+            native_value=lambda device: device.settings.heater_temp / 10,
+            action=lambda api, device, value: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"heaterTemp": int(value * 10)}
+            ),
+            only_for_types=[W7H],
+        ),
+        PetKitNumberDesc(
+            key="Fountain time",
+            translation_key="fountain_time",
+            entity_category=EntityCategory.CONFIG,
+            native_min_value=1,
+            native_max_value=24,
+            native_step=1,
+            native_unit_of_measurement=UnitOfTime.HOURS,
+            mode=NumberMode.SLIDER,
+            native_value=lambda device: device.settings.fountain_time,
+            action=lambda api, device, value: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"fountainTime": int(value)}
+            ),
+        ),
+        PetKitNumberDesc(
+            key="Sleep time",
+            translation_key="sleep_time",
+            entity_category=EntityCategory.CONFIG,
+            native_min_value=1,
+            native_max_value=24,
+            native_step=1,
+            native_unit_of_measurement=UnitOfTime.HOURS,
+            mode=NumberMode.SLIDER,
+            native_value=lambda device: device.settings.sleep_time,
+            action=lambda api, device, value: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"sleepTime": int(value)}
+            ),
+        ),
+        PetKitNumberDesc(
+            key="Pet notify interval",
+            translation_key="pet_notify_interval",
+            entity_category=EntityCategory.CONFIG,
+            native_min_value=10,
+            native_max_value=180,
+            native_step=10,
+            native_unit_of_measurement=UnitOfTime.MINUTES,
+            mode=NumberMode.SLIDER,
+            native_value=lambda device: device.settings.pet_notify_interval,
+            action=lambda api, device, value: api.send_api_request(
+                device.id,
+                DeviceCommand.UPDATE_SETTING,
+                {"petNotifyInterval": int(value)},
+            ),
+        ),
+    ],
     Purifier: [*COMMON_ENTITIES],
     Pet: [
         *COMMON_ENTITIES,

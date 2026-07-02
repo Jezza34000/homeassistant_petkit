@@ -550,6 +550,13 @@
           "on": "mdi:air-filter"
         }
       },
+      "auto_refill": {
+        "default": "mdi:water-off-outline",
+        "state": {
+          "off": "mdi:water-off-outline",
+          "on": "mdi:water-plus-outline"
+        }
+      },
       "avoid_repeat_clean": {
         "default": "mdi:repeat",
         "state": {
