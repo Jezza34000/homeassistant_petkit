@@ -53,8 +53,6 @@ from homeassistant.const import (
 
 from .const import (
     BATTERY_LEVEL_MAP,
-    BINARY_SENSOR_ICON_DEFAULT_MAP,
-    BINARY_SENSOR_ICON_STATE_MAP,
     DEVICE_STATUS_MAP,
     DOMAIN,
     LOGGER,
@@ -66,8 +64,8 @@ from .entity import PetKitDescSensorBase, PetkitEntity
 from .utils import (
     get_raw_feed_plan_from_schedule,
     get_raw_schedule,
-    get_water_storage_status,
     get_waste_water_status,
+    get_water_storage_status,
     map_litter_event,
     map_work_state,
 )

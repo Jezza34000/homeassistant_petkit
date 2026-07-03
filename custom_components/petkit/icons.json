@@ -164,13 +164,6 @@
       "spray": {
         "default": "mdi:spray"
       },
-      "storage_low_sensor": {
-        "default": "mdi:water-minus",
-        "state": {
-          "off": "mdi:water-check",
-          "on": "mdi:water-minus"
-        }
-      },
       "storage_empty_sensor": {
         "default": "mdi:water-off",
         "state": {
@@ -178,11 +171,11 @@
           "on": "mdi:water-off"
         }
       },
-      "waste_full_sensor": {
-        "default": "mdi:storage-tank",
+      "storage_low_sensor": {
+        "default": "mdi:water-minus",
         "state": {
           "off": "mdi:water-check",
-          "on": "mdi:storage-tank"
+          "on": "mdi:water-minus"
         }
       },
       "waste_bin": {
@@ -197,6 +190,13 @@
         "state": {
           "off": "mdi:delete",
           "on": "mdi:delete-forever"
+        }
+      },
+      "waste_full_sensor": {
+        "default": "mdi:storage-tank",
+        "state": {
+          "off": "mdi:water-check",
+          "on": "mdi:storage-tank"
         }
       },
       "weight_error": {
@@ -224,8 +224,17 @@
       "action_reset": {
         "default": "mdi:refresh-circle"
       },
+      "deep_clean": {
+        "default": "mdi:kettle-steam"
+      },
       "deodorize": {
         "default": "mdi:spray"
+      },
+      "drain": {
+        "default": "mdi:water-minus"
+      },
+      "drain_and_flush": {
+        "default": "mdi:water-sync"
       },
       "dump_litter": {
         "default": "mdi:delete-circle-outline"
@@ -236,20 +245,11 @@
       "level_litter": {
         "default": "mdi:spirit-level"
       },
-      "reset_filter": {
-        "default": "mdi:filter-check-outline"
-      },
       "refill": {
         "default": "mdi:water-plus"
       },
-      "drain": {
-        "default": "mdi:water-minus"
-      },
-      "drain_and_flush": {
-        "default": "mdi:water-sync"
-      },
-      "deep_clean": {
-        "default": "mdi:kettle-steam"
+      "reset_filter": {
+        "default": "mdi:filter-check-outline"
       },
       "reset_n50_odor_eliminator": {
         "default": "mdi:restart"
@@ -389,10 +389,10 @@
       "error_message": {
         "default": "mdi:alert-circle"
       },
-      "filter_percent": {
+      "filter_left_days": {
         "default": "mdi:air-filter"
       },
-      "filter_left_days": {
+      "filter_percent": {
         "default": "mdi:air-filter"
       },
       "food_bowl_percentage": {
@@ -403,21 +403,6 @@
       },
       "food_left": {
         "default": "mdi:food-drumstick"
-      },
-      "water_storage_status": {
-        "default": "mdi:water",
-        "state": {
-          "ok": "mdi:water-check",
-          "low": "mdi:water-alert",
-          "empty": "mdi:water-off"
-        }
-      },
-      "waste_water_status": {
-        "default": "mdi:water-outline",
-        "state": {
-          "ok": "mdi:water-check",
-          "full": "mdi:water-alert"
-        }
       },
       "garbage_bag_box_state": {
         "default": "mdi:trash-can-outline"
@@ -570,6 +555,21 @@
       },
       "total_time": {
         "default": "mdi:timer-sand"
+      },
+      "waste_water_status": {
+        "default": "mdi:water-outline",
+        "state": {
+          "full": "mdi:water-alert",
+          "ok": "mdi:water-check"
+        }
+      },
+      "water_storage_status": {
+        "default": "mdi:water",
+        "state": {
+          "empty": "mdi:water-off",
+          "low": "mdi:water-alert",
+          "ok": "mdi:water-check"
+        }
       }
     },
     "switch": {

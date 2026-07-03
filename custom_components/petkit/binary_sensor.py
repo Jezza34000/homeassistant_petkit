@@ -32,11 +32,7 @@ from homeassistant.const import EntityCategory
 from . import LOGGER
 from .const import BINARY_SENSOR_ICON_DEFAULT_MAP, BINARY_SENSOR_ICON_STATE_MAP
 from .entity import PetKitDescSensorBase, PetkitEntity
-from .utils import (
-    storage_empty_triggered,
-    storage_low_triggered,
-    waste_full_triggered,
-)
+from .utils import storage_empty_triggered, storage_low_triggered, waste_full_triggered
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
