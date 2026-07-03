@@ -239,6 +239,18 @@
       "reset_filter": {
         "default": "mdi:filter-check-outline"
       },
+      "refill": {
+        "default": "mdi:water-plus"
+      },
+      "drain": {
+        "default": "mdi:water-minus"
+      },
+      "drain_and_flush": {
+        "default": "mdi:water-sync"
+      },
+      "deep_clean": {
+        "default": "mdi:kettle-steam"
+      },
       "reset_n50_odor_eliminator": {
         "default": "mdi:restart"
       },

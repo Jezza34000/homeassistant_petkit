@@ -34,7 +34,7 @@ from pypetkitapi import (
     Purifier,
     WaterFountain,
 )
-from pypetkitapi.command import FountainAction
+from pypetkitapi.command import FountainAction, FountainActionWIFI
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 
@@ -309,7 +309,7 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
             action=lambda api, device: api.send_api_request(
                 device.id,
                 DeviceCommand.CONTROL_DEVICE,
-                {DeviceAction.START: FountainCommand.REFILL},
+                {DeviceAction.START: FountainActionWIFI.REFILL},
             ),
             only_for_types=[W7H],
         ),
@@ -319,7 +319,7 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
             action=lambda api, device: api.send_api_request(
                 device.id,
                 DeviceCommand.CONTROL_DEVICE,
-                {DeviceAction.START: FountainCommand.DRAIN},
+                {DeviceAction.START: FountainActionWIFI.DRAIN},
             ),
             only_for_types=[W7H],
         ),
@@ -329,7 +329,17 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
             action=lambda api, device: api.send_api_request(
                 device.id,
                 DeviceCommand.CONTROL_DEVICE,
-                {DeviceAction.START: FountainCommand.DRAIN_AND_FLUSH},
+                {DeviceAction.START: FountainActionWIFI.DRAIN_AND_FLUSH},
+            ),
+            only_for_types=[W7H],
+        ),
+        PetKitButtonDesc(
+            key="Deep clean",
+            translation_key="deep_clean",
+            action=lambda api, device: api.send_api_request(
+                device.id,
+                DeviceCommand.CONTROL_DEVICE,
+                {DeviceAction.START: FountainActionWIFI.DEEP_CLEAN},
             ),
             only_for_types=[W7H],
         ),

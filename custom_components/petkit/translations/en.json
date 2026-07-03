@@ -182,6 +182,9 @@
       "drain_and_flush": {
         "name": "Drain and flush"
       },
+      "deep_clean": {
+        "name": "Deep clean"
+      },
       "action_continue": {
         "name": "Action : Continue"
       },
