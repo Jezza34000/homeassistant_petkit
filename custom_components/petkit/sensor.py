@@ -51,11 +51,23 @@ from homeassistant.const import (
     UnitOfVolume,
 )
 
-from .const import BATTERY_LEVEL_MAP, DEVICE_STATUS_MAP, DOMAIN, LOGGER, NO_ERROR
+from .const import (
+    BATTERY_LEVEL_MAP,
+    BINARY_SENSOR_ICON_DEFAULT_MAP,
+    BINARY_SENSOR_ICON_STATE_MAP,
+    DEVICE_STATUS_MAP,
+    DOMAIN,
+    LOGGER,
+    NO_ERROR,
+    SENSOR_ICON_DEFAULT_MAP,
+    SENSOR_ICON_STATE_MAP,
+)
 from .entity import PetKitDescSensorBase, PetkitEntity
 from .utils import (
     get_raw_feed_plan_from_schedule,
     get_raw_schedule,
+    get_water_storage_status,
+    get_waste_water_status,
     map_litter_event,
     map_work_state,
 )
@@ -562,8 +574,10 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             entity_category=EntityCategory.DIAGNOSTIC,
             device_class=SensorDeviceClass.ENERGY,
             native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-            value=lambda device: round(
-                ((0.75 * int(device.today_pump_run_time)) / 3600000), 4
+            value=lambda device: (
+                round(((0.75 * int(device.today_pump_run_time)) / 3600000), 4)
+                if device.today_pump_run_time is not None
+                else None
             ),
         ),
         PetKitSensorDesc(
@@ -587,8 +601,10 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             translation_key="purified_water",
             entity_category=EntityCategory.DIAGNOSTIC,
             state_class=SensorStateClass.MEASUREMENT,
-            value=lambda device: int(
-                ((1.5 * int(device.today_pump_run_time)) / 60) / 3.0
+            value=lambda device: (
+                int(((1.5 * int(device.today_pump_run_time)) / 60) / 3.0)
+                if device.today_pump_run_time is not None
+                else None
             ),
             only_for_types=[CTW3],
         ),
@@ -597,8 +613,10 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             translation_key="purified_water",
             entity_category=EntityCategory.DIAGNOSTIC,
             state_class=SensorStateClass.MEASUREMENT,
-            value=lambda device: int(
-                ((1.5 * int(device.today_pump_run_time)) / 60) / 2.0
+            value=lambda device: (
+                int(((1.5 * int(device.today_pump_run_time)) / 60) / 2.0)
+                if device.today_pump_run_time is not None
+                else None
             ),
             ignore_types=[CTW3],
         ),
@@ -706,6 +724,22 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
                 else None
             ),
             entity_category=EntityCategory.DIAGNOSTIC,
+        ),
+        PetKitSensorDesc(
+            key="Water storage status",
+            translation_key="water_storage_status",
+            device_class=SensorDeviceClass.ENUM,
+            options=["ok", "low", "empty"],
+            value=get_water_storage_status,
+            only_for_types=[W7H],
+        ),
+        PetKitSensorDesc(
+            key="Waste water status",
+            translation_key="waste_water_status",
+            device_class=SensorDeviceClass.ENUM,
+            options=["ok", "full"],
+            value=get_waste_water_status,
+            only_for_types=[W7H],
         ),
     ],
     Purifier: [
@@ -980,6 +1014,21 @@ class PetkitSensor(PetkitEntity, RestoreSensor):
         if self.entity_description.entity_picture:
             return self.entity_description.entity_picture(self.device)
         return None
+
+    @property
+    def icon(self) -> str | None:
+        """Return the icon for the sensor."""
+        translation_key = self.entity_description.translation_key
+        if translation_key is None:
+            return None
+
+        state_icons = SENSOR_ICON_STATE_MAP.get(translation_key)
+        if state_icons is not None:
+            state = self.native_value
+            if isinstance(state, str) and state in state_icons:
+                return state_icons[state]
+
+        return SENSOR_ICON_DEFAULT_MAP.get(translation_key)
 
     @property
     def native_unit_of_measurement(self) -> str | None:

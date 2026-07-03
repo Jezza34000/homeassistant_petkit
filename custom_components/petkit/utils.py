@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pypetkitapi import LitterRecord, RecordsItems, WorkState
+from pypetkitapi import LitterRecord, RecordsItems, WaterFountain, WorkState
 
 from .const import EVENT_MAPPING, LOGGER
 
@@ -346,3 +346,45 @@ def get_dispense_status(
         status = "pending"
 
     return source, status, plan_amount1, plan_amount2, disp_amount1, disp_amount2
+
+
+def storage_low_triggered(device: WaterFountain) -> bool | None:
+    """Return whether the storage low float sensor is triggered (stgFullState)."""
+    if device.state is None or device.state.stg_full_state is None:
+        return None
+    return bool(device.state.stg_full_state)
+
+
+def storage_empty_triggered(device: WaterFountain) -> bool | None:
+    """Return whether the storage empty sensor is triggered (cwtState)."""
+    if device.state is None or device.state.cwt_state is None:
+        return None
+    return device.state.cwt_state == 0
+
+
+def waste_full_triggered(device: WaterFountain) -> bool | None:
+    """Return whether the waste water full sensor is triggered (wtState)."""
+    if device.state is None or device.state.wt_state is None:
+        return None
+    return device.state.wt_state == 0
+
+
+def get_water_storage_status(device: WaterFountain) -> str | None:
+    """Derive app-style storage tank status from raw sensor flags."""
+    empty = storage_empty_triggered(device)
+    low = storage_low_triggered(device)
+    if empty is None and low is None:
+        return None
+    if empty:
+        return "empty"
+    if low:
+        return "low"
+    return "ok"
+
+
+def get_waste_water_status(device: WaterFountain) -> str | None:
+    """Derive app-style waste tank status from raw sensor flags."""
+    full = waste_full_triggered(device)
+    if full is None:
+        return None
+    return "full" if full else "ok"

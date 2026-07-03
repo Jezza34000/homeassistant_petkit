@@ -26,6 +26,7 @@ from .const import (
     CLEANING_INTERVAL_OPT,
     FOUNTAIN_DRAIN_FLUSH_CYCLE,
     FOUNTAIN_DRAIN_REFILL_CYCLE,
+    FOUNTAIN_WORKING_MODE_CTW3,
     FOUNTAIN_WORKING_MODE_W7H,
     IA_DETECTION_SENSITIVITY_OPT,
     LITTER_TYPE_OPT,
@@ -231,9 +232,29 @@ SELECT_MAPPING: dict[type[PetkitDevices], list[PetKitSelectDesc]] = {
         PetKitSelectDesc(
             key="Flow",
             translation_key="flow",
-            current_option=lambda device: FOUNTAIN_WORKING_MODE_W7H[
+            current_option=lambda device: FOUNTAIN_WORKING_MODE_CTW3.get(
                 device.settings.fountain_mode
-            ],
+            ),
+            options=lambda: list(FOUNTAIN_WORKING_MODE_CTW3.values()),
+            action=lambda api, device, opt_value: api.send_api_request(
+                device.id,
+                DeviceCommand.UPDATE_SETTING,
+                {
+                    "fountainMode": next(
+                        key
+                        for key, value in FOUNTAIN_WORKING_MODE_CTW3.items()
+                        if value == opt_value
+                    )
+                },
+            ),
+            ignore_types=[W7H],
+        ),
+        PetKitSelectDesc(
+            key="Flow",
+            translation_key="flow",
+            current_option=lambda device: FOUNTAIN_WORKING_MODE_W7H.get(
+                device.settings.fountain_mode
+            ),
             options=lambda: list(FOUNTAIN_WORKING_MODE_W7H.values()),
             action=lambda api, device, opt_value: api.send_api_request(
                 device.id,
@@ -246,7 +267,7 @@ SELECT_MAPPING: dict[type[PetkitDevices], list[PetKitSelectDesc]] = {
                     )
                 },
             ),
-            ignore_types=[W7H],
+            only_for_types=[W7H],
         ),
         PetKitSelectDesc(
             key="Auto drain and refill",

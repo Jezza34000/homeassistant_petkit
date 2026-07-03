@@ -161,6 +161,45 @@ FOUNTAIN_WORKING_MODE = {
     2: "Smart",
 }
 
+SENSOR_ICON_STATE_MAP: dict[str, dict[str, str]] = {
+    "water_storage_status": {
+        "ok": "mdi:water-check",
+        "low": "mdi:water-alert",
+        "empty": "mdi:water-off",
+    },
+    "waste_water_status": {
+        "ok": "mdi:water-check",
+        "full": "mdi:water-alert",
+    },
+}
+
+SENSOR_ICON_DEFAULT_MAP: dict[str, str] = {
+    "filter_left_days": "mdi:air-filter",
+    "water_storage_status": "mdi:water",
+    "waste_water_status": "mdi:water-outline",
+}
+
+BINARY_SENSOR_ICON_STATE_MAP: dict[str, dict[bool, str]] = {
+    "storage_low_sensor": {
+        True: "mdi:water-minus",
+        False: "mdi:water-check",
+    },
+    "storage_empty_sensor": {
+        True: "mdi:water-off",
+        False: "mdi:water-check",
+    },
+    "waste_full_sensor": {
+        True: "mdi:storage-tank",
+        False: "mdi:water-check",
+    },
+}
+
+BINARY_SENSOR_ICON_DEFAULT_MAP: dict[str, str] = {
+    "storage_low_sensor": "mdi:water-minus",
+    "storage_empty_sensor": "mdi:water-off",
+    "waste_full_sensor": "mdi:storage-tank",
+}
+
 LED_BRIGHTNESS = {
     1: "Low",
     2: "Normal",

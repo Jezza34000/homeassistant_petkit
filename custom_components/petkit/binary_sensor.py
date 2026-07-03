@@ -30,7 +30,13 @@ from homeassistant.components.binary_sensor import (
 from homeassistant.const import EntityCategory
 
 from . import LOGGER
+from .const import BINARY_SENSOR_ICON_DEFAULT_MAP, BINARY_SENSOR_ICON_STATE_MAP
 from .entity import PetKitDescSensorBase, PetkitEntity
+from .utils import (
+    storage_empty_triggered,
+    storage_low_triggered,
+    waste_full_triggered,
+)
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -65,6 +71,7 @@ COMMON_ENTITIES = [
         key="Camera status",
         translation_key="camera_status",
         value=lambda device: device.state.camera_status,
+        ignore_types=[W7H],
     ),
     PetKitBinarySensorDesc(
         key="Care plus subscription",
@@ -266,6 +273,7 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             translation_key="pump_running",
             device_class=BinarySensorDeviceClass.RUNNING,
             value=get_pump_running_status,
+            ignore_types=[W7H],
         ),
         PetKitBinarySensorDesc(
             key="Pump running",
@@ -282,17 +290,27 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
-            key="Clean water tank empty",
-            translation_key="clean_water_tank_empty",
-            device_class=BinarySensorDeviceClass.PROBLEM,
-            value=lambda device: device.state.cwt_state == 0,
+            key="Storage low sensor",
+            translation_key="storage_low_sensor",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            entity_registry_enabled_default=False,
+            value=storage_low_triggered,
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
-            key="Waste water tank full",
-            translation_key="waste_water_tank_full",
-            device_class=BinarySensorDeviceClass.PROBLEM,
-            value=lambda device: device.state.wt_state == 0,
+            key="Storage empty sensor",
+            translation_key="storage_empty_sensor",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            entity_registry_enabled_default=False,
+            value=storage_empty_triggered,
+            only_for_types=[W7H],
+        ),
+        PetKitBinarySensorDesc(
+            key="Waste water full sensor",
+            translation_key="waste_full_sensor",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            entity_registry_enabled_default=False,
+            value=waste_full_triggered,
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
@@ -314,13 +332,6 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             translation_key="disinfect_state",
             device_class=BinarySensorDeviceClass.RUNNING,
             value=lambda device: bool(device.state.disinfect_state),
-            only_for_types=[W7H],
-        ),
-        PetKitBinarySensorDesc(
-            key="Water tank storage full",
-            translation_key="stg_full_state",
-            device_class=BinarySensorDeviceClass.PROBLEM,
-            value=lambda device: bool(device.state.stg_full_state),
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
@@ -441,6 +452,21 @@ class PetkitBinarySensor(PetkitEntity, BinarySensorEntity):
         if self.entity_description.entity_picture:
             return self.entity_description.entity_picture(self.device)
         return None
+
+    @property
+    def icon(self) -> str | None:
+        """Return the icon for the binary sensor."""
+        translation_key = self.entity_description.translation_key
+        if translation_key is None:
+            return None
+
+        state_icons = BINARY_SENSOR_ICON_STATE_MAP.get(translation_key)
+        if state_icons is not None:
+            is_on = self.is_on
+            if is_on is not None and is_on in state_icons:
+                return state_icons[is_on]
+
+        return BINARY_SENSOR_ICON_DEFAULT_MAP.get(translation_key)
 
     @property
     def is_on(self) -> bool | None:

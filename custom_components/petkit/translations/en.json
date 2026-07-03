@@ -54,11 +54,14 @@
       "water_pump_running": {
         "name": "Water pump running"
       },
-      "clean_water_tank_empty": {
-        "name": "Clean water tank empty"
+      "storage_low_sensor": {
+        "name": "Storage low sensor"
       },
-      "waste_water_tank_full": {
-        "name": "Waste water tank full"
+      "storage_empty_sensor": {
+        "name": "Storage empty sensor"
+      },
+      "waste_full_sensor": {
+        "name": "Waste water full sensor"
       },
       "add_water_state": {
         "name": "Adding water"
@@ -68,9 +71,6 @@
       },
       "disinfect_state": {
         "name": "Disinfecting"
-      },
-      "stg_full_state": {
-        "name": "Water storage full"
       },
       "weight_error": {
         "name": "Weight error"
@@ -356,6 +356,9 @@
       },
       "heater_real_temp": {
         "name": "Heater temperature"
+      },
+      "filter_left_days": {
+        "name": "Filter left days"
       },
       "drink_count": {
         "name": "Drink count"
@@ -656,6 +659,21 @@
       },
       "sand_tray_left_days": {
         "name": "Sand tray left days"
+      },
+      "water_storage_status": {
+        "name": "Water storage",
+        "state": {
+          "ok": "OK",
+          "low": "Low",
+          "empty": "Empty"
+        }
+      },
+      "waste_water_status": {
+        "name": "Waste water",
+        "state": {
+          "ok": "OK",
+          "full": "Full"
+        }
       }
     },
     "switch": {

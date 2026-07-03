@@ -164,6 +164,27 @@
       "spray": {
         "default": "mdi:spray"
       },
+      "storage_low_sensor": {
+        "default": "mdi:water-minus",
+        "state": {
+          "off": "mdi:water-check",
+          "on": "mdi:water-minus"
+        }
+      },
+      "storage_empty_sensor": {
+        "default": "mdi:water-off",
+        "state": {
+          "off": "mdi:water-check",
+          "on": "mdi:water-off"
+        }
+      },
+      "waste_full_sensor": {
+        "default": "mdi:storage-tank",
+        "state": {
+          "off": "mdi:water-check",
+          "on": "mdi:storage-tank"
+        }
+      },
       "waste_bin": {
         "default": "mdi:delete",
         "state": {
@@ -359,6 +380,9 @@
       "filter_percent": {
         "default": "mdi:air-filter"
       },
+      "filter_left_days": {
+        "default": "mdi:air-filter"
+      },
       "food_bowl_percentage": {
         "default": "mdi:bowl"
       },
@@ -367,6 +391,21 @@
       },
       "food_left": {
         "default": "mdi:food-drumstick"
+      },
+      "water_storage_status": {
+        "default": "mdi:water",
+        "state": {
+          "ok": "mdi:water-check",
+          "low": "mdi:water-alert",
+          "empty": "mdi:water-off"
+        }
+      },
+      "waste_water_status": {
+        "default": "mdi:water-outline",
+        "state": {
+          "ok": "mdi:water-check",
+          "full": "mdi:water-alert"
+        }
       },
       "garbage_bag_box_state": {
         "default": "mdi:trash-can-outline"
