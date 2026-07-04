@@ -54,23 +54,32 @@
       "water_pump_running": {
         "name": "Water pump running"
       },
+      "clean_water_tank_low": {
+        "name": "Clean water tank low"
+      },
       "clean_water_tank_empty": {
         "name": "Clean water tank empty"
       },
-      "waste_water_tank_full": {
-        "name": "Waste water tank full"
+      "waste_tank_full": {
+        "name": "Waste tank full"
       },
       "add_water_state": {
         "name": "Adding water"
+      },
+      "heater_installed": {
+        "name": "Heater installed"
+      },
+      "waste_tank_installed": {
+        "name": "Waste tank installed"
+      },
+      "clean_water_tank_installed": {
+        "name": "Clean water tank installed"
       },
       "flush_state": {
         "name": "Flushing"
       },
       "disinfect_state": {
         "name": "Disinfecting"
-      },
-      "stg_full_state": {
-        "name": "Water storage full"
       },
       "weight_error": {
         "name": "Weight error"
@@ -208,6 +217,9 @@
       },
       "deodorize": {
         "name": "Deodorize"
+      },
+      "deep_clean": {
+        "name": "Deep clean"
       },
       "dump_litter": {
         "name": "Dump litter"
@@ -362,6 +374,9 @@
       },
       "drink_time_avg": {
         "name": "Average drink time"
+      },
+      "filter_left_days": {
+        "name": "Filter left days"
       },
       "next_flush_time": {
         "name": "Next flush"
@@ -716,6 +731,27 @@
       "desiccant_notif": {
         "name": "Notif on desiccant change need"
       },
+      "deep_deodor": {
+        "name": "Deep deodorizing"
+      },
+      "pet_notify": {
+        "name": "Notif on pet appeared"
+      },
+      "flush_notify": {
+        "name": "Notif on flush"
+      },
+      "water_change_notify": {
+        "name": "notif on water change"
+      },
+      "clean_water_lack_light": {
+        "name": "Clean water lack alarm light"
+      },
+      "clean_water_empty_light": {
+        "name": "Clean water empty alarm light"
+      },
+      "waste_water_full_light": {
+        "name": "Waste tank full alarm light"
+      },
       "dispensing_notif": {
         "name": "Notif on dispense"
       },
@@ -799,9 +835,6 @@
       },
       "proximity_sensor": {
         "name": "Sensor mode"
-      },
-      "filter_left_days": {
-        "name": "Filter left days"
       },
       "refill_notif": {
         "name": "Notif on refill need"

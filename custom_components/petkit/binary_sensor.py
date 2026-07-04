@@ -170,14 +170,14 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             key="Toilet occupied",
             translation_key="toilet_occupied",
             device_class=BinarySensorDeviceClass.OCCUPANCY,
-            value=lambda device: bool(device.state.pet_in_time),
+            value=lambda device: device.state.pet_in_time,
             enable_fast_poll=True,
         ),
         PetKitBinarySensorDesc(
             key="Frequent use",
             translation_key="frequent_use",
             device_class=BinarySensorDeviceClass.PROBLEM,
-            value=lambda device: bool(device.state.frequent_restroom),
+            value=lambda device: device.state.frequent_restroom,
         ),
         PetKitBinarySensorDesc(
             key="Deodorization",
@@ -271,26 +271,33 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             key="Pump running",
             translation_key="pump_running",
             device_class=BinarySensorDeviceClass.RUNNING,
-            value=lambda device: bool(device.state.pump_state),
+            value=lambda device: device.state.pump_state,
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
             key="Water pump running",
             translation_key="water_pump_running",
             device_class=BinarySensorDeviceClass.RUNNING,
-            value=lambda device: bool(device.state.water_pump_state),
+            value=lambda device: device.state.water_pump_state,
+            only_for_types=[W7H],
+        ),
+        PetKitBinarySensorDesc(
+            key="Clean water tank low",
+            translation_key="clean_water_tank_low",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            value=lambda device: device.state.stg_full_state == 0,
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
             key="Clean water tank empty",
             translation_key="clean_water_tank_empty",
             device_class=BinarySensorDeviceClass.PROBLEM,
-            value=lambda device: device.state.cwt_state == 0,
+            value=lambda device: device.state.cwt_state != 0,
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
-            key="Waste water tank full",
-            translation_key="waste_water_tank_full",
+            key="Waste tank full",
+            translation_key="waste_tank_full",
             device_class=BinarySensorDeviceClass.PROBLEM,
             value=lambda device: device.state.wt_state == 0,
             only_for_types=[W7H],
@@ -299,36 +306,54 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             key="Adding water",
             translation_key="add_water_state",
             device_class=BinarySensorDeviceClass.RUNNING,
-            value=lambda device: bool(device.state.add_water_state),
+            value=lambda device: device.state.add_water_state,
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
             key="Flushing",
             translation_key="flush_state",
             device_class=BinarySensorDeviceClass.RUNNING,
-            value=lambda device: bool(device.state.flush_state),
+            value=lambda device: device.state.flush_state,
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
             key="Disinfecting",
             translation_key="disinfect_state",
             device_class=BinarySensorDeviceClass.RUNNING,
-            value=lambda device: bool(device.state.disinfect_state),
+            value=lambda device: device.state.disinfect_state,
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
             key="Water tank storage full",
             translation_key="stg_full_state",
             device_class=BinarySensorDeviceClass.PROBLEM,
-            value=lambda device: bool(device.state.stg_full_state),
+            value=lambda device: device.state.stg_full_state,
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
             key="Camera status",
             translation_key="camera_status",
             device_class=BinarySensorDeviceClass.RUNNING,
-            value=lambda device: bool(device.state.camera_status),
+            value=lambda device: device.state.camera_status,
             only_for_types=[W7H],
+        ),
+        PetKitBinarySensorDesc(
+            key="Heater installed",
+            translation_key="heater_installed",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            value=lambda device: device.state.heat_install,
+        ),
+        PetKitBinarySensorDesc(
+            key="Waste tank installed",
+            translation_key="waste_tank_installed",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            value=lambda device: device.state.wt_install,
+        ),
+        PetKitBinarySensorDesc(
+            key="Clean water tank installed",
+            translation_key="clean_water_tank_installed",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            value=lambda device: device.state.cwt_install,
         ),
     ],
     Purifier: [
@@ -447,7 +472,8 @@ class PetkitBinarySensor(PetkitEntity, BinarySensorEntity):
         """Return the state of the binary sensor."""
         device_data = self.coordinator.data.get(self.device.id)
         if device_data:
-            value = self.entity_description.value(device_data)
+            raw_value = self.entity_description.value(device_data)
+            value = None if raw_value is None else bool(raw_value)
 
             if (
                 self.entity_description.enable_fast_poll
