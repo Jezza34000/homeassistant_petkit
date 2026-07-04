@@ -128,6 +128,8 @@ class PetkitOptionsFlowHandler(OptionsFlow):
                                             "Dish_before",
                                             "Dish_after",
                                             "Waste_check",
+                                            "Pet_detected",
+                                            "Drink_over",
                                         ],
                                     )
                                 ),

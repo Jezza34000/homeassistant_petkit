@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any
 import aiofiles
 from pypetkitapi import (
     FEEDER_WITH_CAMERA,
+    FOUNTAIN_WITH_CAMERA,
     LITTER_WITH_CAMERA,
     Feeder,
     Litter,
@@ -94,6 +95,21 @@ IMAGE_MAPPING: dict[type[PetkitDevices], list[PetKitImageDesc]] = {
             event_key="waste_check",
             translation_key="waste_check",
             only_for_types=LITTER_WITH_CAMERA,
+        ),
+    ],
+    WaterFountain: [
+        *COMMON_ENTITIES,
+        PetKitImageDesc(
+            key="Pet detected",
+            event_key="pet_detected",
+            translation_key="pet_detected",
+            only_for_types=FOUNTAIN_WITH_CAMERA,
+        ),
+        PetKitImageDesc(
+            key="Drink",
+            event_key="drink_over",
+            translation_key="pet_detected",
+            only_for_types=FOUNTAIN_WITH_CAMERA,
         ),
     ],
 }
