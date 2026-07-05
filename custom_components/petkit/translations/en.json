@@ -290,6 +290,12 @@
       },
       "waste_check": {
         "name": "Waste check"
+      },
+      "pet_detect": {
+        "name": "Pet detected"
+      },
+      "drink_over": {
+        "name": "Last drink event"
       }
     },
     "number": {

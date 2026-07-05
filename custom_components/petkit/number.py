@@ -189,6 +189,7 @@ NUMBER_MAPPING: dict[type[PetkitDevices], list[PetKitNumberDesc]] = {
             action=lambda api, device, value: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"fountainTime": int(value)}
             ),
+            only_for_types=[W7H],
         ),
         PetKitNumberDesc(
             key="Sleep time",
@@ -203,6 +204,7 @@ NUMBER_MAPPING: dict[type[PetkitDevices], list[PetKitNumberDesc]] = {
             action=lambda api, device, value: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"sleepTime": int(value)}
             ),
+            only_for_types=[W7H],
         ),
         PetKitNumberDesc(
             key="Pet notify interval",
@@ -219,6 +221,7 @@ NUMBER_MAPPING: dict[type[PetkitDevices], list[PetKitNumberDesc]] = {
                 DeviceCommand.UPDATE_SETTING,
                 {"petNotifyInterval": int(value)},
             ),
+            only_for_types=[W7H],
         ),
     ],
     Purifier: [*COMMON_ENTITIES],

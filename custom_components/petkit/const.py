@@ -67,7 +67,7 @@ DEFAULT_EVENTS = [
     "Dish_before",
     "Dish_after",
     "Waste_check",
-    "Pet_detected",
+    "Pet_detect",
     "Drink_over",
 ]
 DEFAULT_DL_VIDEO = False

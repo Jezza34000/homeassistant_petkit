@@ -100,15 +100,15 @@ IMAGE_MAPPING: dict[type[PetkitDevices], list[PetKitImageDesc]] = {
     WaterFountain: [
         *COMMON_ENTITIES,
         PetKitImageDesc(
-            key="Pet detected",
-            event_key="pet_detected",
-            translation_key="pet_detected",
+            key="Pet detect",
+            event_key="pet_detect",
+            translation_key="pet_detect",
             only_for_types=FOUNTAIN_WITH_CAMERA,
         ),
         PetKitImageDesc(
             key="Drink",
             event_key="drink_over",
-            translation_key="pet_detected",
+            translation_key="drink_over",
             only_for_types=FOUNTAIN_WITH_CAMERA,
         ),
     ],
