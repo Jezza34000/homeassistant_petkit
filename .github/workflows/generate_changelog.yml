@@ -24,6 +24,6 @@ jobs:
           fetch-depth: 0
 
       - name: Bump version using semantic-release
-        uses: python-semantic-release/python-semantic-release@350c48fcb3ffcdfd2e0a235206bc2ecea6b69df0 # Version 10.5.3
+        uses: python-semantic-release/python-semantic-release@39dd2052f2ce8282a5d932c31d58a2ca06d2550e # Version 10.6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
