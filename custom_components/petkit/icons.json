@@ -238,10 +238,16 @@
       "dish_before": {
         "default": "mdi:camera"
       },
+      "last_drink_event": {
+        "default": "mdi:camera"
+      },
       "last_eat_event": {
         "default": "mdi:camera"
       },
       "last_feed_event": {
+        "default": "mdi:camera"
+      },
+      "last_pet_detect_event": {
         "default": "mdi:camera"
       },
       "last_toileting_event": {
@@ -251,12 +257,6 @@
         "default": "mdi:camera"
       },
       "waste_check": {
-        "default": "mdi:camera"
-      },
-      "last_pet_detect_event": {
-        "default": "mdi:camera"
-      },
-      "last_drink_event": {
         "default": "mdi:camera"
       }
     },

@@ -392,8 +392,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: PetkitConfigEntry) -> 
         events = media_section.get(CONF_MEDIA_EV_TYPE)
         if events:
             media_section[CONF_MEDIA_EV_TYPE] = [
-                "Pet_detect" if event == "Pet_detected" else event
-                for event in events
+                "Pet_detect" if event == "Pet_detected" else event for event in events
             ]
         new_options[MEDIA_SECTION] = media_section
         hass.config_entries.async_update_entry(entry, options=new_options, version=9)
