@@ -331,13 +331,6 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
-            key="Camera status",
-            translation_key="camera_status",
-            device_class=BinarySensorDeviceClass.RUNNING,
-            value=lambda device: device.state.camera_status,
-            only_for_types=[W7H],
-        ),
-        PetKitBinarySensorDesc(
             key="Heater installed",
             translation_key="heater_installed",
             entity_category=EntityCategory.DIAGNOSTIC,

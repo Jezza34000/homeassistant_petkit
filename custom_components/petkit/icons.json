@@ -252,6 +252,12 @@
       },
       "waste_check": {
         "default": "mdi:camera"
+      },
+      "last_pet_detect_event": {
+        "default": "mdi:camera"
+      },
+      "last_drink_event": {
+        "default": "mdi:camera"
       }
     },
     "light": {

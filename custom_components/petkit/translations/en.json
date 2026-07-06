@@ -291,10 +291,10 @@
       "waste_check": {
         "name": "Waste check"
       },
-      "pet_detect": {
-        "name": "Pet detected"
+      "last_pet_detect_event": {
+        "name": "Last pet detect event"
       },
-      "drink_over": {
+      "last_drink_event": {
         "name": "Last drink event"
       }
     },

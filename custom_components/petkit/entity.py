@@ -195,7 +195,7 @@ class PetkitCameraBaseEntity(
     def __init__(
         self,
         coordinator: PetkitDataUpdateCoordinator,
-        device: Feeder | Litter,
+        device: Feeder | Litter | WaterFountain,
         key: str,
     ) -> None:
         """Initialize the camera entity."""
