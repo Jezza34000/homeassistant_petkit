@@ -70,6 +70,7 @@ DEFAULT_EVENTS = [
     "Pet_detect",
     "Drink_over",
 ]
+FOUNTAIN_MEDIA_EVENTS = ["Pet_detect", "Drink_over"]
 DEFAULT_DL_VIDEO = False
 DEFAULT_DL_IMAGE = True
 DEFAULT_SMART_POLLING = True

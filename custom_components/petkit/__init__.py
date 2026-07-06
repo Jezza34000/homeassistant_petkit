@@ -47,6 +47,7 @@ from .const import (
     DEFAULT_SCAN_INTERVAL_BLUETOOTH,
     DEFAULT_SCAN_INTERVAL_MEDIA,
     DOMAIN,
+    FOUNTAIN_MEDIA_EVENTS,
     LOGGER,
     MEDIA_SECTION,
     NOTIFICATION_SECTION,
@@ -396,6 +397,17 @@ async def async_migrate_entry(hass: HomeAssistant, entry: PetkitConfigEntry) -> 
             ]
         new_options[MEDIA_SECTION] = media_section
         hass.config_entries.async_update_entry(entry, options=new_options, version=9)
+
+    if entry.version < 10:
+        new_options = dict(entry.options)
+        media_section = dict(new_options.get(MEDIA_SECTION, {}))
+        events = list(media_section.get(CONF_MEDIA_EV_TYPE, DEFAULT_EVENTS))
+        for event in FOUNTAIN_MEDIA_EVENTS:
+            if event not in events:
+                events.append(event)
+        media_section[CONF_MEDIA_EV_TYPE] = events
+        new_options[MEDIA_SECTION] = media_section
+        hass.config_entries.async_update_entry(entry, options=new_options, version=10)
 
     return True
 
