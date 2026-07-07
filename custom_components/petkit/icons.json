@@ -140,6 +140,13 @@
           "on": "mdi:power"
         }
       },
+      "recirculation_tray_low": {
+        "default": "mdi:water-outline",
+        "state": {
+          "off": "mdi:water-check",
+          "on": "mdi:water-alert"
+        }
+      },
       "replace_filter": {
         "default": "mdi:air-filter",
         "state": {
@@ -238,10 +245,16 @@
       "dish_before": {
         "default": "mdi:camera"
       },
+      "last_drink_event": {
+        "default": "mdi:camera"
+      },
       "last_eat_event": {
         "default": "mdi:camera"
       },
       "last_feed_event": {
+        "default": "mdi:camera"
+      },
+      "last_pet_detect_event": {
         "default": "mdi:camera"
       },
       "last_toileting_event": {
@@ -329,6 +342,15 @@
         "state": {
           "0": "mdi:battery-low",
           "1": "mdi:battery-high"
+        }
+      },
+      "clean_water_tank_state": {
+        "default": "mdi:water-outline",
+        "state": {
+          "empty": "mdi:water-remove",
+          "low": "mdi:water-alert",
+          "normal": "mdi:water-check",
+          "unknown": "mdi:water-off"
         }
       },
       "desiccant_left_days": {

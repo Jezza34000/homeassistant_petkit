@@ -562,8 +562,10 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             entity_category=EntityCategory.DIAGNOSTIC,
             device_class=SensorDeviceClass.ENERGY,
             native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-            value=lambda device: round(
-                ((0.75 * int(device.today_pump_run_time)) / 3600000), 4
+            value=lambda device: (
+                None
+                if device.today_pump_run_time is None
+                else round(((0.75 * int(device.today_pump_run_time)) / 3600000), 4)
             ),
         ),
         PetKitSensorDesc(
@@ -587,8 +589,10 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             translation_key="purified_water",
             entity_category=EntityCategory.DIAGNOSTIC,
             state_class=SensorStateClass.MEASUREMENT,
-            value=lambda device: int(
-                ((1.5 * int(device.today_pump_run_time)) / 60) / 3.0
+            value=lambda device: (
+                None
+                if device.today_pump_run_time is None
+                else int(((1.5 * int(device.today_pump_run_time)) / 60) / 3.0)
             ),
             only_for_types=[CTW3],
         ),
@@ -597,8 +601,10 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             translation_key="purified_water",
             entity_category=EntityCategory.DIAGNOSTIC,
             state_class=SensorStateClass.MEASUREMENT,
-            value=lambda device: int(
-                ((1.5 * int(device.today_pump_run_time)) / 60) / 2.0
+            value=lambda device: (
+                None
+                if device.today_pump_run_time is None
+                else int(((1.5 * int(device.today_pump_run_time)) / 60) / 2.0)
             ),
             ignore_types=[CTW3],
         ),
@@ -661,6 +667,19 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             device_class=SensorDeviceClass.TEMPERATURE,
             native_unit_of_measurement=UnitOfTemperature.CELSIUS,
             value=lambda device: round(device.state.heat_real_temp / 10, 1),
+            only_for_types=[W7H],
+        ),
+        PetKitSensorDesc(
+            key="Clean water tank state",
+            translation_key="clean_water_tank_state",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            device_class=SensorDeviceClass.ENUM,
+            options=["normal", "empty", "low", "unknown"],
+            value=lambda device: {
+                0: "normal",
+                2: "empty",
+                3: "low",
+            }.get(device.state.cwt_state, "unknown"),
             only_for_types=[W7H],
         ),
         PetKitSensorDesc(

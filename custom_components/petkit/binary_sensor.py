@@ -266,6 +266,7 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             translation_key="pump_running",
             device_class=BinarySensorDeviceClass.RUNNING,
             value=get_pump_running_status,
+            ignore_types=[W7H],
         ),
         PetKitBinarySensorDesc(
             key="Pump running",
@@ -285,21 +286,21 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             key="Clean water tank low",
             translation_key="clean_water_tank_low",
             device_class=BinarySensorDeviceClass.PROBLEM,
-            value=lambda device: device.state.stg_full_state == 0,
+            value=lambda device: device.state.cwt_state == 3,
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
             key="Clean water tank empty",
             translation_key="clean_water_tank_empty",
             device_class=BinarySensorDeviceClass.PROBLEM,
-            value=lambda device: device.state.cwt_state != 0,
+            value=lambda device: device.state.cwt_state == 2,
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
             key="Waste tank full",
             translation_key="waste_tank_full",
             device_class=BinarySensorDeviceClass.PROBLEM,
-            value=lambda device: device.state.wt_state == 0,
+            value=lambda device: device.state.wt_state == 2,
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
@@ -324,17 +325,10 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
-            key="Water tank storage full",
-            translation_key="stg_full_state",
+            key="Recirculation tray low",
+            translation_key="recirculation_tray_low",
             device_class=BinarySensorDeviceClass.PROBLEM,
-            value=lambda device: device.state.stg_full_state,
-            only_for_types=[W7H],
-        ),
-        PetKitBinarySensorDesc(
-            key="Camera status",
-            translation_key="camera_status",
-            device_class=BinarySensorDeviceClass.RUNNING,
-            value=lambda device: device.state.camera_status,
+            value=lambda device: device.state.stg_full_state == 0,
             only_for_types=[W7H],
         ),
         PetKitBinarySensorDesc(
