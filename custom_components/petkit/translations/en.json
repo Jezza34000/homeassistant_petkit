@@ -838,6 +838,20 @@
             },
             "description": "Control which PetKit device events raise a Home Assistant persistent notification independently from the Petkit app settings.",
             "name": "Notifications"
+          },
+          "advanced_polling_options": {
+            "data": {
+              "scan_interval_slow": "Refresh interval — MQTT connected (seconds)",
+              "scan_interval_default": "Refresh interval — MQTT disconnected (seconds)",
+              "smart_polling_boost_duration": "Smart polling boost duration (seconds)"
+            },
+            "data_description": {
+              "scan_interval_slow": "How often to poll the PetKit cloud while the IoT MQTT listener is connected. The default (190 s) keeps cloud load low because MQTT is expected to push prompt updates between polls. Lower it (e.g. 5–30 s) when you need near-real-time entity updates and accept the extra REST traffic.",
+              "scan_interval_default": "Fallback poll interval used when the IoT MQTT listener is disconnected. Defaults to 60 s so entities recover quickly if the MQTT channel drops.",
+              "smart_polling_boost_duration": "When an event-triggered entity (e.g. toilet occupied) flips on, the coordinator briefly polls every 5 s to capture the follow-up state changes. This setting controls how long that fast burst lasts. Default is 15 s (≈3 fast ticks)."
+            },
+            "description": "Tune how aggressively the coordinator polls the PetKit REST API. Lower intervals improve responsiveness at the cost of additional API requests; raise them to reduce cloud usage. Changes take effect immediately after saving.",
+            "name": "Advanced polling"
           }
         },
         "title": "Petkit integration configuration"
