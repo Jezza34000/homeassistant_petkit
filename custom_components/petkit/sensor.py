@@ -666,7 +666,11 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             state_class=SensorStateClass.MEASUREMENT,
             device_class=SensorDeviceClass.TEMPERATURE,
             native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-            value=lambda device: round(device.state.heat_real_temp / 10, 1),
+            value=lambda device: (
+                None
+                if device.state.heat_install == 0
+                else round(device.state.heat_real_temp / 10, 1)
+            ),
             only_for_types=[W7H],
         ),
         PetKitSensorDesc(

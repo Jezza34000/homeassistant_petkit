@@ -888,7 +888,11 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             key="Heater",
             translation_key="heater_switch",
             entity_category=EntityCategory.CONFIG,
-            value=lambda device: device.settings.heater_switch,
+            value=lambda device: (
+                None
+                if device.state.heat_install == 0
+                else device.settings.heater_switch
+            ),
             turn_on=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"heaterSwitch": 1}
             ),
