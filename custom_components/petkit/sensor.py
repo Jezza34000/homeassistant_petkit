@@ -670,6 +670,19 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             only_for_types=[W7H],
         ),
         PetKitSensorDesc(
+            key="Clean water tank state",
+            translation_key="clean_water_tank_state",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            device_class=SensorDeviceClass.ENUM,
+            options=["normal", "empty", "low", "unknown"],
+            value=lambda device: {
+                0: "normal",
+                2: "empty",
+                3: "low",
+            }.get(device.state.cwt_state, "unknown"),
+            only_for_types=[W7H],
+        ),
+        PetKitSensorDesc(
             key="Drink count",
             translation_key="drink_count",
             state_class=SensorStateClass.TOTAL_INCREASING,

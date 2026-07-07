@@ -75,6 +75,9 @@
       "clean_water_tank_installed": {
         "name": "Clean water tank installed"
       },
+      "recirculation_tray_low": {
+        "name": "Recirculation tray low"
+      },
       "flush_state": {
         "name": "Flushing"
       },
@@ -374,6 +377,15 @@
       },
       "heater_real_temp": {
         "name": "Heater temperature"
+      },
+      "clean_water_tank_state": {
+        "name": "Clean water tank state",
+        "state": {
+          "normal": "Normal",
+          "empty": "Empty",
+          "low": "Low",
+          "unknown": "Unknown"
+        }
       },
       "drink_count": {
         "name": "Drink count"
