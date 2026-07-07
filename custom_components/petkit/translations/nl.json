@@ -263,10 +263,22 @@
         "name": "Strooiseltype"
       },
       "working_mode": {
-        "name": "Werkingsmodus"
+        "name": "Werkingsmodus",
+        "state": {
+          "normal": "Normaal",
+          "smart": "Slim",
+          "standard": "Standaard",
+          "intermittent": "Intermitterend",
+          "battery": "Batterij"
+        }
       },
       "led_brightness": {
-        "name": "LED-helderheid"
+        "name": "LED-helderheid",
+        "state": {
+          "low": "Laag",
+          "normal": "Normaal",
+          "high": "Hoog"
+        }
       },
       "move_detection_sensitivity": {
         "name": "Bewegingsdetectiegevoeligheid"

@@ -278,10 +278,22 @@
         "name": "Litter type"
       },
       "working_mode": {
-        "name": "Working mode"
+        "name": "Working mode",
+        "state": {
+          "normal": "Normal",
+          "smart": "Smart",
+          "standard": "Standard",
+          "intermittent": "Intermittent",
+          "battery": "Battery"
+        }
       },
       "led_brightness": {
-        "name": "Led brightness"
+        "name": "Led brightness",
+        "state": {
+          "low": "Low",
+          "normal": "Normal",
+          "high": "High"
+        }
       },
       "move_detection_sensitivity": {
         "name": "Move detection sensitivity"
