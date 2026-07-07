@@ -15,7 +15,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from pypetkitapi import D3, D4S, D4SH, Feeder, Litter, WaterFountain
+from pypetkitapi import D3, D4S, D4SH, W7H, Feeder, Litter, WaterFountain
 
 from homeassistant.components.persistent_notification import async_create, async_dismiss
 from homeassistant.helpers import translation
@@ -23,8 +23,11 @@ from homeassistant.helpers import translation
 from .const import (
     NOTIFICATION_CAT_FEEDER_ERROR,
     NOTIFICATION_CAT_FEEDER_FOOD_LOW,
+    NOTIFICATION_CAT_FOUNTAIN_CWT_EMPTY,
+    NOTIFICATION_CAT_FOUNTAIN_CWT_LOW,
     NOTIFICATION_CAT_FOUNTAIN_FILTER,
     NOTIFICATION_CAT_FOUNTAIN_WATER_LOW,
+    NOTIFICATION_CAT_FOUNTAIN_WT_FULL,
     NOTIFICATION_CAT_LITTER_BOX_FULL,
     NOTIFICATION_CAT_LITTER_ERROR,
     NOTIFICATION_CAT_LITTER_EVENT,
@@ -133,6 +136,9 @@ class PetkitNotificationManager:
             NOTIFICATION_CAT_FEEDER_FOOD_LOW: ("food_low",),
             NOTIFICATION_CAT_FEEDER_ERROR: ("error",),
             NOTIFICATION_CAT_FOUNTAIN_WATER_LOW: ("lack_warning",),
+            NOTIFICATION_CAT_FOUNTAIN_CWT_LOW: ("clean_water_tank_low",),
+            NOTIFICATION_CAT_FOUNTAIN_CWT_EMPTY: ("clean_water_tank_empty",),
+            NOTIFICATION_CAT_FOUNTAIN_WT_FULL: ("waste_tank_full",),
             NOTIFICATION_CAT_FOUNTAIN_FILTER: ("filter_warning",),
         }
 
@@ -149,6 +155,9 @@ class PetkitNotificationManager:
             },
             WaterFountain: {
                 NOTIFICATION_CAT_FOUNTAIN_WATER_LOW,
+                NOTIFICATION_CAT_FOUNTAIN_CWT_LOW,
+                NOTIFICATION_CAT_FOUNTAIN_CWT_EMPTY,
+                NOTIFICATION_CAT_FOUNTAIN_WT_FULL,
                 NOTIFICATION_CAT_FOUNTAIN_FILTER,
             },
         }
@@ -326,6 +335,14 @@ class PetkitNotificationManager:
 
     def _check_fountain(self, device: WaterFountain) -> None:
         """Check water fountain alerts."""
+        device_type = _safe_get(device, "device_nfo", "device_type", default="")
+        if device_type == W7H:
+            self._check_fountain_w7h(device)
+        else:
+            self._check_fountain_legacy(device)
+
+    def _check_fountain_legacy(self, device: WaterFountain) -> None:
+        """Check legacy water fountain alerts (CTW, etc.)."""
         # --- Water level low ---
         rose, fell = self._track_binary(
             device.id, "lack_warning", _safe_get(device, "lack_warning")
@@ -339,7 +356,50 @@ class PetkitNotificationManager:
         elif fell:
             self._dismiss(f"petkit_{device.id}_lack_warning")
 
-        # --- Filter needs replacement ---
+        self._check_fountain_filter(device)
+
+    def _check_fountain_w7h(self, device: WaterFountain) -> None:
+        """Check W7H water fountain panel-light alerts."""
+        cwt_state = _safe_get(device, "state", "cwt_state")
+        rose, fell = self._track_binary(
+            device.id, "clean_water_tank_low", cwt_state == 3
+        )
+        if rose and self._category_enabled(NOTIFICATION_CAT_FOUNTAIN_CWT_LOW):
+            self._notify(
+                f"petkit_{device.id}_clean_water_tank_low",
+                f"PetKit — {_device_name(device)}",
+                "Clean water tank is low. Please refill.",
+            )
+        elif fell:
+            self._dismiss(f"petkit_{device.id}_clean_water_tank_low")
+
+        rose, fell = self._track_binary(
+            device.id, "clean_water_tank_empty", cwt_state == 2
+        )
+        if rose and self._category_enabled(NOTIFICATION_CAT_FOUNTAIN_CWT_EMPTY):
+            self._notify(
+                f"petkit_{device.id}_clean_water_tank_empty",
+                f"PetKit — {_device_name(device)}",
+                "Clean water tank is empty. Please refill.",
+            )
+        elif fell:
+            self._dismiss(f"petkit_{device.id}_clean_water_tank_empty")
+
+        wt_state = _safe_get(device, "state", "wt_state")
+        rose, fell = self._track_binary(device.id, "waste_tank_full", wt_state == 2)
+        if rose and self._category_enabled(NOTIFICATION_CAT_FOUNTAIN_WT_FULL):
+            self._notify(
+                f"petkit_{device.id}_waste_tank_full",
+                f"PetKit — {_device_name(device)}",
+                "Waste tank is full. Please empty.",
+            )
+        elif fell:
+            self._dismiss(f"petkit_{device.id}_waste_tank_full")
+
+        self._check_fountain_filter(device)
+
+    def _check_fountain_filter(self, device: WaterFountain) -> None:
+        """Check water fountain filter replacement alert."""
         rose, fell = self._track_binary(
             device.id, "filter_warning", _safe_get(device, "filter_warning")
         )

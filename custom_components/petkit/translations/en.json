@@ -987,8 +987,11 @@
       "options": {
         "feeder_error": "Feeder — device error",
         "feeder_food_low": "Feeder — food level low",
+        "fountain_cwt_empty": "Water fountain — clean water tank empty",
+        "fountain_cwt_low": "Water fountain — clean water tank low",
         "fountain_filter": "Water fountain — filter needs replacement",
         "fountain_water_low": "Water fountain — water level low",
+        "fountain_wt_full": "Water fountain — waste tank full",
         "litter_box_full": "Litter box — waste bin full",
         "litter_error": "Litter box — device error",
         "litter_event": "Litter box — cleaning / pet visit events",

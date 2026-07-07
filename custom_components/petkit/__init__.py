@@ -50,6 +50,9 @@ from .const import (
     FOUNTAIN_MEDIA_EVENTS,
     LOGGER,
     MEDIA_SECTION,
+    NOTIFICATION_CAT_FOUNTAIN_CWT_EMPTY,
+    NOTIFICATION_CAT_FOUNTAIN_CWT_LOW,
+    NOTIFICATION_CAT_FOUNTAIN_WT_FULL,
     NOTIFICATION_SECTION,
 )
 from .coordinator import (
@@ -407,6 +410,34 @@ async def async_migrate_entry(hass: HomeAssistant, entry: PetkitConfigEntry) -> 
         media_section[CONF_MEDIA_EV_TYPE] = events
         new_options[MEDIA_SECTION] = media_section
         hass.config_entries.async_update_entry(entry, options=new_options, version=10)
+
+    if entry.version < 11:
+        new_options = dict(entry.options)
+        section = dict(new_options.get(NOTIFICATION_SECTION, {}))
+        enabled = list(
+            section.get(CONF_ENABLED_NOTIFICATIONS, DEFAULT_ENABLED_NOTIFICATIONS)
+        )
+        for category in (
+            NOTIFICATION_CAT_FOUNTAIN_CWT_EMPTY,
+            NOTIFICATION_CAT_FOUNTAIN_WT_FULL,
+        ):
+            if category not in enabled:
+                enabled.append(category)
+        section[CONF_ENABLED_NOTIFICATIONS] = enabled
+        new_options[NOTIFICATION_SECTION] = section
+        hass.config_entries.async_update_entry(entry, options=new_options, version=11)
+
+    if entry.version < 12:
+        new_options = dict(entry.options)
+        section = dict(new_options.get(NOTIFICATION_SECTION, {}))
+        enabled = list(
+            section.get(CONF_ENABLED_NOTIFICATIONS, DEFAULT_ENABLED_NOTIFICATIONS)
+        )
+        if NOTIFICATION_CAT_FOUNTAIN_CWT_LOW not in enabled:
+            enabled.append(NOTIFICATION_CAT_FOUNTAIN_CWT_LOW)
+        section[CONF_ENABLED_NOTIFICATIONS] = enabled
+        new_options[NOTIFICATION_SECTION] = section
+        hass.config_entries.async_update_entry(entry, options=new_options, version=12)
 
     return True
 
