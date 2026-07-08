@@ -67,7 +67,10 @@ DEFAULT_EVENTS = [
     "Dish_before",
     "Dish_after",
     "Waste_check",
+    "Pet_detect",
+    "Drink_over",
 ]
+FOUNTAIN_MEDIA_EVENTS = ["Pet_detect", "Drink_over"]
 DEFAULT_DL_VIDEO = False
 DEFAULT_DL_IMAGE = True
 DEFAULT_SMART_POLLING = True
@@ -139,6 +142,21 @@ FOUNTAIN_WORKING_MODE_CTW3 = {
     1: "Standard",
     2: "Intermittent",
     3: "Battery",
+}
+
+FOUNTAIN_WORKING_MODE_W7H = {
+    0: "Do not flow",
+    1: "Continuous",
+    2: "Intermittent",
+    3: "Motion activated",
+}
+
+FOUNTAIN_DRAIN_REFILL_CYCLE = {0: "Disabled"} | {
+    i: f"Every {i} day{'s' if i > 1 else ''}" for i in range(1, 8)
+}
+
+FOUNTAIN_DRAIN_FLUSH_CYCLE = {0: "Disabled"} | {
+    i: f"Every {i} day{'s' if i > 1 else ''}" for i in range(1, 8)
 }
 
 FOUNTAIN_WORKING_MODE = {

@@ -128,6 +128,8 @@ class PetkitOptionsFlowHandler(OptionsFlow):
                                             "Dish_before",
                                             "Dish_after",
                                             "Waste_check",
+                                            "Pet_detect",
+                                            "Drink_over",
                                         ],
                                     )
                                 ),
@@ -196,7 +198,7 @@ class PetkitOptionsFlowHandler(OptionsFlow):
 class PetkitFlowHandler(ConfigFlow, domain=DOMAIN):
     """Config flow for Petkit Smart Devices."""
 
-    VERSION = 8
+    VERSION = 10
 
     @staticmethod
     @callback

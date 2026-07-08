@@ -51,6 +51,39 @@
       "battery": {
         "name": "Battery"
       },
+      "water_pump_running": {
+        "name": "Water pump running"
+      },
+      "clean_water_tank_low": {
+        "name": "Clean water tank low"
+      },
+      "clean_water_tank_empty": {
+        "name": "Clean water tank empty"
+      },
+      "waste_tank_full": {
+        "name": "Waste tank full"
+      },
+      "add_water_state": {
+        "name": "Adding water"
+      },
+      "heater_installed": {
+        "name": "Heater installed"
+      },
+      "waste_tank_installed": {
+        "name": "Waste tank installed"
+      },
+      "clean_water_tank_installed": {
+        "name": "Clean water tank installed"
+      },
+      "recirculation_tray_low": {
+        "name": "Recirculation tray low"
+      },
+      "flush_state": {
+        "name": "Flushing"
+      },
+      "disinfect_state": {
+        "name": "Disinfecting"
+      },
       "weight_error": {
         "name": "Weight error"
       },
@@ -152,6 +185,15 @@
       }
     },
     "button": {
+      "refill": {
+        "name": "Refill"
+      },
+      "drain": {
+        "name": "Drain"
+      },
+      "drain_and_flush": {
+        "name": "Drain and flush"
+      },
       "action_continue": {
         "name": "Action : Continue"
       },
@@ -178,6 +220,9 @@
       },
       "deodorize": {
         "name": "Deodorize"
+      },
+      "deep_clean": {
+        "name": "Deep clean"
       },
       "dump_litter": {
         "name": "Dump litter"
@@ -248,11 +293,29 @@
       },
       "waste_check": {
         "name": "Waste check"
+      },
+      "last_pet_detect_event": {
+        "name": "Last pet detect event"
+      },
+      "last_drink_event": {
+        "name": "Last drink event"
       }
     },
     "number": {
       "cleaning_delay": {
         "name": "Cleaning delay"
+      },
+      "heater_temp": {
+        "name": "Heater temperature"
+      },
+      "fountain_time": {
+        "name": "Fountain run time"
+      },
+      "sleep_time": {
+        "name": "Sleep time"
+      },
+      "pet_notify_interval": {
+        "name": "Pet notify interval"
       },
       "manual_feed": {
         "name": "Manual feed"
@@ -291,6 +354,15 @@
       },
       "surplus_level": {
         "name": "Surplus control level"
+      },
+      "auto_drain_flush": {
+        "name": "Auto drain and flush"
+      },
+      "auto_drain_refill": {
+        "name": "Auto dran and refill"
+      },
+      "flow": {
+        "name": "Flow"
       }
     },
     "sensor": {
@@ -302,6 +374,36 @@
       },
       "pet_last_urination_date": {
         "name": "Last urination"
+      },
+      "heater_real_temp": {
+        "name": "Heater temperature"
+      },
+      "clean_water_tank_state": {
+        "name": "Clean water tank state",
+        "state": {
+          "normal": "Normal",
+          "empty": "Empty",
+          "low": "Low",
+          "unknown": "Unknown"
+        }
+      },
+      "drink_count": {
+        "name": "Drink count"
+      },
+      "drink_time_avg": {
+        "name": "Average drink time"
+      },
+      "filter_left_days": {
+        "name": "Filter left days"
+      },
+      "next_flush_time": {
+        "name": "Next flush"
+      },
+      "next_water_change_time": {
+        "name": "Next water change"
+      },
+      "drink_time": {
+        "name": "Last drink time"
       },
       "pet_last_defecation_date": {
         "name": "Last defecation"
@@ -599,6 +701,24 @@
       "auto_clean": {
         "name": "Auto clean"
       },
+      "auto_refill": {
+        "name": "Auto refill"
+      },
+      "heater_switch": {
+        "name": "Heater"
+      },
+      "auto_water_change": {
+        "name": "Auto water change"
+      },
+      "auto_flush": {
+        "name": "Auto flush"
+      },
+      "pet_detection": {
+        "name": "Pet detection"
+      },
+      "drink_detection": {
+        "name": "Drink detection"
+      },
       "auto_deodor": {
         "name": "Auto deodorizing"
       },
@@ -617,9 +737,6 @@
       "deep_cleaning": {
         "name": "Deep cleaning"
       },
-      "deep_deodor": {
-        "name": "Deep deodorizing"
-      },
       "deodorant_n50_notify": {
         "name": "Notif on N50 replacement need"
       },
@@ -628,6 +745,27 @@
       },
       "desiccant_notif": {
         "name": "Notif on desiccant change need"
+      },
+      "deep_deodor": {
+        "name": "Deep deodorizing"
+      },
+      "pet_notify": {
+        "name": "Notif on pet appeared"
+      },
+      "flush_notify": {
+        "name": "Notif on flush"
+      },
+      "water_change_notify": {
+        "name": "notif on water change"
+      },
+      "clean_water_lack_light": {
+        "name": "Clean water lack alarm light"
+      },
+      "clean_water_empty_light": {
+        "name": "Clean water empty alarm light"
+      },
+      "waste_water_full_light": {
+        "name": "Waste tank full alarm light"
       },
       "dispensing_notif": {
         "name": "Notif on dispense"

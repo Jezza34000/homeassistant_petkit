@@ -848,6 +848,142 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
                 device.id, FountainAction.POWER_OFF
             ),
         ),
+        PetKitSwitchDesc(
+            key="Auto refill",
+            translation_key="auto_refill",
+            value=lambda device: device.settings.add_water_switch,
+            entity_category=EntityCategory.CONFIG,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"addWaterSwitch": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"addWaterSwitch": 0}
+            ),
+        ),
+        PetKitSwitchDesc(
+            key="Pet detection",
+            translation_key="pet_detection",
+            entity_category=EntityCategory.CONFIG,
+            value=lambda device: device.settings.pet_detection,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"petDetection": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"petDetection": 0}
+            ),
+        ),
+        PetKitSwitchDesc(
+            key="Drink detection",
+            translation_key="drink_detection",
+            entity_category=EntityCategory.CONFIG,
+            value=lambda device: device.settings.drink_detection,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"drinkDetection": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"drinkDetection": 0}
+            ),
+        ),
+        PetKitSwitchDesc(
+            key="Heater",
+            translation_key="heater_switch",
+            entity_category=EntityCategory.CONFIG,
+            value=lambda device: (
+                None
+                if device.state.heat_install == 0
+                else device.settings.heater_switch
+            ),
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"heaterSwitch": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"heaterSwitch": 0}
+            ),
+        ),
+        PetKitSwitchDesc(
+            key="Pet notify",
+            translation_key="pet_notify",
+            value=lambda device: device.settings.pet_in_notify,
+            entity_category=EntityCategory.CONFIG,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"petNotify": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"petNotify": 0}
+            ),
+        ),
+        PetKitSwitchDesc(
+            key="Drink detection",
+            translation_key="drink_detection",
+            value=lambda device: device.settings.pet_in_notify,
+            entity_category=EntityCategory.CONFIG,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"drinkDetection": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"drinkDetection": 0}
+            ),
+        ),
+        PetKitSwitchDesc(
+            key="Flush notify",
+            translation_key="flush_notify",
+            value=lambda device: device.settings.pet_in_notify,
+            entity_category=EntityCategory.CONFIG,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"flushNotify": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"flushNotify": 0}
+            ),
+        ),
+        PetKitSwitchDesc(
+            key="Water change notify",
+            translation_key="water_change_notify",
+            value=lambda device: device.settings.pet_in_notify,
+            entity_category=EntityCategory.CONFIG,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"waterChangeNotify": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"waterChangeNotify": 0}
+            ),
+        ),
+        PetKitSwitchDesc(
+            key="Clean water lack light",
+            translation_key="clean_water_lack_light",
+            entity_category=EntityCategory.CONFIG,
+            value=lambda device: device.settings.clean_water_lack_light,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"cleanWaterLackLight": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"cleanWaterLackLight": 0}
+            ),
+        ),
+        PetKitSwitchDesc(
+            key="Clean water empty light",
+            translation_key="clean_water_empty_light",
+            entity_category=EntityCategory.CONFIG,
+            value=lambda device: device.settings.clean_water_empty_light,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"cleanWaterEmptyLight": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"cleanWaterEmptyLight": 0}
+            ),
+        ),
+        PetKitSwitchDesc(
+            key="Waste water full light",
+            translation_key="waste_water_full_light",
+            entity_category=EntityCategory.CONFIG,
+            value=lambda device: device.settings.waste_water_full_light,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"wasteWaterFullLight": 1}
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, DeviceCommand.UPDATE_SETTING, {"wasteWaterFullLight": 0}
+            ),
+        ),
     ],
     Purifier: [
         *COMMON_ENTITIES,
