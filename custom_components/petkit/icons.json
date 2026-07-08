@@ -63,6 +63,13 @@
           "on": "mdi:gauge-empty"
         }
       },
+      "heater_installed": {
+        "default": "mdi:water-boiler-off",
+        "state": {
+          "off": "mdi:water-boiler-off",
+          "on": "mdi:water-boiler"
+        }
+      },
       "lack_warning": {
         "default": "mdi:water-outline",
         "state": {
@@ -691,6 +698,13 @@
           "on": "mdi:bell-check"
         }
       },
+      "heater_switch": {
+        "default": "mdi:water-boiler-off",
+        "state": {
+          "off": "mdi:water-boiler-off",
+          "on": "mdi:water-boiler"
+        }
+      },
       "indicator_light": {
         "default": "mdi:led-outline",
         "state": {
@@ -779,6 +793,13 @@
         "state": {
           "off": "mdi:calendar-remove",
           "on": "mdi:calendar-multiple-check"
+        }
+      },
+      "pet_detection": {
+        "default": "mdi:cat",
+        "state": {
+          "off": "mdi:cat",
+          "on": "mdi:cat"
         }
       },
       "pet_eat_notif": {
