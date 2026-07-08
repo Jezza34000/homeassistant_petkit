@@ -62,12 +62,12 @@ def _device_name(device: Any) -> str:
     return (
         _safe_get(device, "device_nfo", "device_name")
         or _safe_get(device, "name")
-        or f"PetKit device {device.id}"
+        or f"Petkit device {device.id}"
     )
 
 
 class PetkitNotificationManager:
-    """Fires HA persistent notifications when PetKit device events occur.
+    """Fires HA persistent notifications when Petkit device events occur.
 
     Instantiate once per config entry and pass in the main data coordinator.
     Call :meth:`async_start` after instantiation (from an async context) to
@@ -115,7 +115,7 @@ class PetkitNotificationManager:
                 integrations=["petkit"],
             )
         except Exception:
-            LOGGER.exception("PetKit: failed to load translations for notifications")
+            LOGGER.exception("Petkit: failed to load translations for notifications")
 
         # Dismiss any previously-shown persistent notifications for categories
         # the user has just disabled.  Safe to call even if the notification
@@ -242,7 +242,7 @@ class PetkitNotificationManager:
                     label = self._translate_litter_event(current_event)
                     self._notify(
                         f"petkit_{device.id}_litter_event",
-                        f"PetKit — {_device_name(device)}",
+                        f"Petkit — {_device_name(device)}",
                         label,
                     )
             elif current_event != prev_event:
@@ -255,7 +255,7 @@ class PetkitNotificationManager:
         if rose and self._category_enabled(NOTIFICATION_CAT_LITTER_BOX_FULL):
             self._notify(
                 f"petkit_{device.id}_box_full",
-                f"PetKit — {_device_name(device)}",
+                f"Petkit — {_device_name(device)}",
                 "The waste bin is full and needs to be emptied.",
             )
         elif fell:
@@ -268,7 +268,7 @@ class PetkitNotificationManager:
         if rose and self._category_enabled(NOTIFICATION_CAT_LITTER_SAND_LOW):
             self._notify(
                 f"petkit_{device.id}_sand_lack",
-                f"PetKit — {_device_name(device)}",
+                f"Petkit — {_device_name(device)}",
                 "Litter level is low. Please refill.",
             )
         elif fell:
@@ -282,7 +282,7 @@ class PetkitNotificationManager:
         if rose and self._category_enabled(NOTIFICATION_CAT_LITTER_ERROR):
             self._notify(
                 f"petkit_{device.id}_error",
-                f"PetKit — {_device_name(device)}",
+                f"Petkit — {_device_name(device)}",
                 str(error_msg),
             )
         elif fell:
@@ -313,7 +313,7 @@ class PetkitNotificationManager:
         if rose and self._category_enabled(NOTIFICATION_CAT_FEEDER_FOOD_LOW):
             self._notify(
                 f"petkit_{device.id}_food_low",
-                f"PetKit — {_device_name(device)}",
+                f"Petkit — {_device_name(device)}",
                 "Food level is low. Please refill.",
             )
         elif fell:
@@ -327,7 +327,7 @@ class PetkitNotificationManager:
         if rose and self._category_enabled(NOTIFICATION_CAT_FEEDER_ERROR):
             self._notify(
                 f"petkit_{device.id}_error",
-                f"PetKit — {_device_name(device)}",
+                f"Petkit — {_device_name(device)}",
                 str(error_msg),
             )
         elif fell:
@@ -350,7 +350,7 @@ class PetkitNotificationManager:
         if rose and self._category_enabled(NOTIFICATION_CAT_FOUNTAIN_WATER_LOW):
             self._notify(
                 f"petkit_{device.id}_lack_warning",
-                f"PetKit — {_device_name(device)}",
+                f"Petkit — {_device_name(device)}",
                 "Water level is low. Please refill.",
             )
         elif fell:
@@ -367,7 +367,7 @@ class PetkitNotificationManager:
         if rose and self._category_enabled(NOTIFICATION_CAT_FOUNTAIN_CWT_LOW):
             self._notify(
                 f"petkit_{device.id}_clean_water_tank_low",
-                f"PetKit — {_device_name(device)}",
+                f"Petkit — {_device_name(device)}",
                 "Clean water tank is low. Please refill.",
             )
         elif fell:
@@ -379,7 +379,7 @@ class PetkitNotificationManager:
         if rose and self._category_enabled(NOTIFICATION_CAT_FOUNTAIN_CWT_EMPTY):
             self._notify(
                 f"petkit_{device.id}_clean_water_tank_empty",
-                f"PetKit — {_device_name(device)}",
+                f"Petkit — {_device_name(device)}",
                 "Clean water tank is empty. Please refill.",
             )
         elif fell:
@@ -390,7 +390,7 @@ class PetkitNotificationManager:
         if rose and self._category_enabled(NOTIFICATION_CAT_FOUNTAIN_WT_FULL):
             self._notify(
                 f"petkit_{device.id}_waste_tank_full",
-                f"PetKit — {_device_name(device)}",
+                f"Petkit — {_device_name(device)}",
                 "Waste tank is full. Please empty.",
             )
         elif fell:
@@ -406,7 +406,7 @@ class PetkitNotificationManager:
         if rose and self._category_enabled(NOTIFICATION_CAT_FOUNTAIN_FILTER):
             self._notify(
                 f"petkit_{device.id}_filter_warning",
-                f"PetKit — {_device_name(device)}",
+                f"Petkit — {_device_name(device)}",
                 "The water filter needs to be replaced.",
             )
         elif fell:
@@ -430,6 +430,6 @@ class PetkitNotificationManager:
                     self._check_fountain(device)
             except Exception:
                 LOGGER.exception(
-                    "PetKit: error while processing notification for device %s",
+                    "Petkit: error while processing notification for device %s",
                     getattr(device, "id", "?"),
                 )
