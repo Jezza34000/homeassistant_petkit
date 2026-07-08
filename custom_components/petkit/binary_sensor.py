@@ -140,6 +140,13 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             value=lambda device: device.state.sand_lack,
         ),
         PetKitBinarySensorDesc(
+            key="Litter tray installed",
+            translation_key="litter_tray_installed",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            value=lambda device: device.state.sand_tray_state == 3,
+        ),
+        PetKitBinarySensorDesc(
             key="Low power",
             translation_key="low_power",
             entity_category=EntityCategory.DIAGNOSTIC,

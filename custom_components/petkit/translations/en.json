@@ -42,6 +42,9 @@
       "yowling_detected": {
         "name": "Yowling detected"
       },
+      "litter_tray_installed": {
+        "name": "Litter tray installed"
+      },
       "abnormal_ph_detected": {
         "name": "Abnormal pH detected"
       },
