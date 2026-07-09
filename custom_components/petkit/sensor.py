@@ -611,7 +611,6 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
         PetKitSensorDesc(
             key="Drink times",
             translation_key="drink_times",
-            entity_category=EntityCategory.DIAGNOSTIC,
             state_class=SensorStateClass.TOTAL,
             value=lambda device: (
                 len(device.device_records)
