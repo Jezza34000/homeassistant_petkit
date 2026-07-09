@@ -401,4 +401,3 @@ def get_device_records_history(device) -> dict[str, any] | None:
     setattr(device, "_cached_records_first_ts", first_ts)
 
     return cached_history
-
