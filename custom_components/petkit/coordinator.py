@@ -75,7 +75,6 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
         self.mqtt_connected = False
         self._last_processed_record_timestamps = {}
 
-
     def enable_smart_polling(self, nb_tic: int) -> None:
         """Enable smart polling."""
         if self.fast_poll_tic > 0:
@@ -160,8 +159,12 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
 
                     # Sort records chronologically (oldest first) so we fire events in order
                     sorted_records = sorted(
-                        [r for r in records if getattr(r, "timestamp", None) is not None],
-                        key=lambda x: x.timestamp
+                        [
+                            r
+                            for r in records
+                            if getattr(r, "timestamp", None) is not None
+                        ],
+                        key=lambda x: x.timestamp,
                     )
 
                     if not sorted_records:
@@ -172,7 +175,9 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
                     if last_ts is None:
                         # First update - seed the timestamp with the newest record's timestamp
                         # so we don't flood HA with historical records on startup
-                        self._last_processed_record_timestamps[device_id] = sorted_records[-1].timestamp
+                        self._last_processed_record_timestamps[device_id] = (
+                            sorted_records[-1].timestamp
+                        )
                     else:
                         new_last_ts = last_ts
                         for record in sorted_records:
@@ -187,9 +192,12 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
     def _fire_record_event(self, device: Litter, record) -> None:
         """Fire a Home Assistant event for a new device record."""
         import json
+
         try:
             if hasattr(record, "model_dump_json"):
-                serialized = json.loads(record.model_dump_json(by_alias=True, exclude_none=True))
+                serialized = json.loads(
+                    record.model_dump_json(by_alias=True, exclude_none=True)
+                )
             elif hasattr(record, "json"):
                 serialized = json.loads(record.json(by_alias=True, exclude_none=True))
             else:
@@ -200,10 +208,11 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
 
         # Prepare top-level flat fields for easy InfluxDB/HA integration
         content = serialized.get("content", {})
-        
+
         event_data = {
             "device_id": device.id,
-            "device_name": getattr(device.device_nfo, "device_name", None) or getattr(device, "name", f"PetKit {device.id}"),
+            "device_name": getattr(device.device_nfo, "device_name", None)
+            or getattr(device, "name", f"PetKit {device.id}"),
             "device_type": "litter",
             "enum_event_type": serialized.get("enumEventType"),
             "event_type_id": serialized.get("eventType"),
@@ -222,7 +231,6 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
             event_data["duration"] = time_out - time_in
 
         self.hass.bus.async_fire("petkit_record_added", event_data)
-
 
 
 class PetkitMediaUpdateCoordinator(DataUpdateCoordinator):
