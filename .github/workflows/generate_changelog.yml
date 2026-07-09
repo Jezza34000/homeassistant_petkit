@@ -19,11 +19,11 @@ jobs:
         python-version: ["3.14"]
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # Version 6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # Version 7.0.0
         with:
           fetch-depth: 0
 
       - name: Bump version using semantic-release
-        uses: python-semantic-release/python-semantic-release@350c48fcb3ffcdfd2e0a235206bc2ecea6b69df0 # Version 10.5.3
+        uses: python-semantic-release/python-semantic-release@39dd2052f2ce8282a5d932c31d58a2ca06d2550e # Version 10.6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

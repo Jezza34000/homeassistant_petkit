@@ -10,6 +10,7 @@ from pypetkitapi import (
     D4H,
     D4SH,
     T7,
+    W7H,
     DeviceCommand,
     Feeder,
     Litter,
@@ -23,6 +24,9 @@ from homeassistant.const import EntityCategory
 
 from .const import (
     CLEANING_INTERVAL_OPT,
+    FOUNTAIN_DRAIN_FLUSH_CYCLE,
+    FOUNTAIN_DRAIN_REFILL_CYCLE,
+    FOUNTAIN_WORKING_MODE_W7H,
     IA_DETECTION_SENSITIVITY_OPT,
     LITTER_TYPE_OPT,
     LOGGER,
@@ -62,6 +66,40 @@ async def _handle_surplus_control(api, device, opt_value):
             device.id,
             DeviceCommand.UPDATE_SETTING,
             {"surplusControl": 1, "surplusStandard": selected_key},
+        )
+
+
+async def _handle_drain_and_refill(api, device, opt_value):
+    selected_key = next(
+        key for key, value in FOUNTAIN_DRAIN_REFILL_CYCLE.items() if value == opt_value
+    )
+
+    if selected_key == 0:
+        await api.send_api_request(
+            device.id, DeviceCommand.UPDATE_SETTING, {"autoWaterChange": 0}
+        )
+    else:
+        await api.send_api_request(
+            device.id,
+            DeviceCommand.UPDATE_SETTING,
+            {"autoWaterChange": 1, "waterChangeCycle": selected_key},
+        )
+
+
+async def _handle_drain_and_flush(api, device, opt_value):
+    selected_key = next(
+        key for key, value in FOUNTAIN_DRAIN_REFILL_CYCLE.items() if value == opt_value
+    )
+
+    if selected_key == 0:
+        await api.send_api_request(
+            device.id, DeviceCommand.UPDATE_SETTING, {"autoFlush": 0}
+        )
+    else:
+        await api.send_api_request(
+            device.id,
+            DeviceCommand.UPDATE_SETTING,
+            {"autoFlush": 1, "flushCycle": selected_key},
         )
 
 
@@ -188,7 +226,53 @@ SELECT_MAPPING: dict[type[PetkitDevices], list[PetKitSelectDesc]] = {
             entity_category=EntityCategory.CONFIG,
         ),
     ],
-    WaterFountain: [*COMMON_ENTITIES],
+    WaterFountain: [
+        *COMMON_ENTITIES,
+        PetKitSelectDesc(
+            key="Flow",
+            translation_key="flow",
+            current_option=lambda device: FOUNTAIN_WORKING_MODE_W7H.get(
+                device.settings.fountain_mode
+            ),
+            options=lambda: list(FOUNTAIN_WORKING_MODE_W7H.values()),
+            action=lambda api, device, opt_value: api.send_api_request(
+                device.id,
+                DeviceCommand.UPDATE_SETTING,
+                {
+                    "fountainMode": next(
+                        key
+                        for key, value in FOUNTAIN_WORKING_MODE_W7H.items()
+                        if value == opt_value
+                    )
+                },
+            ),
+            only_for_types=[W7H],
+        ),
+        PetKitSelectDesc(
+            key="Auto drain and refill",
+            translation_key="auto_drain_refill",
+            current_option=lambda device: (
+                FOUNTAIN_DRAIN_REFILL_CYCLE[0]
+                if device.settings.auto_water_change == 0
+                else FOUNTAIN_DRAIN_REFILL_CYCLE.get(device.settings.water_change_cycle)
+            ),
+            options=lambda: list(FOUNTAIN_DRAIN_REFILL_CYCLE.values()),
+            action=_handle_drain_and_refill,
+            only_for_types=[W7H],
+        ),
+        PetKitSelectDesc(
+            key="Auto drain and flush",
+            translation_key="auto_drain_flush",
+            current_option=lambda device: (
+                FOUNTAIN_DRAIN_FLUSH_CYCLE[0]
+                if device.settings.auto_flush == 0
+                else FOUNTAIN_DRAIN_FLUSH_CYCLE.get(device.settings.flush_cycle)
+            ),
+            options=lambda: list(FOUNTAIN_DRAIN_FLUSH_CYCLE.values()),
+            action=_handle_drain_and_flush,
+            only_for_types=[W7H],
+        ),
+    ],
     Purifier: [*COMMON_ENTITIES],
     Pet: [*COMMON_ENTITIES],
 }

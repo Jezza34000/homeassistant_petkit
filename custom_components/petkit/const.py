@@ -40,6 +40,9 @@ NOTIFICATION_CAT_LITTER_ERROR = "litter_error"
 NOTIFICATION_CAT_FEEDER_FOOD_LOW = "feeder_food_low"
 NOTIFICATION_CAT_FEEDER_ERROR = "feeder_error"
 NOTIFICATION_CAT_FOUNTAIN_WATER_LOW = "fountain_water_low"
+NOTIFICATION_CAT_FOUNTAIN_CWT_LOW = "fountain_cwt_low"
+NOTIFICATION_CAT_FOUNTAIN_CWT_EMPTY = "fountain_cwt_empty"
+NOTIFICATION_CAT_FOUNTAIN_WT_FULL = "fountain_wt_full"
 NOTIFICATION_CAT_FOUNTAIN_FILTER = "fountain_filter"
 
 NOTIFICATION_CATEGORIES = [
@@ -50,6 +53,9 @@ NOTIFICATION_CATEGORIES = [
     NOTIFICATION_CAT_FEEDER_FOOD_LOW,
     NOTIFICATION_CAT_FEEDER_ERROR,
     NOTIFICATION_CAT_FOUNTAIN_WATER_LOW,
+    NOTIFICATION_CAT_FOUNTAIN_CWT_LOW,
+    NOTIFICATION_CAT_FOUNTAIN_CWT_EMPTY,
+    NOTIFICATION_CAT_FOUNTAIN_WT_FULL,
     NOTIFICATION_CAT_FOUNTAIN_FILTER,
 ]
 
@@ -67,7 +73,10 @@ DEFAULT_EVENTS = [
     "Dish_before",
     "Dish_after",
     "Waste_check",
+    "Pet_detect",
+    "Drink_over",
 ]
+FOUNTAIN_MEDIA_EVENTS = ["Pet_detect", "Drink_over"]
 DEFAULT_DL_VIDEO = False
 DEFAULT_DL_IMAGE = True
 DEFAULT_SMART_POLLING = True
@@ -139,6 +148,21 @@ FOUNTAIN_WORKING_MODE_CTW3 = {
     1: "Standard",
     2: "Intermittent",
     3: "Battery",
+}
+
+FOUNTAIN_WORKING_MODE_W7H = {
+    0: "Do not flow",
+    1: "Continuous",
+    2: "Intermittent",
+    3: "Motion activated",
+}
+
+FOUNTAIN_DRAIN_REFILL_CYCLE = {0: "Disabled"} | {
+    i: f"Every {i} day{'s' if i > 1 else ''}" for i in range(1, 8)
+}
+
+FOUNTAIN_DRAIN_FLUSH_CYCLE = {0: "Disabled"} | {
+    i: f"Every {i} day{'s' if i > 1 else ''}" for i in range(1, 8)
 }
 
 FOUNTAIN_WORKING_MODE = {

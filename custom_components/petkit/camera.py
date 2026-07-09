@@ -17,11 +17,13 @@ from go2rtc_client.ws import (
 )
 from pypetkitapi import (
     FEEDER_WITH_CAMERA,
+    FOUNTAIN_WITH_CAMERA,
     LITTER_WITH_CAMERA,
     Feeder,
     Litter,
     LiveFeed,
     MediaType,
+    WaterFountain,
 )
 from webrtc_models import RTCIceCandidateInit, RTCIceServer
 
@@ -71,7 +73,7 @@ class _BrowserSession:
     queued_candidates: list[str] = field(default_factory=list)
 
 
-CAMERA_MAPPING: dict[type[Feeder | Litter], list[PetKitCameraDesc]] = {
+CAMERA_MAPPING: dict[type[Feeder | Litter | WaterFountain], list[PetKitCameraDesc]] = {
     Feeder: [
         PetKitCameraDesc(
             key="camera",
@@ -85,6 +87,14 @@ CAMERA_MAPPING: dict[type[Feeder | Litter], list[PetKitCameraDesc]] = {
             key="camera",
             translation_key="camera",
             only_for_types=LITTER_WITH_CAMERA,
+            value=lambda _device: True,
+        )
+    ],
+    WaterFountain: [
+        PetKitCameraDesc(
+            key="camera",
+            translation_key="camera",
+            only_for_types=FOUNTAIN_WITH_CAMERA,
             value=lambda _device: True,
         )
     ],
@@ -136,7 +146,7 @@ class PetkitWebRTCCamera(PetkitCameraBaseEntity):
     def __init__(
         self,
         coordinator: PetkitDataUpdateCoordinator,
-        device: Feeder | Litter,
+        device: Feeder | Litter | WaterFountain,
         entity_description: PetKitCameraDesc,
         hass: HomeAssistant,
     ) -> None:
