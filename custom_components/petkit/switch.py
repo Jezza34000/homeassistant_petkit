@@ -793,6 +793,7 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             turn_off=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"phDetection": 0}
             ),
+            only_for_types=LITTER_WITH_CAMERA,
         ),
         PetKitSwitchDesc(
             key="AI Yowling detection",
@@ -805,6 +806,7 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             turn_off=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"voice": 0}
             ),
+            only_for_types=LITTER_WITH_CAMERA,
         ),
         PetKitSwitchDesc(
             key="AI soft stool detection",
@@ -817,6 +819,7 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             turn_off=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"softMode": 0}
             ),
+            only_for_types=LITTER_WITH_CAMERA,
         ),
         PetKitSwitchDesc(
             key="Soft stool stop cleaning",
@@ -829,6 +832,7 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             turn_off=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"softModeClean": 0}
             ),
+            only_for_types=LITTER_WITH_CAMERA,
         ),
     ],
     WaterFountain: [
