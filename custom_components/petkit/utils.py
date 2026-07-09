@@ -364,10 +364,16 @@ def get_device_records_history(device) -> dict[str, any] | None:
     cached_len = getattr(device, "_cached_records_len", -1)
 
     # Check if the number of records is the same, and the timestamp of the latest record matches
-    first_ts = records[0].timestamp if records and hasattr(records[0], "timestamp") else None
+    first_ts = (
+        records[0].timestamp if records and hasattr(records[0], "timestamp") else None
+    )
     cached_first_ts = getattr(device, "_cached_records_first_ts", None)
 
-    if cached_records is not None and cached_len == len(records) and first_ts == cached_first_ts:
+    if (
+        cached_records is not None
+        and cached_len == len(records)
+        and first_ts == cached_first_ts
+    ):
         return cached_records
 
     # pypetkitapi uses Pydantic. Use json serialization to ensure basic types
