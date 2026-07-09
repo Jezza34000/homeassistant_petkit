@@ -194,7 +194,7 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
                 serialized = json.loads(record.json(by_alias=True, exclude_none=True))
             else:
                 serialized = vars(record)
-        except Exception as e:
+        except (TypeError, ValueError, AttributeError) as e:
             LOGGER.error("Failed to serialize record for event: %s", e)
             return
 

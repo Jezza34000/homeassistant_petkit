@@ -389,9 +389,10 @@ def get_device_records_history(device) -> dict[str, any] | None:
             LOGGER.error("Failed to serialize litter record: %s", e)
 
     # Store serialized result in cache attributes on the device object
-    device._cached_records_history = {"records": serialized_records[::-1]}
-    device._cached_records_len = len(records)
-    device._cached_records_first_ts = first_ts
+    cached_history = {"records": serialized_records[::-1]}
+    setattr(device, "_cached_records_history", cached_history)
+    setattr(device, "_cached_records_len", len(records))
+    setattr(device, "_cached_records_first_ts", first_ts)
 
-    return device._cached_records_history
+    return cached_history
 
