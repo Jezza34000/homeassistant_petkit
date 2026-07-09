@@ -50,6 +50,9 @@ from .const import (
     FOUNTAIN_MEDIA_EVENTS,
     LOGGER,
     MEDIA_SECTION,
+    NOTIFICATION_CAT_FOUNTAIN_CWT_EMPTY,
+    NOTIFICATION_CAT_FOUNTAIN_CWT_LOW,
+    NOTIFICATION_CAT_FOUNTAIN_WT_FULL,
     NOTIFICATION_SECTION,
 )
 from .coordinator import (
@@ -391,22 +394,31 @@ async def async_migrate_entry(hass: HomeAssistant, entry: PetkitConfigEntry) -> 
         media_section = dict(new_options.get(MEDIA_SECTION, {}))
         events = media_section.get(CONF_MEDIA_EV_TYPE)
         if events:
-            media_section[CONF_MEDIA_EV_TYPE] = [
+            events = [
                 "Pet_detect" if event == "Pet_detected" else event for event in events
             ]
-        new_options[MEDIA_SECTION] = media_section
-        hass.config_entries.async_update_entry(entry, options=new_options, version=9)
+        else:
+            events = list(DEFAULT_EVENTS)
 
-    if entry.version < 10:
-        new_options = dict(entry.options)
-        media_section = dict(new_options.get(MEDIA_SECTION, {}))
-        events = list(media_section.get(CONF_MEDIA_EV_TYPE, DEFAULT_EVENTS))
         for event in FOUNTAIN_MEDIA_EVENTS:
             if event not in events:
                 events.append(event)
         media_section[CONF_MEDIA_EV_TYPE] = events
         new_options[MEDIA_SECTION] = media_section
-        hass.config_entries.async_update_entry(entry, options=new_options, version=10)
+        section = dict(new_options.get(NOTIFICATION_SECTION, {}))
+        enabled = list(
+            section.get(CONF_ENABLED_NOTIFICATIONS, DEFAULT_ENABLED_NOTIFICATIONS)
+        )
+        for category in (
+            NOTIFICATION_CAT_FOUNTAIN_CWT_EMPTY,
+            NOTIFICATION_CAT_FOUNTAIN_WT_FULL,
+            NOTIFICATION_CAT_FOUNTAIN_CWT_LOW,
+        ):
+            if category not in enabled:
+                enabled.append(category)
+        section[CONF_ENABLED_NOTIFICATIONS] = enabled
+        new_options[NOTIFICATION_SECTION] = section
+        hass.config_entries.async_update_entry(entry, options=new_options, version=9)
 
     return True
 
