@@ -1,1 +1,1002 @@
-{}
+{
+  "config": {
+    "error": {
+      "account_exists": "Ez a fiók már létezik..",
+      "connection": "Nem sikerült csatlakozni a kiszolgálóhoz.",
+      "unknown": "Ismeretlen hiba történt, kérjük ellenőrizze a naplófájlokat.",
+      "invalid_auth": "Érvénytelen e-mail cím vagy jelszó",
+      "invalid_region": "Ehhez az e-mail címhez nem tartozik fiók. A megfelelő régiót választotta ki?",
+      "cannot_connect": "Nem sikerült csatlakozni a Petkit-szerverhez.",
+      "session_error": "Munkamenet-hiba, kérjük, próbálja újra.",
+      "server_busy": "A szerver foglalt, kérjük, próbálja újra."
+    },
+    "step": {
+      "user": {
+        "data": {
+          "password": "Jelszó",
+          "username": "Felhasználónév"
+        },
+        "data_description": {
+          "username": "{username_hint}"
+        },
+        "description": "Add meg azt a PetKit-fiókot, amelyet a Home Assistant a PetKit felhőjével való kommunikációhoz fog használni.\n\n**Fontos:** Ennek egy, a mobilalkalmazásban használt fióktól *elkülönülő* PetKit-fióknak kell lennie. A PetKit fiókonként csak egyetlen aktív munkamenetet engedélyez, így ha itt a fő fiókoddal jelentkezel be, azzal kijelentkezel az alkalmazásból (és fordítva).\n\n**Beállítás:**\n1. Hozz létre egy második PetKit fiókot (más e-mail címmel).\n2. A PetKit mobilalkalmazásban, fő fiókoddal bejelentkezve, nyisd meg a **Családkezelés** menüpontot, és hozz létre egy családot.\n3. Hívd meg a második fiókot családtagként, és fogadd el a meghívást.\n4. Adja meg alább a második fiók belépési adatait.\n\nTeljes útmutató: [Konfigurációs wiki]({wiki_url}).",
+        "sections": {
+          "advanced_options": {
+            "data": {
+              "region": "Régió",
+              "time_zone": "Időzóna"
+            },
+            "data_description": {
+              "region": "A Home Assistant automatikusan észlelte. Csak akkor írd felül, ha a PetKit-fiókod egy másik régiós szerveren van regisztrálva.",
+              "time_zone": "Automatikusan felismerve a Home Assistant által. Szükség esetén felülírható."
+            },
+            "description": "A régiót és az időzónát a Home Assistant automatikusan észleli. Csak akkor bontsa ki, ha felül szeretné írni őket.",
+            "name": "Haladó"
+          }
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "yowling_detected": {
+        "name": "Nyávogás észlelve"
+      },
+      "litter_tray_installed": {
+        "name": "Az alomtálca beszerelve"
+      },
+      "abnormal_ph_detected": {
+        "name": "Abnormális pH érzékelve"
+      },
+      "soft_stool_detected": {
+        "name": "Lágy széklet észlelve"
+      },
+      "battery": {
+        "name": "Akkumulátor"
+      },
+      "water_pump_running": {
+        "name": "A vízszivattyú üzemel"
+      },
+      "clean_water_tank_low": {
+        "name": "Alacsony a tisztavíz-tartály szintje"
+      },
+      "clean_water_tank_empty": {
+        "name": "Tisztavíz-tartály üres"
+      },
+      "waste_tank_full": {
+        "name": "Hulladéktartály megtelt"
+      },
+      "add_water_state": {
+        "name": "Víz hozzáadása"
+      },
+      "heater_installed": {
+        "name": "Fűtőberendezés beszerelve"
+      },
+      "waste_tank_installed": {
+        "name": "Szennyvíztartály beszerelve"
+      },
+      "clean_water_tank_installed": {
+        "name": "Tisztavíz-tartály beszerelve"
+      },
+      "recirculation_tray_low": {
+        "name": "Alacsony recirkulációs tálcaszint"
+      },
+      "flush_state": {
+        "name": "Öblítés"
+      },
+      "disinfect_state": {
+        "name": "Fertőtlenítés"
+      },
+      "weight_error": {
+        "name": "Súlyhiba"
+      },
+      "pet_error": {
+        "name": "Háziállat-hiba"
+      },
+      "light": {
+        "name": "Fény"
+      },
+      "spray": {
+        "name": "Permet"
+      },
+      "battery_installed": {
+        "name": "Akkumulátor beszerelve"
+      },
+      "camera_status": {
+        "name": "Kamera státusz"
+      },
+      "n60_deodorize_presence": {
+        "name": "N60 szagtalanító modul állapota"
+      },
+      "care_plus_subscription": {
+        "name": "Care+ előfizetés"
+      },
+      "deodorizer": {
+        "name": "Szagtalanító"
+      },
+      "deodorization_running": {
+        "name": "Szagtalanítás"
+      },
+      "do_not_disturb_state": {
+        "name": "Ne zavarj"
+      },
+      "eating": {
+        "name": "Evés"
+      },
+      "feeding": {
+        "name": "Adagolás"
+      },
+      "food_level": {
+        "name": "Élelem szint"
+      },
+      "food_level_1": {
+        "name": "Élelem szint hopper 1"
+      },
+      "food_level_2": {
+        "name": "Élelem szint hopper 2"
+      },
+      "frequent_use": {
+        "name": "Gyakori használat észlelése"
+      },
+      "lack_warning": {
+        "name": "Figyelmeztetés vízhiányra"
+      },
+      "pet_detected": {
+        "name": "Háziállat iszik"
+      },
+      "pump_running": {
+        "name": "Szivattyú"
+      },
+      "liquid_lack": {
+        "name": "Folyadékszint"
+      },
+      "litter": {
+        "name": "Szemét"
+      },
+      "low_battery": {
+        "name": "Alacsony töltöttség"
+      },
+      "low_power": {
+        "name": "Bekapcsolás"
+      },
+      "manually_paused": {
+        "name": "Manuálisan szüneteltetve"
+      },
+      "on_ac_power": {
+        "name": "Hálózati tápellátásról"
+      },
+      "pura_air_liquid": {
+        "name": "Pura Air folyadék"
+      },
+      "replace_filter": {
+        "name": "Szűrőcsere"
+      },
+      "sand_lack": {
+        "name": "Homokhiány"
+      },
+      "toilet_occupied": {
+        "name": "Foglalt a WC"
+      },
+      "waste_bin": {
+        "name": "Hulladékgyűjtő megtelt"
+      },
+      "waste_bin_presence": {
+        "name": "Hulladékgyűjtő megléte"
+      },
+      "water_level": {
+        "name": "Víz szint"
+      }
+    },
+    "button": {
+      "refill": {
+        "name": "Újratöltés"
+      },
+      "drain": {
+        "name": "Le engedés"
+      },
+      "drain_and_flush": {
+        "name": "Le engedés és öblítés"
+      },
+      "action_continue": {
+        "name": "Művelet: Folytatás"
+      },
+      "action_pause": {
+        "name": "Művelet: Szünet"
+      },
+      "pause": {
+        "name": "Szünet"
+      },
+      "resume": {
+        "name": "Visszatérés"
+      },
+      "action_reset": {
+        "name": "Művelet: Visszaállítás"
+      },
+      "call_pet": {
+        "name": "Háziállat hívása"
+      },
+      "play_sound": {
+        "name": "Hang lejátszása"
+      },
+      "cancel_manual_feed": {
+        "name": "Kézi adagolás megszakítása"
+      },
+      "deodorize": {
+        "name": "Szagtalanítás"
+      },
+      "deep_clean": {
+        "name": "Mély tisztítás"
+      },
+      "dump_litter": {
+        "name": "Hulladékot lerakni"
+      },
+      "exit_maintenance": {
+        "name": "Karbantartás: Kilépés"
+      },
+      "food_replenished": {
+        "name": "Élelem pótolva"
+      },
+      "reset_desiccant": {
+        "name": "Szárítóanyag visszaállítása"
+      },
+      "reset_n50_odor_eliminator": {
+        "name": "Visszaállítás N50 szagsemlegesítő"
+      },
+      "reset_n60_odor_eliminator": {
+        "name": "Visszaállítás N60 szagsemlegesítő"
+      },
+      "start_maintenance": {
+        "name": "Karbantartás: Indítás"
+      },
+      "start_scoop": {
+        "name": "Lapátolás"
+      },
+      "level_litter": {
+        "name": "Alom szint"
+      },
+      "reset_filter": {
+        "name": "Szűrő visszaállítás"
+      },
+      "ptz_left": {
+        "name": "PTZ Bal"
+      },
+      "ptz_right": {
+        "name": "PTZ Jobb"
+      },
+      "ptz_stop": {
+        "name": "PTZ Állj"
+      },
+      "ptz_flip": {
+        "name": "PTZ Fordít"
+      }
+    },
+    "fan": {
+      "air_purifier_fan": {
+        "name": "Légtisztító"
+      }
+    },
+    "image": {
+      "last_eat_event": {
+        "name": "Utolsó étkezési esemény"
+      },
+      "last_feed_event": {
+        "name": "Utolsó adagolás esemény"
+      },
+      "last_toileting_event": {
+        "name": "Utolsó WC használat"
+      },
+      "last_visit_event": {
+        "name": "Utolsó látogatás esemény"
+      },
+      "dish_before": {
+        "name": "Korábbi fogás"
+      },
+      "dish_after": {
+        "name": "Későbbi fogás"
+      },
+      "waste_check": {
+        "name": "Hulladék ellenőrzés"
+      },
+      "last_pet_detect_event": {
+        "name": "Utolsó kisállat-észlelési esemény"
+      },
+      "last_drink_event": {
+        "name": "Utolsó ivás esemény"
+      }
+    },
+    "number": {
+      "cleaning_delay": {
+        "name": "Tisztítási késleltetés"
+      },
+      "heater_temp": {
+        "name": "Fűtőelem hőmérséklete"
+      },
+      "fountain_time": {
+        "name": "Szökőkút működési ideje"
+      },
+      "sleep_time": {
+        "name": "Alvásidő"
+      },
+      "pet_notify_interval": {
+        "name": "Kisállat értesítési időköz"
+      },
+      "manual_feed": {
+        "name": "Kézi adagolás"
+      },
+      "min_eating_duration": {
+        "name": "Minimális étkezési időtartam"
+      },
+      "surplus": {
+        "name": "Többlet"
+      },
+      "volume": {
+        "name": "Adag"
+      }
+    },
+    "select": {
+      "avoid_repeat_cleaning_interval": {
+        "name": "Kerülje az ismételt tisztítási intervallumot"
+      },
+      "eat_detection_sensitivity": {
+        "name": "IA evésérzékelési érzékenység"
+      },
+      "litter_type": {
+        "name": "Alom típusa"
+      },
+      "working_mode": {
+        "name": "Működési mód"
+      },
+      "led_brightness": {
+        "name": "LED-fényerő"
+      },
+      "move_detection_sensitivity": {
+        "name": "Mozgásérzékelés érzékenysége"
+      },
+      "pet_detection_sensitivity": {
+        "name": "IA kisállat-észlelési érzékenység"
+      },
+      "surplus_level": {
+        "name": "Többletszabályozási szint"
+      },
+      "auto_drain_flush": {
+        "name": "Automatikus leeresztés és átöblítés"
+      },
+      "auto_drain_refill": {
+        "name": "Automatikus leeresztés és újratöltés"
+      },
+      "flow": {
+        "name": "Folyás"
+      }
+    },
+    "sensor": {
+      "urine_measured_ph": {
+        "name": "Mért vizelet-pH"
+      },
+      "device_id": {
+        "name": "Eszközazonosító"
+      },
+      "pet_last_urination_date": {
+        "name": "Utolsó vizeletürítés"
+      },
+      "heater_real_temp": {
+        "name": "Fűtőelem hőmérséklete"
+      },
+      "clean_water_tank_state": {
+        "name": "Tisztavíz-tartály állapota",
+        "state": {
+          "normal": "Normál",
+          "empty": "Üres",
+          "low": "Alacsony",
+          "unknown": "Ismeretlen"
+        }
+      },
+      "drink_count": {
+        "name": "Ivások száma"
+      },
+      "drink_time_avg": {
+        "name": "Átlagos ivás ideje"
+      },
+      "filter_left_days": {
+        "name": "Szűrő hátralévő napok"
+      },
+      "next_flush_time": {
+        "name": "Következő öblítés"
+      },
+      "next_water_change_time": {
+        "name": "Következő vízcsere"
+      },
+      "drink_time": {
+        "name": "Utolsó ivás ideje"
+      },
+      "pet_last_defecation_date": {
+        "name": "Utolsó székletürítés"
+      },
+      "air_purified": {
+        "name": "Levegőtisztítva"
+      },
+      "amount_eaten": {
+        "name": "Elfogyasztott mennyiség"
+      },
+      "battery_voltage": {
+        "name": "Akkumulátorfeszültség"
+      },
+      "supply_voltage": {
+        "name": "Tápfeszültség"
+      },
+      "average_time": {
+        "name": "Átlagos használat"
+      },
+      "avg_eating_time": {
+        "name": "Átlagos étkezési idő"
+      },
+      "battery_level": {
+        "name": "Akkumulátorszint"
+      },
+      "odor_eliminator_n50_left_days": {
+        "name": "N50 szagsemlegesítő hátralévő napok"
+      },
+      "odor_eliminator_n60_left_days": {
+        "name": "N60 szagsemlegesítő hátralévő napok"
+      },
+      "deodorizer_level": {
+        "name": "Szagtalanítási szint"
+      },
+      "desiccant_left_days": {
+        "name": "Nedvszívó hátralévő napok"
+      },
+      "device_status": {
+        "name": "Eszköz állapota"
+      },
+      "drink_times": {
+        "name": "Ivás időpontok"
+      },
+      "end_date_care_plus_subscription": {
+        "name": "Care+ hátralévő napok"
+      },
+      "error": {
+        "name": "Hiba"
+      },
+      "battery": {
+        "name": "Akkumulátor"
+      },
+      "error_message": {
+        "name": "Error",
+        "state": {
+          "no_error": "Nincs hiba"
+        }
+      },
+      "feeder_error": {
+        "name": "Etető hiba"
+      },
+      "filter_percent": {
+        "name": "Hátralévő szűrő"
+      },
+      "food_bowl_percentage": {
+        "name": "Etetőtál feltöltése"
+      },
+      "food_in_bowl": {
+        "name": "Étel az etetőtálban"
+      },
+      "food_left": {
+        "name": "Megmaradt étel"
+      },
+      "last_connection": {
+        "name": "Utolsó Bluetooth kapcsolat"
+      },
+      "last_update": {
+        "name": "Utolsó frissítés"
+      },
+      "last_used_by": {
+        "name": "Utoljára használta"
+      },
+      "litter_last_event": {
+        "name": "Last event",
+        "state": {
+          "auto_cleaning_canceled": "Automatikus tisztítás megszakítva",
+          "auto_cleaning_canceled_kitten": "Automatikus tisztítás megszakítva: Macska",
+          "auto_cleaning_completed": "Automatikus tisztítás befejeződött",
+          "auto_cleaning_failed_full": "Az automatikus tisztítás sikertelen: megtelt",
+          "auto_cleaning_failed_hall_l": "Automatikus tisztítás sikertelen: hall L",
+          "auto_cleaning_failed_hall_t": "Automatikus tisztítás sikertelen: hall T",
+          "auto_cleaning_terminated": "Automatikus tisztítás leállítva",
+          "auto_odor_failed": "Az automatikus szagtalanítás sikertelen volt.",
+          "clean_over": "Tisztítás",
+          "deodorant_finished": "Szagtalanítás befejeződött",
+          "deodorant_finished_liquid_lack": "Szagtalanítás befejeződött: folyadékhiány",
+          "light_over": "Világítás",
+          "litter_empty_completed": "Hulladéktartály kiürítve.",
+          "litter_empty_failed_full": "Hulladéktartály ürítése sikertelen: megtelt",
+          "litter_empty_failed_hall_l": "Hulladéktartály ürítése sikertelen: hall L",
+          "litter_empty_failed_hall_t": "Hulladéktartály ürítése sikertelen: hall T",
+          "litter_empty_terminated": "Hulladéktartály ürítés leállítva",
+          "manual_cleaning_canceled": "Kézi tisztítás megszakítva",
+          "manual_cleaning_completed": "Kézi tisztítás befejezve",
+          "manual_cleaning_failed_full": "Kézi tisztítás sikertelen: megtelt",
+          "manual_cleaning_failed_hall_l": "Kézi tisztítás sikertelen: hall L",
+          "manual_cleaning_failed_hall_t": "Kézi tisztítás sikertelen: hall T",
+          "manual_cleaning_terminated": "Kézi tisztítás leállítva",
+          "manual_odor_completed": "A kézi szagtalanítás befejeződött",
+          "manual_odor_completed_liquid_lack": "Kézi szagtalanítás elvégezve: folyadékhiány",
+          "manual_odor_failed": "Kézi szagtalanítás sikertelen",
+          "periodic_cleaning_canceled": "Az időszakos tisztítás törölve.",
+          "periodic_cleaning_canceled_kitten": "Időszakos tisztítás törölve: Macska",
+          "periodic_cleaning_completed": "Időszakos tisztítás elvégezve",
+          "periodic_cleaning_terminated": "Időszakos tisztítás leállítva",
+          "periodic_odor_completed": "Időszakos szagtalanítás befejezve",
+          "periodic_odor_completed_liquid_lack": "Időszakos szagtalanítás elvégezve: folyadékhiány",
+          "periodic_odor_failed": "Időszakos szagtalanítás sikertelen",
+          "pet_detect": "Kisállat észlelve",
+          "pet_out": "Kisállat eltűnt",
+          "reset_completed": "Visszaállítás befejeződött.",
+          "reset_failed_full": "Visszaállítás sikertelen: megtelt",
+          "reset_failed_hall_l": "Visszaállítás sikertelen: hall L",
+          "reset_failed_hall_t": "Visszaállítás sikertelen: hall T",
+          "reset_over": "Visszaállítás",
+          "reset_terminated": "Visszaállítás leállítva",
+          "scheduled_cleaning_failed_full": "Ütemezett tisztítás sikertelen: megtelt",
+          "scheduled_cleaning_failed_hall_l": "Ütemezett tisztítás sikertelen: hall L",
+          "scheduled_cleaning_failed_hall_t": "Ütemezett tisztítás sikertelen: hall T",
+          "spray_over": "Deodorize"
+        }
+      },
+      "litter_level": {
+        "name": "Hulladékgyüjtő szintje"
+      },
+      "litter_state": {
+        "name": "State",
+        "state": {
+          "calibrating": "Kalibráció",
+          "cleaning": "Tiszítás",
+          "cleaning_paused": "Tisztítás szünetel",
+          "cleaning_paused_cover": "Tisztítás szüneteltetve – Fedél",
+          "cleaning_paused_pet_approach": "Tisztítás szünetel – Háziállat megközelítése",
+          "cleaning_paused_pet_entered": "Tisztítás szünetel - Háziállat belépett",
+          "cleaning_paused_pet_using": "Tisztítás szünetel - Háziállat használja",
+          "cleaning_paused_system_error": "Tisztítás szünetel - Rendszerhiba",
+          "dumping": "Ürítés",
+          "dumping_paused": "Ürítés szünetel",
+          "dumping_paused_cover": "Ürítés szünetel - Fedél",
+          "dumping_paused_pet_approach": "Ürítés szünetel - Háziállat megközelítése",
+          "dumping_paused_pet_entered": "Ürítés szünetel - Háziállat belépett",
+          "dumping_paused_pet_using": "Ürítés szünetel - Háziállat használja",
+          "dumping_paused_system_error": "Ürítés szünetel - Rendszerhiba",
+          "idle": "Tétlen",
+          "leveling": "Szintezés",
+          "maintenance": "Karbantartás",
+          "maintenance_paused": "Karbantartás szünetel",
+          "maintenance_paused_cover": "Karbantartás szünetel - Fedél",
+          "maintenance_paused_pet_approach": "Karbantartás szünetel - Háziállat megközelítése",
+          "maintenance_paused_pet_entered": "Karbantartás szünetel - Háziállat belépett",
+          "maintenance_paused_pet_using": "Karbantartás szünetel - Háziállat használja",
+          "maintenance_paused_system_error": "Karbantartás szünetel - Rendszerhiba",
+          "paused": "Szüneteltetve",
+          "paused_cover": "Szüneteltetve - Fedél",
+          "paused_pet_approach": "Szüneteltetve - Háziállat megközelítése",
+          "paused_pet_entered": "Szüneteltetve - Háziállat belépett",
+          "paused_pet_using": "Szüneteltetve - Háziállat használja",
+          "paused_system_error": "Szüneteltetve - Rendszerhiba",
+          "resetting": "Visszaállítás folyamatban",
+          "resetting_device": "Eszköz alaphelyzetbe állítása",
+          "unknown": "Ismeretlen"
+        }
+      },
+      "litter_weight": {
+        "name": "Alom súlya"
+      },
+      "manual_dispensed": {
+        "name": "Kézi adagolás"
+      },
+      "manual_dispensed_hopper_1": {
+        "name": "Kézi adagolás hopper 1"
+      },
+      "manual_dispensed_hopper_2": {
+        "name": "Kézi adagolás hopper 2"
+      },
+      "package_used": {
+        "name": "Felhasznált csomag"
+      },
+      "pet_last_device_used": {
+        "name": "Utoljára használt alom"
+      },
+      "pet_last_use_date": {
+        "name": "Utolsó használat dátuma"
+      },
+      "connection_state": {
+        "name": "Kapcsolati állapot"
+      },
+      "pet_last_use_duration": {
+        "name": "Utolsó használat hossza"
+      },
+      "pet_last_weight_measurement": {
+        "name": "Utolsó súlymérés"
+      },
+      "planned_dispensed": {
+        "name": "Tervezett kiadás"
+      },
+      "planned_dispensed_hopper_1": {
+        "name": "Tervezett kiadás hopper 1"
+      },
+      "planned_dispensed_hopper_2": {
+        "name": "Tervezett kiadás hopper 2"
+      },
+      "purified_water": {
+        "name": "Tisztított víz"
+      },
+      "purifier_liquid": {
+        "name": "Folyadékszint"
+      },
+      "raw_distribution_data": {
+        "name": "Nyers eloszlási adatok"
+      },
+      "rssi": {
+        "name": "RSSI"
+      },
+      "spray_times": {
+        "name": "Permetezési idők"
+      },
+      "spray_deodorant_liquid": {
+        "name": "Szagtalanító permet folyadék"
+      },
+      "times_dispensed": {
+        "name": "Kiadott időpontok"
+      },
+      "times_eaten": {
+        "name": "Étkezések száma"
+      },
+      "times_used": {
+        "name": "Használatok száma"
+      },
+      "total_dispensed": {
+        "name": "Teljes kiadott"
+      },
+      "total_dispensed_hopper_1": {
+        "name": "Teljes kiadott hopper 1"
+      },
+      "total_dispensed_hopper_2": {
+        "name": "Teljes kiadott hopper 2"
+      },
+      "total_package": {
+        "name": "Teljes csomag"
+      },
+      "total_planned": {
+        "name": "Teljes tervezett"
+      },
+      "total_planned_hopper_1": {
+        "name": "Teljes tervezett hopper 1"
+      },
+      "total_planned_hopper_2": {
+        "name": "Teljes tervezett hopper 2"
+      },
+      "total_time": {
+        "name": "Teljes használat"
+      },
+      "garbage_bag_box_state": {
+        "name": "Szemeteszsák-tartó doboz",
+        "state": {
+          "normal": "Normál",
+          "running_out": "Kifogyóban",
+          "used_up": "Elhasználódott",
+          "expired": "Lejárt",
+          "not_available": "Nem érhető el",
+          "not_installed": "Nincs telepítve"
+        }
+      },
+      "purification_n60_left_days": {
+        "name": "Tisztítás N60 hátralévő napok"
+      },
+      "last_pack_time": {
+        "name": "Utolsó csomag időpont"
+      },
+      "last_bag_replacement_time": {
+        "name": "Utolsó zsákcsere"
+      },
+      "sand_tray_left_days": {
+        "name": "Homok tálca hátralévő napok"
+      }
+    },
+    "switch": {
+      "soft_stool": {
+        "name": "AI-alapú lágy széklet felismerés"
+      },
+      "soft_stool_stop_cleaning": {
+        "name": "Tisztítás leállítása lágy széklet észlelésekor"
+      },
+      "auto_clean": {
+        "name": "Automata tisztítás"
+      },
+      "auto_refill": {
+        "name": "Automata újratöltés"
+      },
+      "heater_switch": {
+        "name": "Melegítő"
+      },
+      "auto_water_change": {
+        "name": "Automata vízcsere"
+      },
+      "auto_flush": {
+        "name": "Automata öblítés"
+      },
+      "pet_detection": {
+        "name": "Kisállat érzékelés"
+      },
+      "drink_detection": {
+        "name": "Ivás érzékelés"
+      },
+      "auto_deodor": {
+        "name": "Automata szagtalanítás"
+      },
+      "avoid_repeat_clean": {
+        "name": "Kerülje az ismételt tisztítást"
+      },
+      "camera": {
+        "name": "Kamera"
+      },
+      "child_lock": {
+        "name": "Gyerekzár"
+      },
+      "cont_rotation": {
+        "name": "Folyamatos forgás"
+      },
+      "deep_cleaning": {
+        "name": "Mély tisztítás"
+      },
+      "deodorant_n50_notify": {
+        "name": "Értesítés az N50 cseréjének szükségességéről"
+      },
+      "deodorant_n60_notify": {
+        "name": "Értesítés az N60 cseréjének szükségességéről"
+      },
+      "desiccant_notif": {
+        "name": "Értesítés a nedvszívó cseréjének szükségességéről"
+      },
+      "deep_deodor": {
+        "name": "Mélyreható szagtalanítás"
+      },
+      "pet_notify": {
+        "name": "Értesítés ha a háziállat megjelenik"
+      },
+      "flush_notify": {
+        "name": "Értesítés öblítéskor"
+      },
+      "water_change_notify": {
+        "name": "Értesítés vízcserekor"
+      },
+      "clean_water_lack_light": {
+        "name": "Tiszta víz hiányát jelző lámpa"
+      },
+      "clean_water_empty_light": {
+        "name": "Tiszta víz tartály üresedését jelző lámpa"
+      },
+      "waste_water_full_light": {
+        "name": "Hulladéktartály telítettségét jelző lámpa"
+      },
+      "dispensing_notif": {
+        "name": "Értesítés adagoláskor"
+      },
+      "display": {
+        "name": "Kijelző"
+      },
+      "do_not_disturb": {
+        "name": "Ne zavarjanak"
+      },
+      "feed_sound": {
+        "name": "Etetés hang"
+      },
+      "feed_tone": {
+        "name": "Etetés tónus"
+      },
+      "highlight": {
+        "name": "Kisállatkövetés kiemelése"
+      },
+      "indicator_light": {
+        "name": "Jelzőfény"
+      },
+      "camera_light": {
+        "name": "Kamera jelzőfénye"
+      },
+      "kitten_mode": {
+        "name": "Kismacska mód"
+      },
+      "lack_liquid_notify": {
+        "name": "Értesítés a tisztítófolyadék-hiányról"
+      },
+      "pet_toileting_notif": {
+        "name": "Értesítés a háziállat ürítéséről"
+      },
+      "lack_sand_notify": {
+        "name": "Értesítés alomhiányról"
+      },
+      "light": {
+        "name": "Világítás"
+      },
+      "light_assist": {
+        "name": "Világítás tisztításkor"
+      },
+      "light_weight": {
+        "name": "Könnyű súly"
+      },
+      "litter_full_notify": {
+        "name": "Értesítés megtelt szemetesről"
+      },
+      "low_battery_notif": {
+        "name": "Értesítés alacsony töltöttségről"
+      },
+      "microphone": {
+        "name": "Mikrofon"
+      },
+      "move_notif": {
+        "name": "Értesítés mozgásról"
+      },
+      "night_vision": {
+        "name": "Éjjellátó"
+      },
+      "periodic_cleaning": {
+        "name": "Időszakos tisztítás"
+      },
+      "periodic_deodorizing": {
+        "name": "Időszakos szagtalanítás"
+      },
+      "pet_eat_notif": {
+        "name": "Értesítés, ha a háziállat eszik"
+      },
+      "pet_in_notify": {
+        "name": "Értesítés a háziállat ürítéséről"
+      },
+      "pet_tracking": {
+        "name": "Háziállat-követés"
+      },
+      "pet_visit_notif": {
+        "name": "Értesítés háziállat-látogatásról"
+      },
+      "power": {
+        "name": "Bekapcsolás"
+      },
+      "proximity_sensor": {
+        "name": "Szenzor mód"
+      },
+      "refill_notif": {
+        "name": "Értesítés újratöltési igényről"
+      },
+      "sand_saving": {
+        "name": "Alomtakarékosság"
+      },
+      "shortage_alarm": {
+        "name": "Hiányjelzés"
+      },
+      "surplus_control": {
+        "name": "Többletellenőrzés"
+      },
+      "system_notification": {
+        "name": "Rendszerhang"
+      },
+      "video_timestamp": {
+        "name": "Időbélyeg megjelenítése"
+      },
+      "voice_dispense": {
+        "name": "Hangalapú adagolás"
+      },
+      "waste_covering": {
+        "name": "Hulladékfedés"
+      },
+      "work_log_notify": {
+        "name": "Értesítés ütemezett feladatok végrehajtásáról"
+      },
+      "toilet_light": {
+        "name": "Világítás WC használatkor"
+      },
+      "privacy_mode": {
+        "name": "Privát mód"
+      },
+      "work_notify": {
+        "name": "Értesítés az eszköz tisztításáról"
+      },
+      "privacy_camera_off": {
+        "name": "Adatvédelem: kamera kikapcsolva"
+      },
+      "privacy_camera_inward": {
+        "name": "Adatvédelem: befelé néző kamera"
+      },
+      "privacy_microphone_off": {
+        "name": "Adatvédelem: mikrofon kikapcsolva"
+      },
+      "ai_ph_detection": {
+        "name": "AI-alapú pH-detektálás"
+      },
+      "ai_yowling": {
+        "name": "AI-alapú nyávogásérzékelés"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "Világítás"
+      }
+    },
+    "camera": {
+      "camera": {
+        "name": "Kamera-adatfolyam"
+      }
+    },
+    "text": {
+      "manual_feed_dual_h1": {
+        "name": "Kézi etetés hopper 1"
+      },
+      "manual_feed_dual_h2": {
+        "name": "Kézi etetés hopper 2"
+      },
+      "manual_feed_single": {
+        "name": "Kézi etetés"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "always_on_stream": "Folyamatos újraközvetítés",
+          "region": "Régió",
+          "time_zone": "Időzóna"
+        },
+        "data_description": {
+          "always_on_stream": "Tartsa előkészítve a belső újraközvetítési munkamenetet, hogy a böngészőben megtekinthető tartalmak, a WHEP-kliensek és a kamera általános adatfolyam-felhasználói gyorsan csatlakozhassanak. Az újraközvetített adatfolyamot más felhasználók is újra felhasználhatják. Ez egy upstream munkamenetet életben tart, és több eszköz- és felhőerőforrást használ."
+        },
+        "sections": {
+          "bluetooth_options": {
+            "data": {
+              "ble_relay_enabled": "Bluetooth-továbbítás engedélyezése",
+              "scan_interval_bluetooth": "Bluetooth-frissítési időköz (perc)"
+            },
+            "data_description": {
+              "ble_relay_enabled": "Ha le van tiltva, a szökőkút frissítései csak akkor történnek meg, ha az eszközt az alkalmazáson keresztül frissítik."
+            },
+            "description": "Ezek a funkciók csak akkor működnek, ha rendelkezik szökőkúttal és legalább egy olyan eszközzel, amely Bluetooth-átjátszóként szolgálhat (pl. automata etető vagy alomtálca). További információért tekintse meg a Petkit alkalmazást.",
+            "name": "Bluetooth opciók"
+          },
+          "medias_options": {
+            "data": {
+              "delete_media_after": "Média törlése (napok)",
+              "media_dl_image": "Képek lekérése",
+              "media_dl_video": "Videók lekérése",
+              "media_ev_type": "Letölthető eseménytípus",
+              "media_path": "Médiaútvonal",
+              "scan_interval_media": "Média frissítési időköz (perc)"
+            },
+            "data_description": {
+              "delete_media_after": "A letöltött média törlése a megadott számú nap elteltével. (0 = soha ne törölje)",
+              "media_dl_image": "Töltse le az összes képet eszközeiről az alább kiválasztott események szerint szűrve (nincs szükség aktív Care+ előfizetésre)..",
+              "media_dl_video": "Töltse le az összes videót eszközeiről, az alább kiválasztott események szerint szűrve. (Aktív Care+ előfizetés szükséges)",
+              "media_path": "Az útvonal, ahol a médiafájlok tárolásra kerülnek. Ha nincs megadva, a médiafájlok a Home Assistant `/media` mappájában lesznek tárolva.",
+              "scan_interval_media": "Új médiafájlok (képek és videók) letöltésének gyakorisága a Petkit szervereiről."
+            },
+            "description": "Ezek a lehetőségek csak akkor hatékonyak, ha rendelkezik legalább egy olyan eszközzel (pl. etetővel vagy alomtálcával), amely képes képek és videók rögzítésére.",
+            "name": "Média opciók"
+          },
+          "notifications_options": {
+            "data": {
+              "enabled_notifications": "Engedélyezett értesítések"
+            },
+            "data_description": {
+              "enabled_notifications": "Válassza ki, hogy mely PetKit-események esetén kell állandó értesítést küldeni a Home Assistant számára. Törölje a jelölést egy kategóriáról, ha el szeretné némítani azt a Home Assistantben. Ezek a kategóriák függetlenek a Petkit alkalmazás eszközoldali értesítési kapcsolóitól."
+            },
+            "description": "A PetKit-alkalmazás beállításaitól függetlenül szabályozhatod, hogy mely PetKit-eszközesemények váltsanak ki állandó értesítést a Home Assistantban.",
+            "name": "Értesítések"
+          }
+        },
+        "title": "Petkit-integráció konfigurálása"
+      }
+    }
+  },
+  "selector": {
+    "petkit_notification_category": {
+      "options": {
+        "feeder_error": "Etető – eszközhiba",
+        "feeder_food_low": "Etető – alacsony élelemszint",
+        "fountain_filter": "Ivókút – szűrőcsere szükséges",
+        "fountain_water_low": "Ivókút – alacsony vízszint",
+        "litter_box_full": "Alomtálca – a szemetes megtelt",
+        "litter_error": "Alomtálca – eszközhiba",
+        "litter_event": "Alomtálca tisztítás / háziállat látogatási alkalmak",
+        "litter_sand_low": "Alomtálca – alacsony alomszint"
+      }
+    }
+  }
+}
