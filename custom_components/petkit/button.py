@@ -312,6 +312,7 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
                 DeviceCommand.CONTROL_DEVICE,
                 {DeviceAction.START: FountainActionWIFI.REFILL},
             ),
+            is_available=lambda device: device.state.work_state is None,
             only_for_types=[W7H],
         ),
         PetKitButtonDesc(
@@ -322,6 +323,7 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
                 DeviceCommand.CONTROL_DEVICE,
                 {DeviceAction.START: FountainActionWIFI.DRAIN},
             ),
+            is_available=lambda device: device.state.work_state is None,
             only_for_types=[W7H],
         ),
         PetKitButtonDesc(
@@ -332,6 +334,7 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
                 DeviceCommand.CONTROL_DEVICE,
                 {DeviceAction.START: FountainActionWIFI.DRAIN_AND_FLUSH},
             ),
+            is_available=lambda device: device.state.work_state is None,
             only_for_types=[W7H],
         ),
         PetKitButtonDesc(
@@ -351,6 +354,7 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
                 DeviceCommand.CONTROL_DEVICE,
                 {DeviceAction.START: FountainActionWIFI.DEEP_CLEAN},
             ),
+            is_available=lambda device: device.state.work_state is None,
             only_for_types=[W7H],
         ),
     ],
