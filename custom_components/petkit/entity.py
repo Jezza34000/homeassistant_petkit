@@ -89,6 +89,15 @@ class PetKitDescSensorBase(EntityDescription):
         if self._is_not_in_supported_types(device_type):
             return False
 
+        if getattr(self, "restore_state", False):
+            # Entities that restore their last known state must always be
+            # created, even if the current value is momentarily unavailable
+            # (e.g. right after a HA restart, before the coordinator has a
+            # meaningful reading). Otherwise RestoreSensor never gets a
+            # chance to run and the entity is silently dropped for the
+            # whole session.
+            return True
+
         return self._check_value_support(device)
 
     def _is_force_added(self, device_type: str) -> bool:
