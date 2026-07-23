@@ -73,6 +73,7 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
         self.current_devices = set()
         self.fast_poll_tic = 0
         self.mqtt_connected = False
+        self._last_processed_record_timestamps = {}
 
     def enable_smart_polling(self, nb_tic: int) -> None:
         """Enable smart polling."""
@@ -148,7 +149,88 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
                             remove_config_entry_id=self.config_entry.entry_id,
                         )
             self.previous_devices = self.current_devices
+
+            # Process new records for event firing
+            for device_id, device in data.items():
+                if isinstance(device, Litter):
+                    records = getattr(device, "device_records", None)
+                    if not records:
+                        continue
+
+                    # Sort records chronologically (oldest first) so we fire events in order
+                    sorted_records = sorted(
+                        [
+                            r
+                            for r in records
+                            if getattr(r, "timestamp", None) is not None
+                        ],
+                        key=lambda x: x.timestamp,
+                    )
+
+                    if not sorted_records:
+                        continue
+
+                    last_ts = self._last_processed_record_timestamps.get(device_id)
+
+                    if last_ts is None:
+                        # First update - seed the timestamp with the newest record's timestamp
+                        # so we don't flood HA with historical records on startup
+                        self._last_processed_record_timestamps[device_id] = (
+                            sorted_records[-1].timestamp
+                        )
+                    else:
+                        new_last_ts = last_ts
+                        for record in sorted_records:
+                            if record.timestamp > last_ts:
+                                # This is a new record! Fire event.
+                                self._fire_record_event(device, record)
+                                new_last_ts = max(new_last_ts, record.timestamp)
+                        self._last_processed_record_timestamps[device_id] = new_last_ts
+
             return data
+
+    def _fire_record_event(self, device: Litter, record) -> None:
+        """Fire a Home Assistant event for a new device record."""
+        import json
+
+        try:
+            if hasattr(record, "model_dump_json"):
+                serialized = json.loads(
+                    record.model_dump_json(by_alias=True, exclude_none=True)
+                )
+            elif hasattr(record, "json"):
+                serialized = json.loads(record.json(by_alias=True, exclude_none=True))
+            else:
+                serialized = vars(record)
+        except (TypeError, ValueError, AttributeError) as e:
+            LOGGER.error("Failed to serialize record for event: %s", e)
+            return
+
+        # Prepare top-level flat fields for easy InfluxDB/HA integration
+        content = serialized.get("content", {})
+
+        event_data = {
+            "device_id": device.id,
+            "device_name": getattr(device.device_nfo, "device_name", None)
+            or getattr(device, "name", f"PetKit {device.id}"),
+            "device_type": "litter",
+            "enum_event_type": serialized.get("enumEventType"),
+            "event_type_id": serialized.get("eventType"),
+            "record_timestamp": serialized.get("timestamp"),
+            "pet_name": serialized.get("petName"),
+            "pet_id": serialized.get("petId"),
+            "pet_weight": content.get("petWeight"),
+            "duration": None,
+            "record": serialized,
+        }
+
+        # Calculate duration if timeIn and timeOut are present
+        time_in = content.get("timeIn")
+        time_out = content.get("timeOut")
+        if time_in is not None and time_out is not None:
+            event_data["duration"] = time_out - time_in
+
+        self.hass.bus.async_fire("petkit_record_added", event_data)
 
 
 class PetkitMediaUpdateCoordinator(DataUpdateCoordinator):

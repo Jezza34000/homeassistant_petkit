@@ -16,6 +16,7 @@ from pypetkitapi import (
     FEEDER_WITH_CAMERA,
     K2,
     K3,
+    LITTER_NO_CAMERA,
     LITTER_WITH_CAMERA,
     T3,
     T4,
@@ -54,6 +55,7 @@ from homeassistant.const import (
 from .const import BATTERY_LEVEL_MAP, DEVICE_STATUS_MAP, DOMAIN, LOGGER, NO_ERROR
 from .entity import PetKitDescSensorBase, PetkitEntity
 from .utils import (
+    get_device_records_history,
     get_raw_feed_plan_from_schedule,
     get_raw_schedule,
     map_litter_event,
@@ -115,6 +117,20 @@ def format_pet_date(timestamp):
     if timestamp == 0:
         return "Unknown"
     return datetime.fromtimestamp(timestamp)
+
+
+def _get_latest_usage_record_timestamp(device) -> datetime | None:
+    """Return the timestamp of the most recent pet usage record (event_type 10)."""
+    records = device.device_records
+    if not records:
+        return None
+    usage_records = [r for r in records if r.event_type == 10]
+    if not usage_records:
+        return None
+    latest = usage_records[0]
+    if latest.timestamp is None:
+        return None
+    return datetime.fromtimestamp(int(latest.timestamp), tz=UTC)
 
 
 COMMON_ENTITIES = [
@@ -552,6 +568,15 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             native_unit_of_measurement=UnitOfTime.DAYS,
             value=lambda device: device.state.sand_tray_left_day,
             only_for_types=[T7],
+        ),
+        PetKitSensorDesc(
+            key="Device records history",
+            translation_key="device_records_history",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            device_class=SensorDeviceClass.TIMESTAMP,
+            value=_get_latest_usage_record_timestamp,
+            attributes=lambda device: get_device_records_history(device),
+            force_add=LITTER_NO_CAMERA,
         ),
     ],
     WaterFountain: [

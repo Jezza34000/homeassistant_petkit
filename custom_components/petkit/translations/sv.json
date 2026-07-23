@@ -584,6 +584,9 @@
             },
             "last_pack_time": {
                 "name": "Senaste påsanvändning"
+            },
+            "device_records_history": {
+                "name": "Enhetshistorik"
             }
         },
         "switch": {
