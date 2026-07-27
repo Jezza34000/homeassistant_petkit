@@ -404,7 +404,7 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             key="Times used T3 T4",
             translation_key="times_used",
             state_class=SensorStateClass.TOTAL,
-            value=lambda device: device.device_stats.times,
+            value=lambda device: device.device_stats.times if device.device_stats else None,
             force_add=[T3, T4],
             ignore_types=[T5, T6],
         ),
@@ -421,7 +421,7 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             translation_key="total_time",
             state_class=SensorStateClass.TOTAL,
             native_unit_of_measurement=UnitOfTime.SECONDS,
-            value=lambda device: device.device_stats.total_time,
+            value=lambda device: device.device_stats.total_time if device.device_stats else None,
             force_add=[T3, T4],
             ignore_types=[T5, T6],
         ),
@@ -440,14 +440,14 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             entity_category=EntityCategory.DIAGNOSTIC,
             state_class=SensorStateClass.MEASUREMENT,
             native_unit_of_measurement=UnitOfTime.SECONDS,
-            value=lambda device: device.device_stats.avg_time,
+            value=lambda device: device.device_stats.avg_time if device.device_stats else None,
         ),
         PetKitSensorDesc(
             key="Last used by",
             translation_key="last_used_by",
             value=lambda device: (
                 device.device_stats.statistic_info[-1].pet_name
-                if device.device_stats.statistic_info
+                if device.device_stats and device.device_stats.statistic_info
                 else None
             ),
             force_add=[T3, T4],
