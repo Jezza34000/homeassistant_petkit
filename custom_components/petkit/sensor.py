@@ -858,6 +858,42 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             value=lambda pet: format_pet_date(pet.last_defecation),
             restore_state=True,
         ),
+        PetKitSensorDesc(
+            key="Pet last meal date",
+            translation_key="pet_last_meal_date",
+            entity_picture=lambda pet: pet.avatar,
+            value=lambda pet: (
+                datetime.fromtimestamp(pet.last_meal_time)
+                if pet.last_meal_time is not None and pet.last_meal_time != 0
+                else "Unknown"
+            ),
+            restore_state=True,
+        ),
+        PetKitSensorDesc(
+            key="Pet last meal duration",
+            translation_key="pet_last_meal_duration",
+            entity_picture=lambda pet: pet.avatar,
+            device_class=SensorDeviceClass.DURATION,
+            state_class=SensorStateClass.MEASUREMENT,
+            native_unit_of_measurement=UnitOfTime.SECONDS,
+            value=lambda pet: pet.last_meal_duration or None,
+            restore_state=True,
+        ),
+        PetKitSensorDesc(
+            key="Pet last feeder used",
+            translation_key="pet_last_feeder_used",
+            entity_picture=lambda pet: pet.avatar,
+            value=lambda pet: pet.last_feeder_used,
+            restore_state=True,
+        ),
+        PetKitSensorDesc(
+            key="Pet meals today",
+            translation_key="pet_meals_today",
+            entity_picture=lambda pet: pet.avatar,
+            state_class=SensorStateClass.TOTAL,
+            value=lambda pet: pet.meals_today,
+            restore_state=True,
+        ),
     ],
 }
 
