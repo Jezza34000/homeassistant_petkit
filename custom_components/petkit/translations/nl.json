@@ -572,6 +572,9 @@
       },
       "sand_tray_left_days": {
         "name": "Zandbak resterende dagen"
+      },
+      "device_records_history": {
+        "name": "Geschiedenis van apparaatrecords"
       }
     },
     "switch": {

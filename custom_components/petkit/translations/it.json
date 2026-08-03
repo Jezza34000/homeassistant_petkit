@@ -423,6 +423,9 @@
       },
       "total_time": {
         "name": "Uso totale"
+      },
+      "device_records_history": {
+        "name": "Cronologia dei record del dispositivo"
       }
     },
     "switch": {

@@ -406,6 +406,9 @@
       },
       "total_time": {
         "name": "Ca\u0142kowite u\u017cycie"
+      },
+      "device_records_history": {
+        "name": "Historia rekordów urządzenia"
       }
     },
     "switch": {
