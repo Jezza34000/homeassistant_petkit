@@ -235,7 +235,9 @@ NUMBER_MAPPING: dict[type[PetkitDevices], list[PetKitNumberDesc]] = {
             mode=NumberMode.BOX,
             native_value=lambda device: device.pet_details.weight,
             action=lambda api, device, value: api.send_api_request(
-                device.id, PetCommand.PET_UPDATE_SETTING, {"weight": int(value)}
+                device.id,
+                PetCommand.PET_UPDATE_SETTING,
+                {"weight": round(float(value), 1)},
             ),
             only_for_types=[PET],
         ),
