@@ -692,6 +692,18 @@
       },
       "sand_tray_left_days": {
         "name": "Sand tray left days"
+      },
+      "pet_last_meal_date": {
+        "name": "Last meal date"
+      },
+      "pet_last_meal_duration": {
+        "name": "Last meal duration"
+      },
+      "pet_last_feeder_used": {
+        "name": "Last feeder used"
+      },
+      "pet_meals_today": {
+        "name": "Meals today"
       }
     },
     "switch": {
