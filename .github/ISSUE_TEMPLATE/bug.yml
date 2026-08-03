@@ -60,7 +60,8 @@ body:
     attributes:
       label: "Describe the issue"
       description: |
-        **⚠️⚠️⚠️ WARNING: Do NOT paste AI-generated text here.**
+        **⚠️ WARNING** Do NOT ❌ paste 🤖 AI-generated text here.**
+        
         Describe the issue in your own words, short and clear is better than a wall of AI-generated text.
 
         What did you observe? What did you expect instead?
@@ -68,7 +69,7 @@ body:
         If you are not a developer and don't understand Python code, PLEASE do NOT suggest a fix.
         The maintainer has their own AI-tools to investigate and find solutions.
 
-        A simple, honest description of what happened is far more useful than a long AI-generated block of text that you haven't fully read or understood.
+        💡 A simple, honest description of what happened is far more useful than a long AI-generated block of text that you haven't fully read or understood.
     validations:
       required: true
 
