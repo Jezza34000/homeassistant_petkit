@@ -60,7 +60,7 @@ body:
     attributes:
       label: "Describe the issue"
       description: |
-        **⚠️ WARNING** Do NOT ❌ paste 🤖 AI-generated text here.**
+        **⚠️ WARNING : ** Do NOT ❌ paste 🤖 AI-generated text here.
         
         Describe the issue in your own words, short and clear is better than a wall of AI-generated text.
 
