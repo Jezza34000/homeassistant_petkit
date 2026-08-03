@@ -1,83 +1,82 @@
 repos:
--   repo: https://gitlab.com/vojko.pribudic.foss/pre-commit-update
+  - repo: https://gitlab.com/vojko.pribudic.foss/pre-commit-update
     rev: v0.9.0
     hooks:
-    -   id: pre-commit-update
+      - id: pre-commit-update
         stages: [manual]
 
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
-    -   id: check-added-large-files
-    -   id: check-ast
-    -   id: check-toml
-    -   id: check-yaml
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-toml
+      - id: check-yaml
         exclude: ^blueprints/
-    -   id: debug-statements
-    -   id: check-case-conflict
-    -   id: end-of-file-fixer
-    -   id: detect-private-key
-    -   id: mixed-line-ending
-    -   id: requirements-txt-fixer
-    -   id: check-json
-    -   id: pretty-format-json
+      - id: debug-statements
+      - id: check-case-conflict
+      - id: end-of-file-fixer
+      - id: detect-private-key
+      - id: mixed-line-ending
+      - id: requirements-txt-fixer
+      - id: check-json
+      - id: pretty-format-json
         args: ["--autofix"]
         exclude: manifest.json|CHANGELOG.md|./translations/
 
--   repo: https://github.com/codespell-project/codespell
+  - repo: https://github.com/codespell-project/codespell
     rev: v2.4.3
     hooks:
-    -   id: codespell
+      - id: codespell
         args:
-        -   --ignore-words-list=astroid,checkin,currenty,hass,iif,incomfort,lookin,nam,NotIn,informations,medias
-        -   --skip="./.*,*.csv,*.json,*.ambr"
-        -   --quiet-level=2
+          - --ignore-words-list=astroid,checkin,currenty,hass,iif,incomfort,lookin,nam,NotIn,informations,medias
+          - --skip="./.*,*.csv,*.json,*.ambr"
+          - --quiet-level=2
         exclude_types: [csv, json, html, markdown]
-        exclude:
-          ^tests/fixtures/|homeassistant/generated/|tests/components/.*/snapshots/|.github|const.py
+        exclude: ^tests/fixtures/|homeassistant/generated/|tests/components/.*/snapshots/|.github|const.py
 
--   repo: https://github.com/psf/black-pre-commit-mirror
+  - repo: https://github.com/psf/black-pre-commit-mirror
     rev: 26.5.1
     hooks:
-    -   id: black
+      - id: black
 
--   repo: https://github.com/astral-sh/ruff-pre-commit
+  - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.1
     hooks:
-    -   id: ruff
+      - id: ruff
         args:
-        -   --fix
+          - --fix
     #      - id: ruff-format # Run `ruff-format` conflict with `black`
 
--   repo: https://github.com/gitleaks/gitleaks
+  - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.1
     hooks:
-    -   id: gitleaks
+      - id: gitleaks
 
--   repo: https://github.com/pre-commit/mirrors-prettier
+  - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.1.0
     hooks:
-    -   id: prettier
+      - id: prettier
         exclude: ./translations/|renovate.json
 
--   repo: https://github.com/cdce8p/python-typing-update
+  - repo: https://github.com/cdce8p/python-typing-update
     rev: v0.8.1
     hooks:
       # Run `python-typing-update` hook manually from time to time
       # to update python typing syntax.
       # Will require manual work, before submitting changes!
       # pre-commit run --hook-stage manual python-typing-update --all-files
-    -   id: python-typing-update
+      - id: python-typing-update
         stages: [manual]
         args:
-        -   --py311-plus
-        -   --force
-        -   --keep-updates
+          - --py311-plus
+          - --force
+          - --keep-updates
 
--   repo: https://github.com/renovatebot/pre-commit-hooks
+  - repo: https://github.com/renovatebot/pre-commit-hooks
     rev: 44.7.2
     hooks:
-    -   id: renovate-config-validator
+      - id: renovate-config-validator
 
 ci:
   skip: [renovate-config-validator]
