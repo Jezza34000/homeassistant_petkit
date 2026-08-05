@@ -802,7 +802,7 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             native_unit_of_measurement=UnitOfMass.KILOGRAMS,
             value=lambda pet: (
                 round((pet.last_measured_weight / 1000), 2)
-                if pet.last_measured_weight is not None and pet.last_measured_weight > 0
+                if pet.last_measured_weight is not None
                 else None
             ),
             restore_state=True,
@@ -814,7 +814,7 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             device_class=SensorDeviceClass.DURATION,
             state_class=SensorStateClass.MEASUREMENT,
             native_unit_of_measurement=UnitOfTime.SECONDS,
-            value=lambda pet: pet.last_duration_usage or None,
+            value=lambda pet: pet.last_duration_usage,
             restore_state=True,
         ),
         PetKitSensorDesc(
