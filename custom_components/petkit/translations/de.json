@@ -211,7 +211,13 @@
         "name": "Durchschnittliche Fresszeit"
       },
       "battery_level": {
-        "name": "Batteriestand"
+        "name": "Batteriestand",
+        "state": {
+          "low": "Niedrig",
+          "normal": "Normal",
+          "not_in_use": "Nicht in Gebrauch",
+          "unknown": "Unbekannt"
+        }
       },
       "deodorant_left_days": {
         "name": "Verbleibende Tage Desodorierer"
@@ -223,7 +229,13 @@
         "name": "Verbleibende Tage Trockenmittel"
       },
       "device_status": {
-        "name": "Ger\u00e4testatus"
+        "name": "Ger\u00e4testatus",
+        "state": {
+          "offline": "Offline",
+          "online": "Online",
+          "on_battery": "Im Batteriebetrieb",
+          "unknown": "Unbekannt"
+        }
       },
       "drink_times": {
         "name": "Trinkzeiten"

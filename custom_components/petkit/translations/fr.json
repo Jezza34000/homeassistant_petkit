@@ -325,7 +325,13 @@
         "name": "Temps de repas moyen"
       },
       "battery_level": {
-        "name": "Niveau de la batterie"
+        "name": "Niveau de la batterie",
+        "state": {
+          "low": "Faible",
+          "normal": "Normal",
+          "not_in_use": "Non utilisé",
+          "unknown": "Inconnu"
+        }
       },
       "odor_eliminator_n50_left_days": {
         "name": "Jours restants éliminateur d'odeurs N50"
@@ -340,7 +346,13 @@
         "name": "Jours restants déshydratant"
       },
       "device_status": {
-        "name": "État de l'appareil"
+        "name": "État de l'appareil",
+        "state": {
+          "offline": "Hors ligne",
+          "online": "En ligne",
+          "on_battery": "Sur batterie",
+          "unknown": "Inconnu"
+        }
       },
       "drink_times": {
         "name": "Nombre de fois qu'il a bu"
