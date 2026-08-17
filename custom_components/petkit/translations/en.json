@@ -430,7 +430,13 @@
         "name": "Average eating time"
       },
       "battery_level": {
-        "name": "Battery level"
+        "name": "Battery level",
+        "state": {
+          "low": "Low",
+          "normal": "Normal",
+          "not_in_use": "Not in use",
+          "unknown": "Unknown"
+        }
       },
       "odor_eliminator_n50_left_days": {
         "name": "Odor eliminator N50 left days"
@@ -445,7 +451,13 @@
         "name": "Desiccant left days"
       },
       "device_status": {
-        "name": "Device status"
+        "name": "Device status",
+        "state": {
+          "offline": "Offline",
+          "online": "Online",
+          "on_battery": "On battery",
+          "unknown": "Unknown"
+        }
       },
       "drink_times": {
         "name": "Drink times"

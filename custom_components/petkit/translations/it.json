@@ -200,7 +200,13 @@
         "name": "Tempo medio pasto"
       },
       "battery_level": {
-        "name": "Livello batteria"
+        "name": "Livello batteria",
+        "state": {
+          "low": "Basso",
+          "normal": "Normale",
+          "not_in_use": "Non in uso",
+          "unknown": "Sconosciuto"
+        }
       },
       "deodorant_left_days": {
         "name": "Giorni rimanenti deodorante"
@@ -212,7 +218,13 @@
         "name": "Giorni rimanenti essicante"
       },
       "device_status": {
-        "name": "Stato dispositivo"
+        "name": "Stato dispositivo",
+        "state": {
+          "offline": "Non in linea",
+          "online": "In linea",
+          "on_battery": "A batteria",
+          "unknown": "Sconosciuto"
+        }
       },
       "drink_times": {
         "name": "Volte bevuto"
