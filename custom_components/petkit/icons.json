@@ -889,6 +889,13 @@
           "on": "mdi:bell-check"
         }
       },
+      "feeding_plan": {
+        "default": "mdi:calendar-clock",
+        "state": {
+          "off": "mdi:calendar-remove",
+          "on": "mdi:calendar-clock"
+        }
+      },
       "soft_stool": {
         "default": "mdi:emoticon-poop-outline",
         "state": {

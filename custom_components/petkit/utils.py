@@ -1,10 +1,197 @@
 """Util functions for the Petkit integration."""
 
 from datetime import datetime
+from typing import Any
 
 from pypetkitapi import LitterRecord, RecordsItems, WorkState
 
 from .const import EVENT_MAPPING, LOGGER
+
+
+def _int_time_key(raw: Any) -> int | None:
+    try:
+        return int(raw)
+    except (TypeError, ValueError):
+        return None
+
+
+def _coerce_int_amount(value: Any) -> int:
+    try:
+        return int(value) if value is not None else 0
+    except (TypeError, ValueError):
+        return 0
+
+
+def _schedule_pairs_from_feed_times(feeder) -> list[tuple[int, int]]:
+    """Schedule from feedState.feedTimes (omit multiFeedItem on some FW / models)."""
+
+    state = getattr(feeder, "state", None)
+    fs = getattr(state, "feed_state", None) if state else None
+    ft = getattr(fs, "feed_times", None) if fs else None
+    if ft is None:
+        return []
+
+    # Common: { "18000": 7, "25200": 3 } — time of day in seconds -> portion id or amount
+    if isinstance(ft, dict) and ft:
+        pairs: list[tuple[int, int]] = []
+        for k, v in ft.items():
+            t_sec = _int_time_key(k)
+            if t_sec is None:
+                continue
+            pairs.append((t_sec, _coerce_int_amount(v)))
+        pairs.sort(key=lambda x: x[0])
+        return pairs
+
+    # Some FW returns a list of slots: [ { "time": t, "amount": n } ] or [ [t, n], ... ]
+    if isinstance(ft, list) and ft:
+        pairs = []
+        for el in ft:
+            if isinstance(el, dict):
+                t_sec = _int_time_key(el.get("time", el.get("t")))
+                if t_sec is None:
+                    continue
+                amt = el.get("amount")
+                if amt is None:
+                    a1 = el.get("amount1", 0) or 0
+                    a2 = el.get("amount2", 0) or 0
+                    amt = _coerce_int_amount(a1) + _coerce_int_amount(a2)
+                pairs.append((t_sec, _coerce_int_amount(amt)))
+            elif isinstance(el, (list, tuple)) and len(el) >= 2:
+                t_sec = _int_time_key(el[0])
+                if t_sec is None:
+                    continue
+                pairs.append((t_sec, _coerce_int_amount(el[1])))
+        pairs.sort(key=lambda x: x[0])
+        return pairs
+
+    return []
+
+
+def _schedule_pairs_from_multi_feed(feeder) -> list[tuple[int, int]]:
+    """Schedule from multiFeedItem.feedDailyList — first weekday with items."""
+
+    multi = getattr(feeder, "multi_feed_item", None)
+    if multi is None or multi.feed_daily_list is None:
+        return []
+
+    for day in multi.feed_daily_list:
+        if day is None or not day.items:
+            continue
+        pairs: list[tuple[int, int]] = []
+        for item in day.items:
+            t = getattr(item, "time", 0) or 0
+            a1 = getattr(item, "amount1", 0) or 0
+            a2 = getattr(item, "amount2", 0) or 0
+            amount = getattr(item, "amount", None)
+            if amount is None or amount == 0:
+                amount = int(a1) + int(a2)
+            pairs.append((int(t), int(amount)))
+        return pairs
+
+    return []
+
+
+def _records_item_failed_non_success_state(item: RecordsItems, total_amount: int) -> bool:
+    """True when this record row is a failed execution with no planned portions.
+
+    After clearing the cloud schedule, today's ``device_records.feed`` can still
+    list old diary rows (e.g. failed dispense at a former slot time). Those
+    should not define a schedule slot in ``raw_distribution_data``.
+    """
+
+    if total_amount != 0:
+        return False
+    st = getattr(item, "state", None)
+    if st is None:
+        return False
+
+    def _to_int(v: Any, default: int = -1) -> int:
+        if v is None:
+            return default
+        try:
+            return int(v)
+        except (TypeError, ValueError):
+            return default
+
+    ec = _to_int(getattr(st, "err_code", None), -1)
+    res = _to_int(getattr(st, "result", None), -1)
+    return not (ec == 0 and res == 0)
+
+
+def _schedule_pairs_from_device_records(feeder) -> list[tuple[int, int]]:
+    """Last resort: derive slot times from today's deviceRecords.feed (e.g. Mini daily_feed payload)."""
+
+    rec = getattr(feeder, "device_records", None)
+    if rec is None:
+        return []
+    feed = getattr(rec, "feed", None)
+    if not feed:
+        return []
+
+    by_time: dict[int, int] = {}
+
+    for block in feed:
+        for item in getattr(block, "items", None) or []:
+            ti = getattr(item, "time", None)
+            if ti is None:
+                continue
+            t_sec = _int_time_key(ti)
+            if t_sec is None:
+                continue
+            amount = getattr(item, "amount", None)
+            a1 = getattr(item, "amount1", None)
+            a2 = getattr(item, "amount2", None)
+            if amount is not None and _coerce_int_amount(amount) != 0:
+                tot = _coerce_int_amount(amount)
+            else:
+                tot = _coerce_int_amount(a1) + _coerce_int_amount(a2)
+            if _records_item_failed_non_success_state(item, tot):
+                continue
+            by_time[t_sec] = by_time.get(t_sec, 0) + tot
+
+    if not by_time:
+        return []
+
+    return sorted(by_time.items())
+
+
+def resolve_feed_schedule_pairs(feeder) -> list[tuple[int, int]]:
+    """Return sorted slot (time_secs, amount) pairs.
+
+    Preference: GET ``feed`` plan → multi-feed structure → ``feedTimes`` →
+    today's ``device_records.feed``.
+    """
+
+    from .schedule import oem_days_from_feed_plan, _item_values
+
+    days = oem_days_from_feed_plan(feeder)
+    if days:
+        for day in days:
+            if not day.get("items"):
+                continue
+            pairs: list[tuple[int, int]] = []
+            dual = False
+            nfo = getattr(feeder, "device_nfo", None)
+            device_type = (
+                str(getattr(nfo, "device_type", "") or "").lower() if nfo else ""
+            )
+            dual = device_type in ("d4s", "d4sh")
+            for item in day["items"]:
+                t = int(item.get("time") or 0)
+                vals = _item_values(item, dual)
+                pairs.append((t, sum(vals)))
+            return pairs
+
+    pairs_m = _schedule_pairs_from_multi_feed(feeder)
+    if pairs_m:
+        return pairs_m
+
+    pairs_ft = _schedule_pairs_from_feed_times(feeder)
+    if pairs_ft:
+        return pairs_ft
+
+    pairs_rec = _schedule_pairs_from_device_records(feeder)
+    return pairs_rec
 
 
 def map_work_state(work_state: WorkState | None) -> str:
@@ -69,56 +256,91 @@ def get_raw_schedule(feeder) -> dict[str, any] | None:
       - device_id: int
       - feed_daily_list: list of day objects, each with items preserving
         amount1/amount2 for dual-hopper round-trip editing.
+
+    Preference: GET ``feed`` → ``multi_feed_item`` → synthesized weekday copies.
     """
+
+    from .schedule import oem_days_from_feed_plan
+
+    plan_days = oem_days_from_feed_plan(feeder)
+    if plan_days is not None:
+        return {"device_id": feeder.id, "feed_daily_list": plan_days}
+
     multi = getattr(feeder, "multi_feed_item", None)
-    if multi is None or multi.feed_daily_list is None:
+    if multi is not None and multi.feed_daily_list is not None:
+        days = []
+        for day in multi.feed_daily_list:
+            items = [
+                {
+                    "time": getattr(item, "time", None),
+                    "name": getattr(item, "name", None),
+                    "amount": getattr(item, "amount", None),
+                    "amount1": getattr(item, "amount1", None),
+                    "amount2": getattr(item, "amount2", None),
+                    "id": getattr(item, "id", None),
+                }
+                for item in day.items or []
+            ]
+            days.append(
+                {
+                    "repeats": getattr(day, "repeats", None),
+                    "suspended": getattr(day, "suspended", None),
+                    "count": len(items),
+                    "items": items,
+                }
+            )
+
+        return {
+            "device_id": feeder.id,
+            "feed_daily_list": days,
+        }
+
+    pairs = resolve_feed_schedule_pairs(feeder)
+    if not pairs:
         return None
 
+    # PetKit single-hopper schedule items typically use ``amount`` only; ``amount1``/``amount2``
+    # are omitted/undefined rather than populated with zeros — match that shape so callers
+    # (including schedule UIs that infer dual from two defined hopper fields) stay consistent.
+    synth_items = [
+        {
+            "time": t_sec,
+            "name": None,
+            "amount": amt,
+            "id": str(t_sec),
+        }
+        for t_sec, amt in pairs
+    ]
+
     days = []
-    for day in multi.feed_daily_list:
-        items = [
-            {
-                "time": getattr(item, "time", None),
-                "name": getattr(item, "name", None),
-                "amount": getattr(item, "amount", None),
-                "amount1": getattr(item, "amount1", None),
-                "amount2": getattr(item, "amount2", None),
-                "id": getattr(item, "id", None),
-            }
-            for item in day.items or []
-        ]
+    for weekday in range(1, 8):
         days.append(
             {
-                "repeats": getattr(day, "repeats", None),
-                "suspended": getattr(day, "suspended", None),
-                "count": len(items),
-                "items": items,
+                "repeats": weekday,
+                "suspended": 0,
+                "count": len(synth_items),
+                "items": list(synth_items),
             }
         )
 
-    return {
-        "device_id": feeder.id,
-        "feed_daily_list": days,
-    }
+    return {"device_id": feeder.id, "feed_daily_list": days}
 
 
 def get_raw_feed_plan_from_schedule(feeder) -> str | None:
-    """Get the feed plan from the schedule definition (multi_feed_item).
+    """Get the feed plan from schedule data (multiFeedItem, feedTimes, or device records).
 
     Unlike get_raw_feed_plan() which uses the execution log (growing unbounded),
     this reads the fixed-size schedule definition and cross-references with
     execution records for live status. Always under 255 chars for HA state limit.
 
+    Fresh Element Mini often omits ``multiFeedItem``; schedule is inferred from
+    ``feedState.feedTimes`` when present, otherwise from today's ``device_records.feed``.
+
     :param feeder: Feeder device object
     :return: A string with the feed plan in the format "id,hours,minutes,amount,state"
     """
-    multi = getattr(feeder, "multi_feed_item", None)
-    if multi is None or multi.feed_daily_list is None:
-        return None
-
-    # Use first day's schedule definition (all days share the same items)
-    day = multi.feed_daily_list[0] if multi.feed_daily_list else None
-    if day is None or not day.items:
+    pairs = resolve_feed_schedule_pairs(feeder)
+    if not pairs:
         return None
 
     # Build execution status lookup from device_records.feed
@@ -154,17 +376,11 @@ def get_raw_feed_plan_from_schedule(feeder) -> str | None:
                 if state != 0 or t not in status_lookup:
                     status_lookup[t] = state
 
-    # Generate state string from schedule definition
+    # Generate state string from schedule definition (multi feed_times or synthesized pairs)
     result = []
-    for idx, item in enumerate(day.items):
-        t = getattr(item, "time", 0) or 0
+    for idx, (t, amount) in enumerate(pairs):
         hours = t // 3600
         minutes = (t % 3600) // 60
-        a1 = getattr(item, "amount1", 0) or 0
-        a2 = getattr(item, "amount2", 0) or 0
-        amount = getattr(item, "amount", None)
-        if amount is None or amount == 0:
-            amount = a1 + a2
         state = status_lookup.get(t, 0)
         result.append(f"{idx},{hours},{minutes},{amount},{state}")
 

@@ -2,10 +2,8 @@ set_feeding_schedule:
   name: Set feeding schedule
   description: >
     Replace the full feeding schedule on a Petkit feeder.
-    Each entry in feed_daily_list represents one day of the week (repeats 1-7 = Mon-Sun).
-    For dual-hopper feeders (D4S / D4SH), use amount1 and amount2.
-    For single-hopper feeders, use amount.
-    Time is in seconds since midnight (e.g. 21600 = 06:00, 43200 = 12:00).
+    Prefer OpenPetBowl `schedule` (ISO weekdays, values[]).
+    Legacy `feed_daily_list` is still accepted (OEM repeats 1=Sunday).
   fields:
     device_id:
       name: Device ID
@@ -16,29 +14,163 @@ set_feeding_schedule:
         number:
           min: 1
           mode: box
+    schedule:
+      name: Schedule
+      description: >
+        OpenPetBowl rows. Each row has hour, minute, values (one or two hopper
+        amounts), optional ISO weekdays (1=Mon … 7=Sun), optional label, optional key.
+      required: false
+      selector:
+        object:
     feed_daily_list:
       name: Feed daily list
       description: >
-        A list of day schedules. Each day has a repeats value (1-7 for Mon-Sun),
+        Legacy OEM 7-day list. Each day has a repeats value (1=Sunday … 7=Saturday),
         a suspended flag (0=active, 1=suspended), and an items list.
-        Each item has: time (seconds since midnight), name (string),
-        amount (single hopper), amount1 (hopper 1), amount2 (hopper 2).
-      required: true
-      example:
-        - repeats: 1
-          suspended: 0
-          items:
-            - time: 21600
-              name: Breakfast
-              amount1: 3
-              amount2: 3
-            - time: 43200
-              name: Lunch
-              amount1: 2
-              amount2: 2
-            - time: 75600
-              name: Dinner
-              amount1: 5
-              amount2: 5
+      required: false
       selector:
         object:
+
+add_feeding_schedule_entry:
+  name: Add feeding schedule entry
+  description: Add one meal to the recurring plan (full SAVE_FEED after merge).
+  fields:
+    device_id:
+      name: Device ID
+      required: true
+      selector:
+        number:
+          min: 1
+          mode: box
+    hour:
+      name: Hour
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 23
+          mode: box
+    minute:
+      name: Minute
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 59
+          mode: box
+    values:
+      name: Values
+      description: Hopper amounts. Length must match capabilities.compartments.
+      required: true
+      selector:
+        object:
+    weekdays:
+      name: Weekdays
+      description: ISO weekdays 1=Monday … 7=Sunday. Omit for every day.
+      required: false
+      selector:
+        object:
+    label:
+      name: Label
+      required: false
+      selector:
+        text:
+
+edit_feeding_schedule_entry:
+  name: Edit feeding schedule entry
+  description: Update one meal by key (full SAVE_FEED after merge).
+  fields:
+    device_id:
+      name: Device ID
+      required: true
+      selector:
+        number:
+          min: 1
+          mode: box
+    key:
+      name: Key
+      required: true
+      selector:
+        text:
+    hour:
+      name: Hour
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 23
+          mode: box
+    minute:
+      name: Minute
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 59
+          mode: box
+    values:
+      name: Values
+      required: true
+      selector:
+        object:
+    weekdays:
+      name: Weekdays
+      required: false
+      selector:
+        object:
+    label:
+      name: Label
+      required: false
+      selector:
+        text:
+
+remove_feeding_schedule_entry:
+  name: Remove feeding schedule entry
+  description: Remove one meal by key (full SAVE_FEED after merge).
+  fields:
+    device_id:
+      name: Device ID
+      required: true
+      selector:
+        number:
+          min: 1
+          mode: box
+    key:
+      name: Key
+      required: true
+      selector:
+        text:
+
+skip_feeding_today:
+  name: Skip feeding today
+  description: Cancel today's occurrence of a scheduled meal (remove_dailyfeed).
+  fields:
+    device_id:
+      name: Device ID
+      required: true
+      selector:
+        number:
+          min: 1
+          mode: box
+    key:
+      name: Key
+      required: true
+      selector:
+        text:
+
+unskip_feeding_today:
+  name: Unskip feeding today
+  description: Restore today's occurrence of a scheduled meal (restore_dailyfeed).
+  fields:
+    device_id:
+      name: Device ID
+      required: true
+      selector:
+        number:
+          min: 1
+          mode: box
+    key:
+      name: Key
+      required: true
+      selector:
+        text:
