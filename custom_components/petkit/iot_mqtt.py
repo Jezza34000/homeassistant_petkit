@@ -14,11 +14,14 @@ from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import StrEnum
+from functools import partial
 import hashlib
 import hmac
 import json
 import logging
+from pathlib import Path
 import re
+import ssl
 from typing import Any
 
 from pypetkitapi.client import PetKitClient
@@ -41,6 +44,14 @@ except ImportError:
 
 _HOST_PORT_RE = re.compile(r"^(?P<host>.+?)(?::(?P<port>\d+))?$")
 _SCHEME_RE = re.compile(r"^(?:tcp|ssl|mqtt|mqtts)://", re.IGNORECASE)
+
+# Aliyun IoT serves MQTT over TLS on 8883 (and 443); 1883 is the plaintext port.
+# The broker certificate chains to Alibaba's own "Aliyun IoT Root CA", not a
+# public root, so it is pinned here. Source and MD5 are in the Alibaba docs:
+# https://www.alibabacloud.com/help/en/iot/user-guide/establish-mqtt-connections-over-tcp
+_ALIYUN_MQTT_TLS_PORTS = (8883, 443)
+_ALIYUN_MQTT_TLS_PORT = 8883
+_ALIYUN_IOT_CA_PATH = Path(__file__).with_name("aliyun_iot_ca.crt")
 
 
 class MqttConnectionStatus(StrEnum):
@@ -103,7 +114,8 @@ def _aliyun_mqtt_sign(
     """Compute Aliyun IoT MQTT credentials (clientId, username, password).
 
     Follows the Alibaba Cloud IoT authentication protocol:
-    - clientId: ``{clientId}|securemode=3,signmethod=hmacsha256|``
+    - clientId: ``{clientId}|securemode=2,signmethod=hmacsha256|``
+      (securemode 2 = TLS direct connection; 3 would be plaintext TCP)
     - username: ``{deviceName}&{productKey}``
     - password: HMAC-SHA256(deviceSecret, content) where content is
       ``clientId{cid}deviceName{dn}productKey{pk}`` (keys sorted alphabetically).
@@ -112,7 +124,7 @@ def _aliyun_mqtt_sign(
     sign = hmac.new(
         device_secret.encode(), content.encode(), hashlib.sha256
     ).hexdigest()
-    mqtt_client_id = f"{client_id}|securemode=3,signmethod=hmacsha256|"
+    mqtt_client_id = f"{client_id}|securemode=2,signmethod=hmacsha256|"
     mqtt_username = f"{device_name}&{product_key}"
     return mqtt_client_id, mqtt_username, sign
 
@@ -281,6 +293,18 @@ class PetkitIotMqttListener:
             self._connection_status = MqttConnectionStatus.FAILED
             return
 
+        # Petkit hands out the plaintext endpoint; we always speak TLS.
+        if endpoint.port not in _ALIYUN_MQTT_TLS_PORTS:
+            endpoint = _MqttEndpoint(host=endpoint.host, port=_ALIYUN_MQTT_TLS_PORT)
+
+        if not _ALIYUN_IOT_CA_PATH.is_file():
+            LOGGER.warning(
+                "Aliyun IoT root CA missing at %s; listener disabled",
+                _ALIYUN_IOT_CA_PATH,
+            )
+            self._connection_status = MqttConnectionStatus.FAILED
+            return
+
         self._petkit_device_name = iot.device_name
         self._petkit_product_key = iot.product_key
         base = f"/{iot.product_key}/{iot.device_name}/user"
@@ -299,6 +323,17 @@ class PetkitIotMqttListener:
             client_id=mqtt_client_id,
             clean_session=False,
             protocol=mqtt.MQTTv311,
+        )
+        # Certificate verification + hostname check are paho defaults once
+        # tls_set() is called. Loading the CA file is blocking IO, so run it
+        # in the executor.
+        await self.hass.async_add_executor_job(
+            partial(
+                paho_client.tls_set,
+                ca_certs=str(_ALIYUN_IOT_CA_PATH),
+                cert_reqs=ssl.CERT_REQUIRED,
+                tls_version=ssl.PROTOCOL_TLS_CLIENT,
+            )
         )
         paho_client.username_pw_set(mqtt_username, mqtt_password)
         paho_client.will_set(
