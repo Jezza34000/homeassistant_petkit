@@ -7,10 +7,14 @@ entity/card contract.
 from __future__ import annotations
 
 from datetime import datetime
+from itertools import pairwise
 from typing import Any
 
 D4S = "d4s"
 D4SH = "d4sh"
+D4H = "d4h"
+D3 = "d3"
+D4 = "d4"
 FEEDER = "feeder"
 FEEDER_MINI = "feedermini"
 DUAL_HOPPER_DEVICES = (D4S, D4SH)
@@ -20,13 +24,28 @@ _MINI_PLAN_ITEM_ID_START = 100001
 _D2_MIN_GAP_SECS = 300
 
 _SHAPE_A_TYPES = {FEEDER, FEEDER_MINI}
+# App editors call suspendFeed/restoreFeed only for types 4/6/9/11. D4s/D4sh/D4h
+# pause per day via the feedDailyList ``suspended`` flag instead.
+_GLOBAL_TOGGLE_TYPES = {FEEDER, FEEDER_MINI, D3, D4}
+# The app's plan editor for types 4/6/9/11 enforces both a non-empty name
+# and the 5-minute gap for all of them.
+_LEGACY_EDITOR_TYPES = {FEEDER, FEEDER_MINI, D3, D4}
+# surplusControl skip is a ``state.result`` value, and it differs by family:
+# the app reads 6 on D3 and 8 on D4sh/D4h.
+_SURPLUS_RESULT_BY_TYPE = {D3: 6, D4SH: 8, D4H: 8}
+# Results the app renders as dispensed for the D3-class families.
+_DISPENSED_RESULTS = {0, 1, 2, 4, 5, 6, 9, 10, 11, 12, 13}
+_GRAM_AMOUNT_TYPES = {D3}
+
+# Wire ``amount`` is the displayed portion count times a per-family divisor
+# (the app's editor reads it back as amount / divisor). D3 is grams
+# and the dual hoppers are raw picker ticks, so neither scales. The card is fed
+# display units and the conversion happens here, as it does in the app.
+_AMOUNT_DIVISOR: dict[str, int] = {FEEDER: 20, FEEDER_MINI: 5}
+_DEFAULT_D4_FACTOR = 10
 
 _AMOUNT_BY_TYPE: dict[str, dict[str, int]] = {
-    FEEDER: {"min": 1, "max": 10, "step": 1},
-    FEEDER_MINI: {"min": 5, "max": 50, "step": 5},
-    "d3": {"min": 5, "max": 200, "step": 1},
-    "d4": {"min": 10, "max": 50, "step": 10},
-    "d4h": {"min": 10, "max": 50, "step": 10},
+    D3: {"min": 5, "max": 200, "step": 1},
     D4S: {"min": 0, "max": 10, "step": 1},
     D4SH: {"min": 0, "max": 10, "step": 1},
 }
@@ -91,31 +110,63 @@ def is_dual_hopper(feeder: Any) -> bool:
 
 
 def is_shape_a(feeder: Any) -> bool:
-    """True for weekly FeederPlan families (D1 / Mini)."""
+    """True for shared-mask FeederPlan families (D1 / Mini)."""
     return feeder_device_type(feeder) in _SHAPE_A_TYPES
 
 
-def capabilities_for_feeder(feeder: Any) -> dict[str, Any]:
-    """Build the OpenPetBowl capabilities object."""
+def _amount_divisor(feeder: Any, device_type: str) -> int:
+    """Portion size in wire units, or 1 when the family sends raw values."""
+    if device_type in (D4, D4H):
+        settings = getattr(feeder, "settings", None)
+        factor = _coerce_int(getattr(settings, "factor", None), 0)
+        return factor or _DEFAULT_D4_FACTOR
+    return _AMOUNT_DIVISOR.get(device_type, 1)
+
+
+def amount_config_for_feeder(feeder: Any) -> dict[str, Any]:
+    """Amount bounds in the units the app shows the user."""
     device_type = feeder_device_type(feeder)
-    compartments = 2 if device_type in (D4S, D4SH) else 1
     amount = dict(_AMOUNT_BY_TYPE.get(device_type, _DEFAULT_AMOUNT))
-    return {
+    amount["unit"] = "g" if device_type in _GRAM_AMOUNT_TYPES else "portions"
+    return amount
+
+
+def _to_display_amount(value: Any, divisor: int) -> int:
+    """Wire units -> portions, the way the editors read the value back."""
+    return _coerce_int(value, 0) // divisor if divisor > 1 else _coerce_int(value, 0)
+
+
+def _to_wire_amount(value: Any, divisor: int) -> int:
+    """Portions -> wire units, the way the scale pickers emit them."""
+    return _coerce_int(value, 0) * divisor
+
+
+def capabilities_for_feeder(feeder: Any) -> dict[str, Any]:
+    """Build the OpenPetBowl capabilities object for this family."""
+    device_type = feeder_device_type(feeder)
+    compartments = 2 if device_type in DUAL_HOPPER_DEVICES else 1
+    amount = amount_config_for_feeder(feeder)
+    today_skip = True
+    global_toggle = device_type in _GLOBAL_TOGGLE_TYPES
+    actions: dict[str, str] = {
+        "set": "petkit.set_feeding_schedule",
+        "add": "petkit.add_feeding_schedule_entry",
+        "edit": "petkit.edit_feeding_schedule_entry",
+        "remove": "petkit.remove_feeding_schedule_entry",
+    }
+    if today_skip:
+        actions["skip_today"] = "petkit.skip_feeding_today"
+        actions["unskip_today"] = "petkit.unskip_feeding_today"
+    caps: dict[str, Any] = {
         "compartments": compartments,
         "amount": amount,
-        "weekly": True,
-        "today_skip": True,
-        "global_toggle": True,
-        "labels": True,
-        "actions": {
-            "set": "petkit.set_feeding_schedule",
-            "add": "petkit.add_feeding_schedule_entry",
-            "edit": "petkit.edit_feeding_schedule_entry",
-            "remove": "petkit.remove_feeding_schedule_entry",
-            "skip_today": "petkit.skip_feeding_today",
-            "unskip_today": "petkit.unskip_feeding_today",
-        },
+        "weekly": device_type not in _SHAPE_A_TYPES,
+        "today_skip": today_skip,
+        "global_toggle": global_toggle,
+        "labels": {"required": device_type in _LEGACY_EDITOR_TYPES},
+        "actions": actions,
     }
+    return caps
 
 
 def _item_attr(item: Any, name: str, default: Any = None) -> Any:
@@ -133,27 +184,36 @@ def _coerce_int(value: Any, default: int = 0) -> int:
         return default
 
 
-def _item_values(item: Any, dual: bool) -> list[int]:
+def _item_values(item: Any, dual: bool, divisor: int = 1) -> list[int]:
+    """Displayed amounts for one meal. Dual hoppers never scale."""
     if dual:
         return [
             _coerce_int(_item_attr(item, "amount1"), 0),
             _coerce_int(_item_attr(item, "amount2"), 0),
         ]
-    amount = _item_attr(item, "amount", None)
-    if amount is None:
-        a1 = _coerce_int(_item_attr(item, "amount1"), 0)
-        a2 = _coerce_int(_item_attr(item, "amount2"), 0)
-        return [a1 + a2]
-    return [_coerce_int(amount, 0)]
+    return [_to_display_amount(_item_attr(item, "amount"), divisor)]
 
 
 def _item_key(item: Any) -> str:
-    item_id = _item_attr(item, "id", None)
-    if item_id is not None and str(item_id) != "":
-        return str(item_id)
-    time_sec = _coerce_int(_item_attr(item, "time"), 0)
-    name = _item_attr(item, "name", "") or ""
-    return f"{time_sec}:{name}"
+    """Group meals by time, never by ``id``.
+
+    The app keys a meal by (day, time) and forbids duplicate times within a
+    day. Item ids are not a per-meal identity: the copy-to-other-days screen
+    clones them verbatim, and they are only rewritten when 0, so they go stale
+    as soon as a copied meal's time is edited.
+    """
+    return str(_coerce_int(_item_attr(item, "time"), 0))
+
+
+def _ids_by_key(days: list[dict[str, Any]]) -> dict[str, int]:
+    """Server-assigned ids of the meals already in the plan, keyed by time."""
+    out: dict[str, int] = {}
+    for day in days:
+        for item in day.get("items") or []:
+            item_id = _coerce_int(_item_attr(item, "id"), 0)
+            if item_id:
+                out.setdefault(_item_key(item), item_id)
+    return out
 
 
 def _serialize_item(item: Any) -> dict[str, Any]:
@@ -173,7 +233,61 @@ def _serialize_item(item: Any) -> dict[str, Any]:
     }
 
 
-def _status_from_record(item: Any, now_secs: int) -> tuple[str, str | None]:
+_NATIVE_BY_SRC = {
+    1: "dispensed_schedule",
+    2: "dispensed_remote",
+    3: "dispensed_remote",
+    4: "dispensed_local",
+}
+
+
+def _state_attr(state: Any, snake: str, camel: str) -> Any:
+    return _item_attr(state, snake, _item_attr(state, camel))
+
+
+def _real_amount(state: Any) -> int:
+    """Food actually dispensed, across both hoppers."""
+    return sum(
+        _coerce_int(_state_attr(state, snake, camel), 0)
+        for snake, camel in (
+            ("real_amount", "realAmount"),
+            ("real_amount1", "realAmount1"),
+            ("real_amount2", "realAmount2"),
+        )
+    )
+
+
+def _shape_a_status(state: Any, src: int) -> tuple[str, str | None]:
+    """D1/D2 have no ``result``: success is empty errCode + a completedAt.
+
+    ``FeederItemDataViewHolder`` — errCode is a string there ("ia-1", "em-1"),
+    and manual-offline meals (src 4) report no completedAt.
+    """
+    err = _state_attr(state, "err_code", "errCode")
+    if err is not None and str(err).strip() not in ("", "0"):
+        return "failed", "error"
+    completed = _state_attr(state, "completed_at", "completedAt")
+    if (completed is not None and str(completed).strip()) or src == 4:
+        return "dispensed", _NATIVE_BY_SRC.get(src, "dispensed_schedule")
+    return "pending", None
+
+
+def _d3_class_status(state: Any, src: int, device_type: str) -> tuple[str, str | None]:
+    """D3/D4-class meals are classified by ``state.result``, not errCode."""
+    result = _coerce_int(_state_attr(state, "result", "result"), -1)
+    surplus = _SURPLUS_RESULT_BY_TYPE.get(device_type)
+    if surplus is not None and result == surplus:
+        return "skipped", "surplus_skipped"
+    if result == 7:
+        return "skipped", "cancelled"
+    if result in _DISPENSED_RESULTS and _real_amount(state) > 0:
+        return "dispensed", _NATIVE_BY_SRC.get(src, "dispensed_schedule")
+    return "failed", "error"
+
+
+def _status_from_record(
+    item: Any, now_secs: int, *, device_type: str = ""
+) -> tuple[str, str | None]:
     """Return (canonical_status, native_status) from a daily feed record item."""
     status_val = _coerce_int(_item_attr(item, "status"), 0)
     src = _coerce_int(_item_attr(item, "src"), 0)
@@ -184,34 +298,30 @@ def _status_from_record(item: Any, now_secs: int) -> tuple[str, str | None]:
         return "dispensing", None
     if status_val == 1:
         return "skipped", "cancelled"
+    if status_val == 2:
+        # Overdue today, resumes tomorrow (Feeder_item_not_start_prompt).
+        return "unknown", "past_unknown"
 
     if state is None:
-        if status_val == 0 and time_sec < now_secs:
+        if time_sec < now_secs:
             return "unknown", "past_unknown"
         return "pending", None
 
-    err_code = _coerce_int(_item_attr(state, "err_code", _item_attr(state, "errCode")), -1)
-    result_code = _coerce_int(_item_attr(state, "result"), -1)
-    if err_code == 0 and result_code == 0:
-        native = {
-            1: "dispensed_schedule",
-            2: "dispensed_remote",
-            3: "dispensed_remote",
-            4: "dispensed_local",
-        }.get(src, "dispensed_schedule")
-        return "dispensed", native
-    if err_code == 10 and result_code == 8:
-        return "skipped", "surplus_skipped"
-    return "failed", "error"
+    if device_type in _SHAPE_A_TYPES:
+        return _shape_a_status(state, src)
+    return _d3_class_status(state, src, device_type)
 
 
-def _today_record_status_by_time(feeder: Any) -> dict[int, tuple[str, str | None, str | None]]:
+def _today_record_status_by_time(
+    feeder: Any,
+) -> dict[int, tuple[str, str | None, str | None]]:
     """Map seconds-since-midnight → (status, native_status, daily_id)."""
     out: dict[int, tuple[str, str | None, str | None]] = {}
     records = getattr(feeder, "device_records", None)
     feed = getattr(records, "feed", None) if records is not None else None
     if not feed:
         return out
+    device_type = feeder_device_type(feeder)
     now = datetime.now()
     now_secs = now.hour * 3600 + now.minute * 60 + now.second
     for block in feed:
@@ -219,9 +329,15 @@ def _today_record_status_by_time(feeder: Any) -> dict[int, tuple[str, str | None
             time_sec = _coerce_int(_item_attr(item, "time"), -1)
             if time_sec < 0:
                 continue
-            status, native = _status_from_record(item, now_secs)
+            status, native = _status_from_record(
+                item, now_secs, device_type=device_type
+            )
             daily_id = _item_attr(item, "id", None)
-            out[time_sec] = (status, native, None if daily_id is None else str(daily_id))
+            out[time_sec] = (
+                status,
+                native,
+                None if daily_id is None else str(daily_id),
+            )
     return out
 
 
@@ -338,6 +454,7 @@ def feed_daily_list_from_feeder(feeder: Any) -> list[dict[str, Any]]:
 def flatten_schedule(feeder: Any) -> list[dict[str, Any]]:
     """Flatten OEM plan days into OpenPetBowl rows (ISO weekdays)."""
     dual = is_dual_hopper(feeder)
+    divisor = _amount_divisor(feeder, feeder_device_type(feeder))
     days = feed_daily_list_from_feeder(feeder)
     status_by_time = _today_record_status_by_time(feeder)
     today_iso = datetime.now().isoweekday()
@@ -350,7 +467,7 @@ def flatten_schedule(feeder: Any) -> list[dict[str, Any]]:
         for item in day.get("items") or []:
             time_sec = _coerce_int(item.get("time"), 0)
             name = (item.get("name") or "") or ""
-            values = _item_values(item, dual)
+            values = _item_values(item, dual, divisor)
             key = _item_key(item)
             group = groups.get(key)
             if group is None:
@@ -380,13 +497,18 @@ def flatten_schedule(feeder: Any) -> list[dict[str, Any]]:
             status, native = rec[0], rec[1]
         else:
             status, native = "pending", None
+        # D1/Mini: the card has no per-meal weekday UI, because the app has
+        # none either — the mask is one plan-level Repeat control. Rows carry no
+        # weekdays, but ``today`` still reports whether the plan runs today, so
+        # skip-today is not offered on a day the meal will not fire.
+        row_weekdays = None if is_shape_a(feeder) else iso_days
         rows.append(
             {
                 "key": group["key"],
                 "hour": group["hour"],
                 "minute": group["minute"],
                 "values": group["values"],
-                "weekdays": iso_days,
+                "weekdays": row_weekdays,
                 "label": group["label"],
                 "status": status,
                 "native_status": native,
@@ -399,15 +521,48 @@ def flatten_schedule(feeder: Any) -> list[dict[str, Any]]:
     return rows
 
 
+def plan_weekdays_iso(feeder: Any) -> list[int] | None:
+    """ISO weekdays of the D1/Mini plan-level mask, or None if not Shape A.
+
+    Provider-specific, deliberately outside the OpenPetBowl contract: the app
+    edits this as one Repeat control covering every meal, and there is no
+    per-meal equivalent to map it onto. Exposed so automations and other
+    clients can read and set it; the card ignores it.
+    """
+    if not is_shape_a(feeder):
+        return None
+    _items, mask, _suspended = _shape_a_items_and_mask(
+        feed_daily_list_from_feeder(feeder)
+    )
+    if not mask:
+        return None
+    return sorted(oem_weekday_to_iso(oem) for oem in mask)
+
+
+def set_plan_weekdays(feeder: Any, weekdays: list[int]) -> str:
+    """Validate an ISO weekday list and return the OEM csv the cloud wants."""
+    if not is_shape_a(feeder):
+        raise ValueError(
+            "only the D1 and Mini have a plan-level weekday mask; on this "
+            "family set weekdays per meal instead"
+        )
+    mask = sorted({iso_weekday_to_oem(int(iso)) for iso in weekdays})
+    if not mask:
+        raise ValueError("weekdays must name at least one day")
+    return ",".join(str(oem) for oem in mask)
+
+
 def get_openpetbowl_attributes(feeder: Any) -> dict[str, Any]:
-    """Attributes for the feeding-plan switch (no marker)."""
-    days = feed_daily_list_from_feeder(feeder)
-    return {
+    """Attributes for the feeding-plan entity (no marker)."""
+    attributes: dict[str, Any] = {
         "device_id": getattr(feeder, "id", None),
         "capabilities": capabilities_for_feeder(feeder),
         "schedule": flatten_schedule(feeder),
-        "feed_daily_list": days,
     }
+    plan_weekdays = plan_weekdays_iso(feeder)
+    if plan_weekdays is not None:
+        attributes["plan_weekdays"] = plan_weekdays
+    return attributes
 
 
 def _empty_oem_week() -> list[dict[str, Any]]:
@@ -421,35 +576,26 @@ def _item_from_row(
     row: dict[str, Any],
     dual: bool,
     *,
-    key: str | None = None,
-    allocate_id: int | None = None,
+    item_id: int | None = None,
+    divisor: int = 1,
 ) -> dict[str, Any]:
+    """One OEM meal item. ``id`` 0 means "new" — the library rewrites it."""
     time_sec = int(row["hour"]) * 3600 + int(row["minute"]) * 60
     values = list(row.get("values") or [])
     item: dict[str, Any] = {
         "time": time_sec,
         "name": row.get("label") or "",
-        "petAmount": [],
-        "deviceId": 0,
-        "deviceType": 0,
+        "petAmount": row.get("petAmount") or [],
+        "id": item_id or 0,
     }
     if dual:
         item["amount"] = 0
         item["amount1"] = int(values[0]) if len(values) > 0 else 0
         item["amount2"] = int(values[1]) if len(values) > 1 else 0
     else:
-        item["amount"] = int(values[0]) if values else 0
+        item["amount"] = _to_wire_amount(values[0], divisor) if values else 0
         item["amount1"] = 0
         item["amount2"] = 0
-    if allocate_id is not None:
-        item["id"] = allocate_id
-    elif key is not None:
-        try:
-            item["id"] = int(key)
-        except (TypeError, ValueError):
-            item["id"] = time_sec
-    else:
-        item["id"] = time_sec
     return item
 
 
@@ -460,6 +606,24 @@ def schedule_to_feed_daily_list(
 ) -> list[dict[str, Any]]:
     """Convert OpenPetBowl ISO rows into OEM 7-day feedDailyList."""
     dual = is_dual_hopper(feeder)
+    divisor = _amount_divisor(feeder, feeder_device_type(feeder))
+    prev = previous if previous is not None else feed_daily_list_from_feeder(feeder)
+    known_ids = _ids_by_key(prev)
+    if is_shape_a(feeder):
+        _ignored, mask, suspended = _shape_a_items_and_mask(prev)
+        items = [
+            _item_from_row(
+                row,
+                dual,
+                item_id=known_ids.get(str(row.get("key"))),
+                divisor=divisor,
+            )
+            for row in schedule
+        ]
+        if not mask:
+            mask = {1, 2, 3, 4, 5, 6, 7}
+        return _expand_shape_a_days(items, mask, suspended)
+
     days = _empty_oem_week()
     if previous:
         by_oem = {}
@@ -468,13 +632,15 @@ def schedule_to_feed_daily_list(
             for oem in oem_days:
                 by_oem[oem] = day
         for oem in range(1, 8):
-            prev = by_oem.get(oem)
-            if prev is not None:
-                days[oem - 1]["suspended"] = _coerce_int(prev.get("suspended"), 0)
+            prev_day = by_oem.get(oem)
+            if prev_day is not None:
+                days[oem - 1]["suspended"] = _coerce_int(prev_day.get("suspended"), 0)
 
     for row in schedule:
         iso_days = row.get("weekdays") or [1, 2, 3, 4, 5, 6, 7]
-        item = _item_from_row(row, dual, key=row.get("key"))
+        item = _item_from_row(
+            row, dual, item_id=known_ids.get(str(row.get("key"))), divisor=divisor
+        )
         for iso in iso_days:
             oem = iso_weekday_to_oem(int(iso))
             day = days[oem - 1]
@@ -484,10 +650,16 @@ def schedule_to_feed_daily_list(
         day["count"] = len(day["items"])
         if dual:
             day["totalAmount"] = 0
-            day["totalAmount1"] = sum(_coerce_int(it.get("amount1"), 0) for it in day["items"])
-            day["totalAmount2"] = sum(_coerce_int(it.get("amount2"), 0) for it in day["items"])
+            day["totalAmount1"] = sum(
+                _coerce_int(it.get("amount1"), 0) for it in day["items"]
+            )
+            day["totalAmount2"] = sum(
+                _coerce_int(it.get("amount2"), 0) for it in day["items"]
+            )
         else:
-            day["totalAmount"] = sum(_coerce_int(it.get("amount"), 0) for it in day["items"])
+            day["totalAmount"] = sum(
+                _coerce_int(it.get("amount"), 0) for it in day["items"]
+            )
             day["totalAmount1"] = 0
             day["totalAmount2"] = 0
     return days
@@ -530,16 +702,42 @@ def validate_row(
         if not oem_days.intersection(oem_want):
             continue
         for item in day.get("items") or []:
-            if skip_key is not None and str(item.get("id")) == str(skip_key):
+            if skip_key is not None and _item_key(item) == str(skip_key):
                 continue
             existing_times.append(_coerce_int(item.get("time"), 0))
     if time_sec in existing_times:
         raise ValueError("duplicate hour+minute on the same weekday set")
-    if feeder_device_type(feeder) == FEEDER_MINI:
-        merged = sorted(set(existing_times + [time_sec]))
-        for left, right in zip(merged, merged[1:], strict=False):
+    # The app applies the 5-minute gap check ungated in the editor that serves
+    # types 4/6/9/11, so D1, D3 and D4 get the rule too, not only the Mini.
+    if feeder_device_type(feeder) in _LEGACY_EDITOR_TYPES:
+        merged = sorted({*existing_times, time_sec})
+        for left, right in pairwise(merged):
             if right - left < _D2_MIN_GAP_SECS:
-                raise ValueError("Mini meals must be at least 300 seconds apart")
+                raise ValueError("meals must be at least 300 seconds apart")
+
+
+def _shape_a_items_and_mask(
+    days: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], set[int], int]:
+    """Deduplicate Shape A items, and collect the mask and the pause flag."""
+    items: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    mask: set[int] = set()
+    suspended = 0
+    for day in days:
+        slot = day.get("items") or []
+        if not slot:
+            continue
+        mask.update(parse_oem_repeats(day.get("repeats")))
+        if _coerce_int(day.get("suspended"), 0):
+            suspended = 1
+        for item in slot:
+            key = _item_key(item)
+            if key in seen:
+                continue
+            seen.add(key)
+            items.append(dict(item))
+    return items, mask, suspended
 
 
 def add_schedule_entry(
@@ -553,27 +751,27 @@ def add_schedule_entry(
     """Merge one new row into the current OEM plan."""
     days = feed_daily_list_from_feeder(feeder)
     iso_days = weekdays or [1, 2, 3, 4, 5, 6, 7]
+    if is_shape_a(feeder):
+        _existing_items, existing_oem, _susp = _shape_a_items_and_mask(days)
+        if existing_oem:
+            iso_days = [oem_weekday_to_iso(o) for o in existing_oem]
     validate_row(feeder, days, hour, minute, values, iso_days)
     dual = is_dual_hopper(feeder)
     allocate = _next_mini_id(days) if is_shape_a(feeder) else None
     item = _item_from_row(
         {"hour": hour, "minute": minute, "values": values, "label": label or ""},
         dual,
-        allocate_id=allocate,
+        item_id=allocate,
+        divisor=_amount_divisor(feeder, feeder_device_type(feeder)),
     )
     oem_want = {iso_weekday_to_oem(i) for i in iso_days}
     if is_shape_a(feeder):
-        existing_items: list[dict[str, Any]] = []
-        existing_oem: set[int] = set()
-        for day in days:
-            oem = parse_oem_repeats(day.get("repeats"))
-            if day.get("items") and not existing_items:
-                existing_items = [dict(it) for it in day["items"]]
-            if day.get("items"):
-                existing_oem.update(oem)
+        existing_items, existing_oem, suspended = _shape_a_items_and_mask(days)
         existing_items.append(dict(item))
-        mask = existing_oem | oem_want
-        return _expand_shape_a_days(existing_items, mask)
+        # One meal list × one weekday mask. New meals join the plan; they
+        # cannot introduce a different day set.
+        mask = existing_oem or oem_want
+        return _expand_shape_a_days(existing_items, mask, suspended)
     for day in days:
         oem = parse_oem_repeats(day.get("repeats"))
         if oem and oem[0] in oem_want:
@@ -583,9 +781,15 @@ def add_schedule_entry(
 
 
 def _expand_shape_a_days(
-    items: list[dict[str, Any]], oem_mask: set[int]
+    items: list[dict[str, Any]], oem_mask: set[int], suspended: int = 0
 ) -> list[dict[str, Any]]:
-    """One meal list × weekday mask expanded to 7 OEM days."""
+    """One meal list × weekday mask expanded to 7 OEM days.
+
+    A day outside the mask carries an EMPTY ``repeats``; the library rebuilds the
+    plan mask from the days that have one, so clearing every meal still preserves
+    it. Encoding "not in the mask" as ``suspended`` would collide with the
+    whole-plan pause, which is a separate flag on the same save.
+    """
     out: list[dict[str, Any]] = []
     for oem in range(1, 8):
         if oem in oem_mask:
@@ -593,15 +797,13 @@ def _expand_shape_a_days(
             out.append(
                 {
                     "repeats": str(oem),
-                    "suspended": 0,
+                    "suspended": suspended,
                     "count": len(copied),
                     "items": copied,
                 }
             )
         else:
-            out.append(
-                {"repeats": str(oem), "suspended": 0, "count": 0, "items": []}
-            )
+            out.append({"repeats": "", "suspended": suspended, "count": 0, "items": []})
     return out
 
 
@@ -617,29 +819,39 @@ def edit_schedule_entry(
     """Patch the matching row then rewrite the OEM plan."""
     days = feed_daily_list_from_feeder(feeder)
     iso_days = weekdays or [1, 2, 3, 4, 5, 6, 7]
+    if is_shape_a(feeder) and weekdays is None:
+        _items, existing_oem, _susp = _shape_a_items_and_mask(days)
+        if existing_oem:
+            iso_days = [oem_weekday_to_iso(o) for o in existing_oem]
     validate_row(feeder, days, hour, minute, values, iso_days, skip_key=key)
     dual = is_dual_hopper(feeder)
+    # Keep the server id of the meal being edited; only its fields change.
     new_item = _item_from_row(
-        {
-            "hour": hour,
-            "minute": minute,
-            "values": values,
-            "label": label or "",
-            "key": key,
-        },
+        {"hour": hour, "minute": minute, "values": values, "label": label or ""},
         dual,
-        key=key,
+        item_id=_ids_by_key(days).get(str(key)),
+        divisor=_amount_divisor(feeder, feeder_device_type(feeder)),
     )
     oem_want = {iso_weekday_to_oem(i) for i in iso_days}
+    if is_shape_a(feeder):
+        existing_items, existing_oem, suspended = _shape_a_items_and_mask(days)
+        kept = [it for it in existing_items if _item_key(it) != str(key)]
+        if len(kept) == len(existing_items):
+            raise ValueError(f"schedule key {key!r} not found")
+        kept.append(dict(new_item))
+        mask = existing_oem if weekdays is None else oem_want
+        if not mask:
+            mask = oem_want
+        return _expand_shape_a_days(kept, mask, suspended)
     found = False
     for day in days:
-        kept: list[dict[str, Any]] = []
+        kept_day: list[dict[str, Any]] = []
         for item in day.get("items") or []:
-            if str(item.get("id")) == str(key) or _item_key(item) == str(key):
+            if _item_key(item) == str(key):
                 found = True
                 continue
-            kept.append(item)
-        day["items"] = kept
+            kept_day.append(item)
+        day["items"] = kept_day
         oem = parse_oem_repeats(day.get("repeats"))
         if oem and oem[0] in oem_want:
             day["items"].append(dict(new_item))
@@ -652,11 +864,17 @@ def edit_schedule_entry(
 def remove_schedule_entry(feeder: Any, key: str) -> list[dict[str, Any]]:
     """Drop the matching row from every OEM day."""
     days = feed_daily_list_from_feeder(feeder)
+    if is_shape_a(feeder):
+        existing_items, mask, suspended = _shape_a_items_and_mask(days)
+        kept = [it for it in existing_items if _item_key(it) != str(key)]
+        if len(kept) == len(existing_items):
+            raise ValueError(f"schedule key {key!r} not found")
+        return _expand_shape_a_days(kept, mask, suspended)
     found = False
     for day in days:
         kept = []
         for item in day.get("items") or []:
-            if str(item.get("id")) == str(key) or _item_key(item) == str(key):
+            if _item_key(item) == str(key):
                 found = True
                 continue
             kept.append(item)

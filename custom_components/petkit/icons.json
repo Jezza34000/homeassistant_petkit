@@ -385,6 +385,13 @@
       "error_message": {
         "default": "mdi:alert-circle"
       },
+      "feeding_plan": {
+        "default": "mdi:calendar-clock",
+        "state": {
+          "off": "mdi:calendar-remove",
+          "on": "mdi:calendar-clock"
+        }
+      },
       "filter_percent": {
         "default": "mdi:air-filter"
       },
@@ -698,6 +705,13 @@
           "on": "mdi:bell-check"
         }
       },
+      "feeding_plan": {
+        "default": "mdi:calendar-clock",
+        "state": {
+          "off": "mdi:calendar-remove",
+          "on": "mdi:calendar-clock"
+        }
+      },
       "heater_switch": {
         "default": "mdi:water-boiler-off",
         "state": {
@@ -887,13 +901,6 @@
         "state": {
           "off": "mdi:bell-off",
           "on": "mdi:bell-check"
-        }
-      },
-      "feeding_plan": {
-        "default": "mdi:calendar-clock",
-        "state": {
-          "off": "mdi:calendar-remove",
-          "on": "mdi:calendar-clock"
         }
       },
       "soft_stool": {

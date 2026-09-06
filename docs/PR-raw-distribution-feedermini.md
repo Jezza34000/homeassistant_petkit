@@ -55,14 +55,12 @@ Some devices expose `multi_feed_item.feed_daily_list` with **seven day entries**
 
 Introduced small helpers and a single resolver:
 
-
 | Source                                | Purpose                                                                                                                   |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `_schedule_pairs_from_multi_feed`     | Walk **all** `feedDailyList` entries; return pairs from the **first** day with items.                                     |
 | `_schedule_pairs_from_feed_times`     | Support `**feedTimes` as dict** (seconds → portion/amount) **or list** of `{time/t, amount/…}` / `[time, amount]` tuples. |
 | `_schedule_pairs_from_device_records` | Aggregate **unique times** from `device_records.feed[*].items[*]` with summed amounts per time.                           |
 | `resolve_feed_schedule_pairs`         | Ordered chain: multi → feed_times → device_records; returns `list[tuple[int, int]]`.                                      |
-
 
 `get_raw_feed_plan_from_schedule` and `get_raw_schedule` both use this resolver.
 
@@ -84,7 +82,6 @@ When `multi_feed_item` is absent, build a **seven-day** synthetic list from reso
 
 ## Verification
 
-
 | Evidence                                                                  | Interpretation                            |
 | ------------------------------------------------------------------------- | ----------------------------------------- |
 | `hypothesis=H_ok`, `reject_reason=None`, `schedule_source=device_records` | Fallback chain succeeds for Mini.         |
@@ -92,7 +89,6 @@ When `multi_feed_item` is absent, build a **seven-day** synthetic list from reso
 | `feedermini supports 'RAW distribution data'`                             | Entity passes `is_supported`.             |
 | Sensor count increases (e.g. 15 → 17)                                     | Entities registered for affected feeders. |
 | FE3 (`d3`) same path when multi day 0 empty                               | Multi-day scan + records fallback.        |
-
 
 ---
 
@@ -121,4 +117,3 @@ Optional follow-ups (future PRs):
 - Confirm HA reload reloads inferred `feed_daily_list` attributes for Mini **without** `amount1`/`amount2` on synthetic rows.
 - Confirm `**raw_distribution_data`** entity exists for **FEEDERMINI** and state updates after coordinator refreshes.
 - Sanity-check **dual-hopper** devices still use `**multi`** path first (unchanged when `multi_feed_item` is present).
-

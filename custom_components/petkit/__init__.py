@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from pypetkitapi import Feeder, PetKitClient
 from pypetkitapi.command import FeederCommand
@@ -70,6 +70,7 @@ from .schedule import (
     feed_daily_list_from_feeder,
     remove_schedule_entry,
     schedule_to_feed_daily_list,
+    set_plan_weekdays,
 )
 from .whep_proxy import (
     PetkitDirectWhepProxySessionView,
@@ -104,6 +105,7 @@ SERVICE_EDIT_FEEDING_SCHEDULE_ENTRY = "edit_feeding_schedule_entry"
 SERVICE_REMOVE_FEEDING_SCHEDULE_ENTRY = "remove_feeding_schedule_entry"
 SERVICE_SKIP_FEEDING_TODAY = "skip_feeding_today"
 SERVICE_UNSKIP_FEEDING_TODAY = "unskip_feeding_today"
+SERVICE_SET_FEEDING_PLAN_WEEKDAYS = "set_feeding_plan_weekdays"
 
 FEED_ITEM_SCHEMA = vol.Schema(
     {
@@ -176,53 +178,54 @@ SERVICE_SKIP_TODAY_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SET_PLAN_WEEKDAYS_SCHEMA = vol.Schema(
+    {
+        vol.Required("device_id"): vol.Coerce(int),
+        # The selector hands back strings, automations hand back ints.
+        vol.Required("weekdays"): vol.All(
+            cv.ensure_list,
+            [vol.All(vol.Coerce(int), vol.Range(min=1, max=7))],
+            vol.Length(min=1),
+        ),
+    }
+)
+
+
+def _coerce_amount(value: Any) -> int:
+    """Unused hopper fields come back as None on the cloud models."""
+    if value is None:
+        return 0
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
 
 def _build_feed_daily_list(feed_daily_list: list[dict]) -> list[dict]:
-    """Transform the user-friendly service call data into the Petkit API format.
+    """Add the computed day-level fields the app sends.
 
-    Adds computed fields (count, totalAmount, totalAmount1, totalAmount2) and
-    normalizes each feed item to include all required API fields with defaults.
+    Items are passed through with their ids and ``petAmount`` intact; the
+    library normalises them onto the wire shape (real ``deviceId``, family
+    ``deviceType``, and the id-from-time rewrite for newly added meals).
     """
     result = []
     for day in feed_daily_list:
-        items = []
-        total_amount = 0
-        total_amount1 = 0
-        total_amount2 = 0
-        for item in day["items"]:
-            amount = item.get("amount", 0)
-            amount1 = item.get("amount1", 0)
-            amount2 = item.get("amount2", 0)
-            total_amount += amount
-            total_amount1 += amount1
-            total_amount2 += amount2
-            slot_id = item.get("id", item["time"])
-            try:
-                slot_id = int(slot_id)
-            except (TypeError, ValueError):
-                slot_id = item["time"]
-            items.append(
-                {
-                    "amount": amount,
-                    "amount1": amount1,
-                    "amount2": amount2,
-                    "deviceId": 0,
-                    "deviceType": 0,
-                    "id": slot_id,
-                    "name": item.get("name") or "",
-                    "petAmount": [],
-                    "time": item["time"],
-                }
-            )
+        items = [dict(item) for item in day.get("items") or []]
+        totals = [0, 0, 0]
+        for item in items:
+            for index, key in enumerate(("amount", "amount1", "amount2")):
+                value = _coerce_amount(item.get(key))
+                item[key] = value
+                totals[index] += value
         result.append(
             {
                 "count": len(items),
                 "items": items,
-                "repeats": str(day["repeats"]),
-                "suspended": day.get("suspended", 0),
-                "totalAmount": total_amount,
-                "totalAmount1": total_amount1,
-                "totalAmount2": total_amount2,
+                "repeats": str(day.get("repeats", "")),
+                "suspended": _coerce_amount(day.get("suspended")),
+                "totalAmount": totals[0],
+                "totalAmount1": totals[1],
+                "totalAmount2": totals[2],
             }
         )
     return result
@@ -329,6 +332,28 @@ async def _async_handle_skip_today(
         FeederCommand.RESTORE_DAILY_FEED if restore else FeederCommand.REMOVE_DAILY_FEED
     )
     await client.send_api_request(device_id, action, {"feed_id": feed_id})
+
+
+async def _async_handle_set_plan_weekdays(
+    hass: HomeAssistant, call: ServiceCall
+) -> None:
+    """Re-save the D1/Mini plan on a new weekday mask.
+
+    This is the app's plan-level Repeat control. It covers every meal at once —
+    the family has no per-meal weekday — so it is a service rather than part of
+    the schedule rows.
+    """
+    device_id = call.data["device_id"]
+    client, feeder = _find_feeder_client(hass, device_id)
+    repeats = set_plan_weekdays(feeder, list(call.data["weekdays"]))
+    LOGGER.debug(
+        "Setting feeding plan weekdays for device %s to %s (1=Sunday)",
+        device_id,
+        repeats,
+    )
+    await client.send_api_request(
+        device_id, FeederCommand.SET_PLAN_REPEATS, {"repeats": repeats}
+    )
 
 
 async def async_setup_entry(
@@ -466,6 +491,9 @@ async def async_setup_entry(
         async def handle_unskip_today(call: ServiceCall) -> None:
             await _async_handle_skip_today(hass, call, restore=True)
 
+        async def handle_set_plan_weekdays(call: ServiceCall) -> None:
+            await _async_handle_set_plan_weekdays(hass, call)
+
         hass.services.async_register(
             DOMAIN,
             SERVICE_SET_FEEDING_SCHEDULE,
@@ -489,6 +517,12 @@ async def async_setup_entry(
             SERVICE_REMOVE_FEEDING_SCHEDULE_ENTRY,
             handle_remove_entry,
             schema=SERVICE_REMOVE_ENTRY_SCHEMA,
+        )
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SET_FEEDING_PLAN_WEEKDAYS,
+            handle_set_plan_weekdays,
+            schema=SERVICE_SET_PLAN_WEEKDAYS_SCHEMA,
         )
         hass.services.async_register(
             DOMAIN,

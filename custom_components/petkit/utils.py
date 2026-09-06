@@ -91,7 +91,9 @@ def _schedule_pairs_from_multi_feed(feeder) -> list[tuple[int, int]]:
     return []
 
 
-def _records_item_failed_non_success_state(item: RecordsItems, total_amount: int) -> bool:
+def _records_item_failed_non_success_state(
+    item: RecordsItems, total_amount: int
+) -> bool:
     """True when this record row is a failed execution with no planned portions.
 
     After clearing the cloud schedule, today's ``device_records.feed`` can still
@@ -162,7 +164,7 @@ def resolve_feed_schedule_pairs(feeder) -> list[tuple[int, int]]:
     today's ``device_records.feed``.
     """
 
-    from .schedule import oem_days_from_feed_plan, _item_values
+    from .schedule import _item_values, oem_days_from_feed_plan
 
     days = oem_days_from_feed_plan(feeder)
     if days:
@@ -190,8 +192,7 @@ def resolve_feed_schedule_pairs(feeder) -> list[tuple[int, int]]:
     if pairs_ft:
         return pairs_ft
 
-    pairs_rec = _schedule_pairs_from_device_records(feeder)
-    return pairs_rec
+    return _schedule_pairs_from_device_records(feeder)
 
 
 def map_work_state(work_state: WorkState | None) -> str:

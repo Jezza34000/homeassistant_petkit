@@ -174,3 +174,44 @@ unskip_feeding_today:
       required: true
       selector:
         text:
+
+set_feeding_plan_weekdays:
+  name: Set feeding plan weekdays
+  description: >-
+    Set which weekdays the whole feeding plan runs on. Fresh Element (D1) and
+    Mini only: these share one plan-level weekday mask across every meal, the
+    same control the PetKit app shows as "Repeat". On D3/D4-class feeders set
+    weekdays per meal instead, with add/edit_feeding_schedule_entry.
+  fields:
+    device_id:
+      name: Device ID
+      required: true
+      selector:
+        number:
+          min: 1
+          mode: box
+    weekdays:
+      name: Weekdays
+      description: >-
+        ISO weekdays the plan runs on: 1 is Monday through 7 is Sunday. At
+        least one is required; an empty plan mask is rejected.
+      required: true
+      example: "[1, 3, 5]"
+      selector:
+        select:
+          multiple: true
+          options:
+            - label: Monday
+              value: "1"
+            - label: Tuesday
+              value: "2"
+            - label: Wednesday
+              value: "3"
+            - label: Thursday
+              value: "4"
+            - label: Friday
+              value: "5"
+            - label: Saturday
+              value: "6"
+            - label: Sunday
+              value: "7"
