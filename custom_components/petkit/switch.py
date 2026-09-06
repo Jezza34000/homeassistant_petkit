@@ -14,7 +14,6 @@ from pypetkitapi import (
     D4H,
     D4S,
     D4SH,
-    DEVICES_FEEDER,
     DEVICES_LITTER_BOX,
     FEEDER,
     FEEDER_MINI,
@@ -249,8 +248,8 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             turn_off=lambda api, device: api.send_api_request(
                 device.id, FeederCommand.SUSPEND_FEED
             ),
-            force_add=DEVICES_FEEDER,
-            only_for_types=DEVICES_FEEDER,
+            force_add=[FEEDER, FEEDER_MINI, D3, D4],
+            only_for_types=[FEEDER, FEEDER_MINI, D3, D4],
         ),
         PetKitSwitchDesc(
             key="Shortage alarm",

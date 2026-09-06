@@ -716,6 +716,9 @@
       },
       "pet_meals_today": {
         "name": "Meals today"
+      },
+      "feeding_plan": {
+        "name": "Feeding plan"
       }
     },
     "switch": {
