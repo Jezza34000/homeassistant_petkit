@@ -104,3 +104,7 @@ This repository is based on my client library for the Petkit API, which can be f
 [buymeacoffee-shield]: https://img.shields.io/badge/Donate-buy_me_a_coffee-yellow.svg?style=for-the-badge&logo=buy-me-a-coffee
 [buymeacoffee]: https://www.buymeacoffee.com/jezza
 [supported-devices]: https://github.com/Jezza34000/homeassistant_petkit/wiki/Supported-Devices
+
+## T6 N60 consumable reset
+
+T6 N60 重置按钮通过专用耗材接口重置剩余天数；T5/T7 保留原有设备动作。仅在更换耗材后使用重置按钮。

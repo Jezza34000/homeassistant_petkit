@@ -43,6 +43,8 @@ from .const import DOMAIN, LOGGER, POWER_ONLINE_STATE
 from .entity import PetKitDescSensorBase, PetkitEntity
 
 if TYPE_CHECKING:
+    from pypetkitapi.client import PetKitClient
+
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -59,6 +61,25 @@ class PetKitButtonDesc(PetKitDescSensorBase, ButtonEntityDescription):
 
 
 COMMON_ENTITIES = []
+
+
+async def _reset_n60(api: PetKitClient, device: Litter) -> None:
+    """T6 净味小方使用独立计数接口，不能复用其他型号的动作 10。"""
+    if device.device_nfo.device_type == T6:
+        await api.req.request(
+            method="POST",
+            url="t6/purificationReset",
+            params={"deviceId": str(device.id)},
+            headers=await api.get_session_id(),
+        )
+        return
+
+    await api.send_api_request(
+        device.id,
+        DeviceCommand.CONTROL_DEVICE,
+        {DeviceAction.START: LBCommand.RESET_N60_DEODOR},
+    )
+
 
 BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
     Feeder: [
@@ -245,11 +266,7 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
         PetKitButtonDesc(
             key="Reset N60 odor eliminator",
             translation_key="reset_n60_odor_eliminator",
-            action=lambda api, device: api.send_api_request(
-                device.id,
-                DeviceCommand.CONTROL_DEVICE,
-                {DeviceAction.START: LBCommand.RESET_N60_DEODOR},
-            ),
+            action=_reset_n60,
             only_for_types=LITTER_WITH_CAMERA,
         ),
         PetKitButtonDesc(
