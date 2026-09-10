@@ -36,6 +36,11 @@ _SURPLUS_RESULT_BY_TYPE = {D3: 6, D4SH: 8, D4H: 8}
 # Results the app renders as dispensed for the D3-class families.
 _DISPENSED_RESULTS = {0, 1, 2, 4, 5, 6, 9, 10, 11, 12, 13}
 _GRAM_AMOUNT_TYPES = {D3}
+# Families the app shows as a cup fraction rather than a portion count. Wire
+# amounts are hundredths of a cup, so one portion is ``divisor / 100`` cup.
+# The dual hoppers show bare portions and ignore ``factor`` for display.
+_CUP_DISPLAY_TYPES = {FEEDER, FEEDER_MINI, D4, D4H}
+_CUP_HUNDREDTHS = 100
 
 # Wire ``amount`` is the displayed portion count times a per-family divisor
 # (the app's editor reads it back as amount / divisor). D3 is grams
@@ -128,6 +133,13 @@ def amount_config_for_feeder(feeder: Any) -> dict[str, Any]:
     device_type = feeder_device_type(feeder)
     amount = dict(_AMOUNT_BY_TYPE.get(device_type, _DEFAULT_AMOUNT))
     amount["unit"] = "g" if device_type in _GRAM_AMOUNT_TYPES else "portions"
+    if device_type in _CUP_DISPLAY_TYPES:
+        # Same shape as the card's ``alternate_unit`` option; YAML overrides it.
+        divisor = _amount_divisor(feeder, device_type)
+        amount["alternate_unit"] = {
+            "unit_of_measurement": "cup",
+            "conversion_factor": divisor / _CUP_HUNDREDTHS,
+        }
     return amount
 
 

@@ -318,6 +318,10 @@ class TestCapabilities(unittest.TestCase):
         assert "shared_weekdays" not in caps
         assert caps["global_toggle"]
         assert caps["amount"]["unit"] == "portions"
+        assert caps["amount"]["alternate_unit"] == {
+            "unit_of_measurement": "cup",
+            "conversion_factor": 0.05,
+        }
         assert "min_gap_seconds" not in caps
         assert caps["labels"] == {"required": True}
         assert "skip_today" in caps["actions"]
@@ -334,6 +338,7 @@ class TestCapabilities(unittest.TestCase):
         """D3 is grams with independently editable days."""
         caps = capabilities_for_feeder(_feeder(device_type="d3"))
         assert caps["amount"]["unit"] == "g"
+        assert "alternate_unit" not in caps["amount"]
         assert caps["weekly"]
         assert "shared_weekdays" not in caps
         assert caps["global_toggle"]
@@ -352,6 +357,26 @@ class TestCapabilities(unittest.TestCase):
         caps = capabilities_for_feeder(_feeder(device_type="d4"))
         assert caps["global_toggle"]
         assert caps["amount"]["unit"] == "portions"
+        assert caps["amount"]["alternate_unit"] == {
+            "unit_of_measurement": "cup",
+            "conversion_factor": 0.1,
+        }
+
+    def test_cup_fraction_follows_the_device_factor(self):
+        """D4/D4h read the portion size off ``settings.factor``; D1 is fixed."""
+        feeder = _feeder(device_type="d4h")
+        feeder.settings = SimpleNamespace(factor=25)
+        caps = capabilities_for_feeder(feeder)
+        assert caps["amount"]["alternate_unit"]["conversion_factor"] == 0.25
+        caps = capabilities_for_feeder(_feeder(device_type="feeder"))
+        assert caps["amount"]["alternate_unit"]["conversion_factor"] == 0.2
+
+    def test_dual_hoppers_show_bare_portions(self):
+        """D4s/D4sh render the tick count as-is, so no cup fraction is offered."""
+        for device_type in ("d4s", "d4sh"):
+            caps = capabilities_for_feeder(_feeder(device_type=device_type))
+            assert caps["amount"]["unit"] == "portions", device_type
+            assert "alternate_unit" not in caps["amount"], device_type
 
 
 def _record(**kw):
