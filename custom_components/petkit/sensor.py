@@ -51,7 +51,15 @@ from homeassistant.const import (
     UnitOfVolume,
 )
 
-from .const import BATTERY_LEVEL_MAP, DEVICE_STATUS_MAP, DOMAIN, LOGGER, NO_ERROR
+from .const import (
+    BATTERY_LEVEL_MAP,
+    BATTERY_LEVEL_OPTIONS,
+    DEVICE_STATUS_MAP,
+    DEVICE_STATUS_OPTIONS,
+    DOMAIN,
+    LOGGER,
+    NO_ERROR,
+)
 from .entity import PetKitDescSensorBase, PetkitEntity
 from .utils import (
     get_raw_feed_plan_from_schedule,
@@ -122,7 +130,9 @@ COMMON_ENTITIES = [
         key="Device status",
         translation_key="device_status",
         entity_category=EntityCategory.DIAGNOSTIC,
-        value=lambda device: DEVICE_STATUS_MAP.get(device.state.pim, "Unknown Status"),
+        device_class=SensorDeviceClass.ENUM,
+        options=DEVICE_STATUS_OPTIONS,
+        value=lambda device: DEVICE_STATUS_MAP.get(device.state.pim, "unknown"),
     ),
     PetKitSensorDesc(
         key="Rssi",
@@ -181,10 +191,12 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             key="Battery level",
             translation_key="battery_level",
             entity_category=EntityCategory.DIAGNOSTIC,
+            device_class=SensorDeviceClass.ENUM,
+            options=BATTERY_LEVEL_OPTIONS,
             value=lambda device: (
-                BATTERY_LEVEL_MAP.get(device.state.battery_status, "Unknown")
+                BATTERY_LEVEL_MAP.get(device.state.battery_status, "unknown")
                 if device.state.pim == 2
-                else "Not in use"
+                else "not_in_use"
             ),
         ),
         PetKitSensorDesc(
