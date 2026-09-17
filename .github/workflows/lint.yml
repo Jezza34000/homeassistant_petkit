@@ -40,7 +40,7 @@ jobs:
 
       - name: "Install tox"
         run: |
-          python -m pip install tox==4.61.5 tox-gh-actions==3.5.0
+          python -m pip install --only-binary :all: tox==4.61.5 tox-gh-actions==3.5.0
 
       - name: "Run pre-commit with tox"
         run: python -m tox -e precommit
