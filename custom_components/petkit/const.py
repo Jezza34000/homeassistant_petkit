@@ -115,9 +115,6 @@ BATTERY_LEVEL_MAP = {
 
 BATTERY_LEVEL_OPTIONS = ["low", "normal", "not_in_use", "unknown"]
 
-# Text input regex
-INPUT_FEED_PATTERN = "^(0|[1-9][0-9]?|[1-3][0-9]{2}|400)$"
-
 # Select list mapping
 SURPLUS_FOOD_LEVEL_OPT = {0: "Disabled", 1: "Less", 2: "Moderate", 3: "Full"}
 IA_DETECTION_SENSITIVITY_OPT = {1: "Low", 2: "Mid", 3: "High"}
