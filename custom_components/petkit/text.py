@@ -25,7 +25,7 @@ from pypetkitapi import (
 
 from homeassistant.components.text import TextEntity, TextEntityDescription
 
-from .const import INPUT_FEED_PATTERN, LOGGER, POWER_ONLINE_STATE, SCAN_INTERVAL_FAST
+from .const import LOGGER, POWER_ONLINE_STATE, SCAN_INTERVAL_FAST
 from .entity import PetKitDescSensorBase, PetkitEntity
 
 if TYPE_CHECKING:
@@ -42,6 +42,7 @@ class PetkitTextDesc(PetKitDescSensorBase, TextEntityDescription):
 
     native_value: str | None = None
     action: Callable[[PetkitConfigEntry, PetkitDevices, str], Any] | None = None
+    valid_values: Callable[[PetkitDevices], list[int]] | None = None
 
 
 COMMON_ENTITIES = []
@@ -70,7 +71,7 @@ TEXT_MAPPING: dict[type[PetkitDevices], list[PetkitTextDesc]] = {
             translation_key="manual_feed_single",
             native_min=1,
             native_max=3,
-            pattern=INPUT_FEED_PATTERN,
+            valid_values=_valid_manual_feed_values,
             native_value="0",
             action=lambda api, device, amount_value: api.send_api_request(
                 device.id, FeederCommand.MANUAL_FEED, {"amount": int(amount_value)}
@@ -82,7 +83,7 @@ TEXT_MAPPING: dict[type[PetkitDevices], list[PetkitTextDesc]] = {
             translation_key="manual_feed_dual_h1",
             native_min=1,
             native_max=2,
-            pattern=INPUT_FEED_PATTERN,
+            valid_values=_valid_manual_feed_values,
             native_value="0",
             action=lambda api, device, amount_value: api.send_api_request(
                 device.id,
@@ -96,7 +97,7 @@ TEXT_MAPPING: dict[type[PetkitDevices], list[PetkitTextDesc]] = {
             translation_key="manual_feed_dual_h2",
             native_min=1,
             native_max=2,
-            pattern=INPUT_FEED_PATTERN,
+            valid_values=_valid_manual_feed_values,
             native_value="0",
             action=lambda api, device, amount_value: api.send_api_request(
                 device.id,
@@ -173,6 +174,9 @@ class PetkitText(PetkitEntity, TextEntity):
     def pattern(self) -> str | None:
         """Check validity with regex pattern."""
 
+        if self.entity_description.valid_values is not None:
+            values = self.entity_description.valid_values(self.device)
+            return f"^({'|'.join(str(value) for value in values)})$"
         return self.entity_description.pattern
 
     @property
