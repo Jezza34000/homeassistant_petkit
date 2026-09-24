@@ -16,9 +16,9 @@
         "data_description": {
           "region": "Dit veld wordt automatisch ingevuld op basis van uw Home Assistant-configuratie. Als u een andere regio heeft, selecteer deze dan uit de lijst.",
           "time_zone": "Dit veld wordt automatisch ingevuld op basis van uw Home Assistant-configuratie. Als u een andere tijdzone heeft, selecteer deze dan uit de lijst.",
-          "username": "Voer uw PetKit account e-mailadres in, of ID als u een Chinese gebruiker bent"
+          "username": "Voer uw PetKit account e-mailadres in, of ID als u een Chinese gebruiker bent {username_hint}"
         },
-        "description": "Voer uw PetKit-accountgegevens in. Gebruik NIET hetzelfde account als in de PetKit-app op uw smartphone. Raadpleeg de documentatie voor meer informatie."
+        "description": "Voer uw PetKit-accountgegevens in. Gebruik NIET hetzelfde account als in de PetKit-app op uw smartphone. Raadpleeg de documentatie voor meer informatie.\n\n[Wiki]({wiki_url})"
       }
     }
   },

@@ -16,9 +16,9 @@
         "data_description": {
           "region": "此字段将根据 Home Assistant 配置自动填入。如果您的区域不同，请从列表中选择。",
           "time_zone": "此字段将根据 Home Assistant 配置自动填入。如果您的时区不同，请从列表中选择。",
-          "username": "输入您的小佩账号电子邮箱，如果您是中国用户，请输入绑定的手机号"
+          "username": "输入您的小佩账号电子邮箱，如果您是中国用户，请输入绑定的手机号 {username_hint}"
         },
-        "description": "请输入你的小佩账号信息"
+        "description": "请输入你的小佩账号信息\n\n[Wiki]({wiki_url})"
       }
     }
   },
