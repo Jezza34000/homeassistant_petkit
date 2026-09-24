@@ -52,7 +52,15 @@ from homeassistant.const import (
     UnitOfVolume,
 )
 
-from .const import BATTERY_LEVEL_MAP, DEVICE_STATUS_MAP, DOMAIN, LOGGER, NO_ERROR
+from .const import (
+    BATTERY_LEVEL_MAP,
+    BATTERY_LEVEL_OPTIONS,
+    DEVICE_STATUS_MAP,
+    DEVICE_STATUS_OPTIONS,
+    DOMAIN,
+    LOGGER,
+    NO_ERROR,
+)
 from .entity import PetKitDescSensorBase, PetkitEntity
 from .utils import (
     get_device_records_history,
@@ -138,7 +146,9 @@ COMMON_ENTITIES = [
         key="Device status",
         translation_key="device_status",
         entity_category=EntityCategory.DIAGNOSTIC,
-        value=lambda device: DEVICE_STATUS_MAP.get(device.state.pim, "Unknown Status"),
+        device_class=SensorDeviceClass.ENUM,
+        options=DEVICE_STATUS_OPTIONS,
+        value=lambda device: DEVICE_STATUS_MAP.get(device.state.pim, "unknown"),
     ),
     PetKitSensorDesc(
         key="Rssi",
@@ -197,10 +207,12 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             key="Battery level",
             translation_key="battery_level",
             entity_category=EntityCategory.DIAGNOSTIC,
+            device_class=SensorDeviceClass.ENUM,
+            options=BATTERY_LEVEL_OPTIONS,
             value=lambda device: (
-                BATTERY_LEVEL_MAP.get(device.state.battery_status, "Unknown")
+                BATTERY_LEVEL_MAP.get(device.state.battery_status, "unknown")
                 if device.state.pim == 2
-                else "Not in use"
+                else "not_in_use"
             ),
         ),
         PetKitSensorDesc(
@@ -827,7 +839,7 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             native_unit_of_measurement=UnitOfMass.KILOGRAMS,
             value=lambda pet: (
                 round((pet.last_measured_weight / 1000), 2)
-                if pet.last_measured_weight is not None and pet.last_measured_weight > 0
+                if pet.last_measured_weight is not None
                 else None
             ),
             restore_state=True,
@@ -839,7 +851,7 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             device_class=SensorDeviceClass.DURATION,
             state_class=SensorStateClass.MEASUREMENT,
             native_unit_of_measurement=UnitOfTime.SECONDS,
-            value=lambda pet: pet.last_duration_usage or None,
+            value=lambda pet: pet.last_duration_usage,
             restore_state=True,
         ),
         PetKitSensorDesc(
@@ -880,6 +892,42 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             translation_key="pet_last_defecation_date",
             entity_picture=lambda pet: pet.avatar,
             value=lambda pet: format_pet_date(pet.last_defecation),
+            restore_state=True,
+        ),
+        PetKitSensorDesc(
+            key="Pet last meal date",
+            translation_key="pet_last_meal_date",
+            entity_picture=lambda pet: pet.avatar,
+            value=lambda pet: (
+                datetime.fromtimestamp(pet.last_meal_time)
+                if pet.last_meal_time is not None and pet.last_meal_time != 0
+                else "Unknown"
+            ),
+            restore_state=True,
+        ),
+        PetKitSensorDesc(
+            key="Pet last meal duration",
+            translation_key="pet_last_meal_duration",
+            entity_picture=lambda pet: pet.avatar,
+            device_class=SensorDeviceClass.DURATION,
+            state_class=SensorStateClass.MEASUREMENT,
+            native_unit_of_measurement=UnitOfTime.SECONDS,
+            value=lambda pet: pet.last_meal_duration or None,
+            restore_state=True,
+        ),
+        PetKitSensorDesc(
+            key="Pet last feeder used",
+            translation_key="pet_last_feeder_used",
+            entity_picture=lambda pet: pet.avatar,
+            value=lambda pet: pet.last_feeder_used,
+            restore_state=True,
+        ),
+        PetKitSensorDesc(
+            key="Pet meals today",
+            translation_key="pet_meals_today",
+            entity_picture=lambda pet: pet.avatar,
+            state_class=SensorStateClass.TOTAL,
+            value=lambda pet: pet.meals_today,
             restore_state=True,
         ),
     ],

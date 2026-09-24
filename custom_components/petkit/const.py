@@ -97,19 +97,23 @@ NO_ERROR = "No error"
 # Status mapping
 POWER_ONLINE_STATE = [1, 2]
 
+# Values are translation keys, not display strings: Home Assistant only applies
+# `state` translations to sensors declared with SensorDeviceClass.ENUM, so these
+# must match the keys under entity.sensor.<translation_key>.state in strings.json.
 DEVICE_STATUS_MAP = {
-    0: "Offline",
-    1: "Online",
-    2: "On battery",
+    0: "offline",
+    1: "online",
+    2: "on_battery",
 }
+
+DEVICE_STATUS_OPTIONS = ["offline", "online", "on_battery", "unknown"]
 
 BATTERY_LEVEL_MAP = {
-    "0": "Low",
-    "1": "Normal",
+    "0": "low",
+    "1": "normal",
 }
 
-# Text input regex
-INPUT_FEED_PATTERN = "^(0|[1-9][0-9]?|[1-3][0-9]{2}|400)$"
+BATTERY_LEVEL_OPTIONS = ["low", "normal", "not_in_use", "unknown"]
 
 # Select list mapping
 SURPLUS_FOOD_LEVEL_OPT = {0: "Disabled", 1: "Less", 2: "Moderate", 3: "Full"}

@@ -350,12 +350,12 @@ class PetkitIotMqttListener:
 
         try:
             client.disconnect()
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             LOGGER.debug("Disconnect raised: %s", err, exc_info=True)
 
         try:
             client.loop_stop()
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             LOGGER.debug("Loop_stop raised: %s", err, exc_info=True)
 
         self._connection_status = MqttConnectionStatus.DISCONNECTED
@@ -374,7 +374,7 @@ class PetkitIotMqttListener:
         try:
             for topic in topics:
                 client.subscribe(topic, qos=0)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             LOGGER.warning("Subscribe failed: %s", err, exc_info=True)
 
     def _on_subscribe(self, client, userdata, mid, reason_code_list, properties):
@@ -492,7 +492,7 @@ class PetkitIotMqttListener:
         await asyncio.sleep(self.refresh_debounce_s)
         try:
             await self.coordinator.async_request_refresh()
-        except Exception:  # noqa: BLE001
+        except Exception:
             LOGGER.warning("MQTT-triggered refresh failed", exc_info=True)
 
     def _update_coordinator_mqtt_state(self, is_connected: bool) -> None:

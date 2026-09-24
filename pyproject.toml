@@ -764,6 +764,7 @@ ignore = [
   "PLE0605",
 
   "FURB116",
+  "PLR0917",
 ]
 
 [tool.ruff.lint.flake8-import-conventions.extend-aliases]
