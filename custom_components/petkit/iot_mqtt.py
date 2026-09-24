@@ -220,6 +220,7 @@ class PetkitIotMqttListener:
         self._mqtt_client = None
         self._subscribe_topics: list[str] = []
         self._refresh_task: asyncio.Task | None = None
+        self._watchdog_task: asyncio.Task | None = None
         self._started = False
         self._petkit_device_name: str | None = None
         self._petkit_product_key: str | None = None
@@ -306,6 +307,9 @@ class PetkitIotMqttListener:
         )
         paho_client.reconnect_delay_set(min_delay=10, max_delay=300)
 
+        paho_logger = logging.getLogger(f"{__name__}.paho")
+        paho_client.enable_logger(paho_logger)
+
         paho_client.on_connect = self._on_connect
         paho_client.on_disconnect = self._on_disconnect
         paho_client.on_message = self._on_message
@@ -324,6 +328,8 @@ class PetkitIotMqttListener:
             self._connection_status = MqttConnectionStatus.FAILED
             return
 
+        self._watchdog_task = self.hass.async_create_task(self._connection_watchdog())
+
         LOGGER.debug(
             "Listener started (broker=%s:%s, topics=%s)",
             endpoint.host,
@@ -338,6 +344,10 @@ class PetkitIotMqttListener:
         if self._refresh_task is not None:
             self._refresh_task.cancel()
             self._refresh_task = None
+
+        if getattr(self, "_watchdog_task", None) is not None:
+            self._watchdog_task.cancel()
+            self._watchdog_task = None
 
         client = self._mqtt_client
         self._mqtt_client = None
@@ -503,3 +513,13 @@ class PetkitIotMqttListener:
         """Modify coordinator refresh interval"""
         self.coordinator.update_interval = timedelta(seconds=seconds)
         LOGGER.debug("Change coordinator refresh interval to %s sec", seconds)
+
+    async def _connection_watchdog(self) -> None:
+        """Watchdog to warn if the connect handshake is silently stalled."""
+        await asyncio.sleep(30)
+        if self._connection_status == MqttConnectionStatus.CONNECTING:
+            LOGGER.warning(
+                "MQTT connection timeout: Still in CONNECTING state after 30 seconds. "
+                "Broker may be unreachable or connection silently dropped."
+            )
+            self._connection_status = MqttConnectionStatus.FAILED
