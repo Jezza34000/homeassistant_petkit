@@ -572,6 +572,9 @@
       },
       "sand_tray_left_days": {
         "name": "Піщаний лоток, днів залишилось"
+      },
+      "device_records_history": {
+        "name": "Історія записів пристрою"
       }
     },
     "switch": {

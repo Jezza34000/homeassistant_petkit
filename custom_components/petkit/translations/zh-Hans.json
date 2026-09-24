@@ -572,6 +572,9 @@
       },
       "sand_tray_left_days": {
         "name": "猫砂托盘剩余天数"
+      },
+      "device_records_history": {
+        "name": "设备记录历史"
       }
     },
     "switch": {
