@@ -7,6 +7,23 @@ from pypetkitapi import LitterRecord, RecordsItems, WorkState
 from .const import EVENT_MAPPING, LOGGER
 
 
+def find_scheduled_feed(feeder, day: int, seconds: int) -> RecordsItems | None:
+    """Find the feeding-plan entry scheduled at `seconds` on `day` (YYYYMMDD).
+
+    Reads the feeder's daily records, which is where the app takes the id it
+    sends to removeDailyFeed/restoreDailyFeed. Manual feeds are ignored:
+    only src 1 (feeding plan) can be skipped or restored.
+    """
+    records = getattr(feeder, "device_records", None)
+    for record_day in getattr(records, "feed", None) or []:
+        if record_day.day != day:
+            continue
+        for item in record_day.items or []:
+            if item.src == 1 and item.time == seconds:
+                return item
+    return None
+
+
 def map_work_state(work_state: WorkState | None) -> str:
     """Get the state of the litter box.
 

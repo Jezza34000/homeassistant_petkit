@@ -9,13 +9,20 @@ from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
 from pypetkitapi import (
+    D3,
+    D4,
+    D4H,
+    D4S,
+    D4SH,
     DEVICES_LITTER_BOX,
+    FEEDER,
     FEEDER_MINI,
     LITTER_WITH_CAMERA,
     T7,
     DeviceAction,
     DeviceCommand,
     Feeder,
+    FeederCommand,
     Litter,
     Pet,
     Purifier,
@@ -35,6 +42,19 @@ if TYPE_CHECKING:
 
     from .coordinator import PetkitDataUpdateCoordinator
     from .data import PetkitConfigEntry, PetkitDevices
+
+
+def feeding_plan_active(device: Feeder) -> int | None:
+    """Return 1 while the feeding plan runs, 0 once it is suspended.
+
+    The app toggles the whole plan with suspendFeed/restoreFeed, which sets
+    `suspended` on every day of it. None when the feeder reports no plan, so
+    the switch is not created for a feeder without one.
+    """
+    multi = device.multi_feed_item
+    if multi is None or not multi.feed_daily_list:
+        return None
+    return int(any(day.suspended != 1 for day in multi.feed_daily_list))
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -387,6 +407,19 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
                 device.id, DeviceCommand.UPDATE_SETTING, {"settings.desiccantNotify": 0}
             ),
             only_for_types=[FEEDER_MINI],
+        ),
+        PetKitSwitchDesc(
+            key="Feeding schedule",
+            translation_key="feeding_schedule",
+            value=feeding_plan_active,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, FeederCommand.RESTORE_FEED
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, FeederCommand.SUSPEND_FEED
+            ),
+            # Feeder Mini has no suspendFeed/restoreFeed endpoint in the app
+            only_for_types=[FEEDER, D3, D4, D4S, D4H, D4SH],
         ),
     ],
     Litter: [

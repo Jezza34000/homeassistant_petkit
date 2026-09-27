@@ -954,6 +954,13 @@
           "off": "mdi:bell-off",
           "on": "mdi:bell-check"
         }
+      },
+      "feeding_schedule": {
+        "default": "mdi:calendar-clock",
+        "state": {
+          "off": "mdi:calendar-remove",
+          "on": "mdi:calendar-clock"
+        }
       }
     },
     "text": {

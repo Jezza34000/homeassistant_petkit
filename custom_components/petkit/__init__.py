@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, time as dt_time, timedelta
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
-from pypetkitapi import Feeder, PetKitClient
+from pypetkitapi import D3, D4, D4H, D4S, D4SH, Feeder, PetKitClient
 from pypetkitapi.command import FeederCommand
 import voluptuous as vol
 
@@ -17,7 +18,7 @@ from homeassistant.const import (
     Platform,
 )
 from homeassistant.core import ServiceCall
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
 from homeassistant.helpers import config_validation as cv, device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.loader import async_get_loaded_integration
@@ -63,6 +64,7 @@ from .coordinator import (
 from .data import PetkitData
 from .iot_mqtt import PetkitIotMqttListener
 from .notifications import PetkitNotificationManager
+from .utils import find_scheduled_feed
 from .whep_proxy import (
     PetkitDirectWhepProxySessionView,
     PetkitDirectWhepProxyView,
@@ -91,6 +93,31 @@ PLATFORMS: list[Platform] = [
 ]
 
 SERVICE_SET_FEEDING_SCHEDULE = "set_feeding_schedule"
+SERVICE_SKIP_SCHEDULED_FEED = "skip_scheduled_feed"
+SERVICE_RESTORE_SCHEDULED_FEED = "restore_scheduled_feed"
+
+# Types whose app client calls <type>/removeDailyFeed and restoreDailyFeed.
+# Feeder and Feeder Mini use remove_dailyfeed/restore_dailyfeed instead,
+# which pypetkitapi does not send yet.
+DAILY_FEED_TYPES = (D3, D4, D4S, D4H, D4SH)
+
+
+def _time_to_seconds(value: int | str | dt_time) -> int:
+    """Accept seconds since midnight or a time of day ("07:30")."""
+    if isinstance(value, dt_time):
+        return value.hour * 3600 + value.minute * 60
+    return int(value)
+
+
+SERVICE_SCHEDULED_FEED_SCHEMA = vol.Schema(
+    {
+        vol.Required("device_id"): vol.Coerce(int),
+        vol.Required("time"): vol.All(
+            vol.Any(cv.time, vol.All(vol.Coerce(int), vol.Range(min=0, max=86399))),
+            _time_to_seconds,
+        ),
+    }
+)
 
 FEED_ITEM_SCHEMA = vol.Schema(
     {
@@ -197,6 +224,51 @@ async def _async_handle_set_feeding_schedule(
     )
 
     await client.send_api_request(device_id, FeederCommand.SAVE_FEED, api_payload)
+
+
+async def _async_handle_scheduled_feed(
+    hass: HomeAssistant, call: ServiceCall, skip: bool
+) -> None:
+    """Skip or restore one of today's feeding-plan entries."""
+    device_id = call.data["device_id"]
+    seconds = call.data["time"]
+    at = f"{seconds // 3600:02d}:{seconds % 3600 // 60:02d}"
+
+    for entry in hass.config_entries.async_entries(DOMAIN):
+        runtime = getattr(entry, "runtime_data", None)
+        if runtime and device_id in runtime.client.petkit_entities:
+            break
+    else:
+        raise ServiceValidationError(f"Petkit device {device_id} not found")
+
+    device = runtime.client.petkit_entities[device_id]
+    device_type = getattr(getattr(device, "device_nfo", None), "device_type", None)
+    if not isinstance(device, Feeder) or device_type not in DAILY_FEED_TYPES:
+        raise ServiceValidationError(
+            f"Device {device_id} does not support skipping scheduled feeds"
+        )
+
+    # pypetkitapi stamps the request with datetime.now() too, so both agree
+    today = int(datetime.now().strftime("%Y%m%d"))
+    item = find_scheduled_feed(device, today, seconds)
+    if item is None:
+        raise ServiceValidationError(f"No scheduled feed at {at} today")
+    if skip and item.status == 1:
+        raise ServiceValidationError(f"The {at} feed is already skipped")
+    if skip and item.state is not None:
+        raise ServiceValidationError(f"The {at} feed has already run")
+    if not skip and item.status != 1:
+        raise ServiceValidationError(f"The {at} feed is not skipped")
+
+    command = (
+        FeederCommand.REMOVE_DAILY_FEED if skip else FeederCommand.RESTORE_DAILY_FEED
+    )
+    # An object with feed_id, not a dict: pypetkitapi <= 1.29.0 reads the id
+    # as an attribute, and later versions accept both.
+    await runtime.client.send_api_request(
+        device_id, command, SimpleNamespace(feed_id=item.id)
+    )
+    await runtime.coordinator.async_request_refresh()
 
 
 async def async_setup_entry(
@@ -324,6 +396,27 @@ async def async_setup_entry(
             SERVICE_SET_FEEDING_SCHEDULE,
             handle_set_feeding_schedule,
             schema=SERVICE_SET_FEEDING_SCHEDULE_SCHEMA,
+        )
+
+    if not hass.services.has_service(DOMAIN, SERVICE_SKIP_SCHEDULED_FEED):
+
+        async def handle_skip_scheduled_feed(call: ServiceCall) -> None:
+            await _async_handle_scheduled_feed(hass, call, skip=True)
+
+        async def handle_restore_scheduled_feed(call: ServiceCall) -> None:
+            await _async_handle_scheduled_feed(hass, call, skip=False)
+
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SKIP_SCHEDULED_FEED,
+            handle_skip_scheduled_feed,
+            schema=SERVICE_SCHEDULED_FEED_SCHEMA,
+        )
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_RESTORE_SCHEDULED_FEED,
+            handle_restore_scheduled_feed,
+            schema=SERVICE_SCHEDULED_FEED_SCHEMA,
         )
 
     return True
