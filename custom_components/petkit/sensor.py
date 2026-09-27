@@ -66,6 +66,7 @@ from .utils import (
     get_raw_schedule,
     map_litter_event,
     map_work_state,
+    parse_device_local_time,
 )
 
 if TYPE_CHECKING:
@@ -714,20 +715,16 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             key="Next flush",
             translation_key="next_flush_time",
             device_class=SensorDeviceClass.TIMESTAMP,
-            value=lambda device: (
-                datetime.strptime(device.next_flush_time, "%Y/%m/%d %H:%M")
-                if device.next_flush_time
-                else None
+            value=lambda device: parse_device_local_time(
+                device.next_flush_time, device.timezone
             ),
         ),
         PetKitSensorDesc(
             key="Next water change",
             translation_key="next_water_change_time",
             device_class=SensorDeviceClass.TIMESTAMP,
-            value=lambda device: (
-                datetime.strptime(device.next_water_change_time, "%Y/%m/%d %H:%M")
-                if device.next_water_change_time
-                else None
+            value=lambda device: parse_device_local_time(
+                device.next_water_change_time, device.timezone
             ),
         ),
         PetKitSensorDesc(
