@@ -175,8 +175,17 @@ class PetkitText(PetkitEntity, TextEntity):
         """Check validity with regex pattern."""
 
         if self.entity_description.valid_values is not None:
-            values = self.entity_description.valid_values(self.device)
-            return f"^({'|'.join(str(value) for value in values)})$"
+            values = [
+                str(value)
+                for value in self.entity_description.valid_values(self.device)
+            ]
+            # The entity always shows its native_value placeholder ("0"), and
+            # HA refuses to add a text entity whose state fails its pattern.
+            # Allow the placeholder here; async_set_value still rejects it.
+            placeholder = self.entity_description.native_value
+            if placeholder is not None and placeholder not in values:
+                values.insert(0, placeholder)
+            return f"^({'|'.join(values)})$"
         return self.entity_description.pattern
 
     @property
