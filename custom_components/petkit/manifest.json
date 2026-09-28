@@ -10,7 +10,7 @@
   "issue_tracker": "https://github.com/Jezza34000/homeassistant_petkit/issues",
   "loggers": ["petkit"],
   "requirements": [
-    "pypetkitapi==1.28.0",
+    "pypetkitapi==1.29.0",
     "aiofiles==24.1.0",
     "paho-mqtt==2.1.0",
     "websockets==15.0.1",
