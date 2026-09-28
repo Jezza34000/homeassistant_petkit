@@ -26,12 +26,14 @@ from pypetkitapi import (
     Litter,
     Pet,
     Purifier,
+    PypetkitError,
     WaterFountain,
 )
 from pypetkitapi.command import FountainAction
 
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.const import EntityCategory
+from homeassistant.exceptions import HomeAssistantError
 
 from .const import LOGGER, POWER_ONLINE_STATE, SCAN_INTERVAL_FAST
 from .entity import PetKitDescSensorBase, PetkitEntity
@@ -1102,17 +1104,25 @@ class PetkitSwitch(PetkitEntity, SwitchEntity):
     async def async_turn_on(self, **_: Any) -> None:
         """Turn on the switch."""
         LOGGER.debug("Turn ON")
-        res = await self.entity_description.turn_on(
-            self.coordinator.config_entry.runtime_data.client, self.device
-        )
-        await self._update_coordinator_data(res)
+        await self._send(self.entity_description.turn_on)
 
     async def async_turn_off(self, **_: Any) -> None:
         """Turn off the switch."""
         LOGGER.debug("Turn OFF")
-        res = await self.entity_description.turn_off(
-            self.coordinator.config_entry.runtime_data.client, self.device
-        )
+        await self._send(self.entity_description.turn_off)
+
+    async def _send(self, command: Callable) -> None:
+        """Send a command, surfacing PetKit's own refusal to the user.
+
+        Without this a rejected request (e.g. code 1514 "Your operation is
+        too frequently") reaches the frontend as "Unexpected exception".
+        """
+        try:
+            res = await command(
+                self.coordinator.config_entry.runtime_data.client, self.device
+            )
+        except PypetkitError as err:
+            raise HomeAssistantError(f"PetKit refused the request: {err}") from err
         await self._update_coordinator_data(res)
 
     async def _update_coordinator_data(self, result: bool) -> None:

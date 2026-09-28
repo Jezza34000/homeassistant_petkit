@@ -6,7 +6,7 @@ from datetime import datetime, time as dt_time, timedelta
 from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
-from pypetkitapi import D3, D4, D4H, D4S, D4SH, Feeder, PetKitClient
+from pypetkitapi import D3, D4, D4H, D4S, D4SH, Feeder, PetKitClient, PypetkitError
 from pypetkitapi.command import FeederCommand
 import voluptuous as vol
 
@@ -18,7 +18,11 @@ from homeassistant.const import (
     Platform,
 )
 from homeassistant.core import ServiceCall
-from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
+from homeassistant.exceptions import (
+    ConfigEntryNotReady,
+    HomeAssistantError,
+    ServiceValidationError,
+)
 from homeassistant.helpers import config_validation as cv, device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.loader import async_get_loaded_integration
@@ -265,9 +269,12 @@ async def _async_handle_scheduled_feed(
     )
     # An object with feed_id, not a dict: pypetkitapi <= 1.29.0 reads the id
     # as an attribute, and later versions accept both.
-    await runtime.client.send_api_request(
-        device_id, command, SimpleNamespace(feed_id=item.id)
-    )
+    try:
+        await runtime.client.send_api_request(
+            device_id, command, SimpleNamespace(feed_id=item.id)
+        )
+    except PypetkitError as err:
+        raise HomeAssistantError(f"PetKit refused the request: {err}") from err
     await runtime.coordinator.async_request_refresh()
 
 
