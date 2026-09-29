@@ -2,7 +2,7 @@ set_feeding_schedule:
   name: Set feeding schedule
   description: >
     Replace the full feeding schedule on a Petkit feeder.
-    Each entry in feed_daily_list represents one day of the week (repeats 1-7 = Mon-Sun).
+    Each entry in feed_daily_list represents one day of the week (repeats 1-7 = Sun-Sat, so 2 is Monday).
     For dual-hopper feeders (D4S / D4SH), use amount1 and amount2.
     For single-hopper feeders, use amount.
     Time is in seconds since midnight (e.g. 21600 = 06:00, 43200 = 12:00).
@@ -19,7 +19,7 @@ set_feeding_schedule:
     feed_daily_list:
       name: Feed daily list
       description: >
-        A list of day schedules. Each day has a repeats value (1-7 for Mon-Sun),
+        A list of day schedules. Each day has a repeats value (1-7 for Sun-Sat; 2 is Monday),
         a suspended flag (0=active, 1=suspended), and an items list.
         Each item has: time (seconds since midnight), name (string),
         amount (single hopper), amount1 (hopper 1), amount2 (hopper 2).
@@ -42,3 +42,55 @@ set_feeding_schedule:
               amount2: 5
       selector:
         object:
+
+skip_scheduled_feed:
+  name: Skip scheduled feed
+  description: >
+    Skip one of today's feeding-plan portions on a Petkit feeder, as the app's
+    "skip" on a planned feed does. Only today's entries can be skipped, and only
+    before they run. Supported on Fresh Element 3 (D3), SOLO (D4) and the
+    D4S / D4H / D4SH models.
+  fields:
+    device_id:
+      name: Device ID
+      description: The numeric Petkit device ID of the feeder.
+      required: true
+      example: 10014481
+      selector:
+        number:
+          min: 1
+          mode: box
+    time:
+      name: Time
+      description: >
+        The scheduled time of the portion to skip, as a time of day ("07:30")
+        or in seconds since midnight (27000).
+      required: true
+      example: "07:30"
+      selector:
+        time:
+
+restore_scheduled_feed:
+  name: Restore scheduled feed
+  description: >
+    Restore a feeding-plan portion skipped earlier today on a Petkit feeder.
+    Supported on Fresh Element 3 (D3), SOLO (D4) and the D4S / D4H / D4SH models.
+  fields:
+    device_id:
+      name: Device ID
+      description: The numeric Petkit device ID of the feeder.
+      required: true
+      example: 10014481
+      selector:
+        number:
+          min: 1
+          mode: box
+    time:
+      name: Time
+      description: >
+        The scheduled time of the portion to restore, as a time of day
+        ("07:30") or in seconds since midnight (27000).
+      required: true
+      example: "07:30"
+      selector:
+        time:
