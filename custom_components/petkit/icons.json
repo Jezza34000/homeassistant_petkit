@@ -339,9 +339,10 @@
       "battery_level": {
         "default": "mdi:battery",
         "state": {
-          "low": "mdi:battery-low",
-          "normal": "mdi:battery-high",
-          "not_in_use": "mdi:battery-unknown"
+          "0": "mdi:battery-off-outline",
+          "100": "mdi:battery-high",
+          "25": "mdi:battery-low",
+          "75": "mdi:battery-medium"
         }
       },
       "battery_power": {
@@ -488,6 +489,14 @@
       },
       "planned_dispensed_hopper_2": {
         "default": "mdi:food-drumstick"
+      },
+      "power_type": {
+        "default": "mdi:power-plug-battery",
+        "state": {
+          "low_battery": "mdi:battery-alert",
+          "main_power": "mdi:power-plug",
+          "on_battery": "mdi:battery"
+        }
       },
       "purification_n60_left_days": {
         "default": "mdi:air-filter"

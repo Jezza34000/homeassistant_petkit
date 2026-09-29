@@ -89,13 +89,6 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             enable_fast_poll=True,
         ),
         PetKitBinarySensorDesc(
-            key="Battery installed",
-            translation_key="battery_installed",
-            entity_category=EntityCategory.DIAGNOSTIC,
-            value=lambda device: device.state.battery_power,
-            ignore_types=[D3],  # D3 had a buit-in battery
-        ),
-        PetKitBinarySensorDesc(
             key="Eating",
             translation_key="eating",
             device_class=BinarySensorDeviceClass.OCCUPANCY,

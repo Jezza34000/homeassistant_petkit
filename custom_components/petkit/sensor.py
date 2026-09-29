@@ -52,13 +52,13 @@ from homeassistant.const import (
 )
 
 from .const import (
-    BATTERY_LEVEL_MAP,
-    BATTERY_LEVEL_OPTIONS,
     DEVICE_STATUS_MAP,
     DEVICE_STATUS_OPTIONS,
     DOMAIN,
     LOGGER,
     NO_ERROR,
+    POWER_MAP,
+    POWER_OPTIONS,
 )
 from .entity import PetKitDescSensorBase, PetkitEntity
 from .utils import (
@@ -188,15 +188,25 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             value=lambda device: device.state.desiccant_left_days,
         ),
         PetKitSensorDesc(
+            key="Power type",
+            translation_key="power_type",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            device_class=SensorDeviceClass.ENUM,
+            options=POWER_OPTIONS,
+            value=lambda device: (
+                POWER_MAP.get(device.state.battery_status, "unknown")
+            ),
+        ),
+        PetKitSensorDesc(
             key="Battery level",
             translation_key="battery_level",
             entity_category=EntityCategory.DIAGNOSTIC,
-            device_class=SensorDeviceClass.ENUM,
-            options=BATTERY_LEVEL_OPTIONS,
+            device_class=SensorDeviceClass.BATTERY,
+            native_unit_of_measurement=PERCENTAGE,
             value=lambda device: (
-                BATTERY_LEVEL_MAP.get(device.state.battery_status, "unknown")
-                if device.state.pim == 2
-                else "not_in_use"
+                device.state.battery_power * 25
+                if device.state.battery_power is not None
+                else None
             ),
         ),
         PetKitSensorDesc(

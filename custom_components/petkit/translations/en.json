@@ -99,9 +99,6 @@
       "spray": {
         "name": "Spray"
       },
-      "battery_installed": {
-        "name": "Battery installed"
-      },
       "camera_status": {
         "name": "Camera status"
       },
@@ -430,11 +427,14 @@
         "name": "Average eating time"
       },
       "battery_level": {
-        "name": "Battery level",
+        "name": "Battery level"
+      },
+      "power_type": {
+        "name": "Power type",
         "state": {
-          "low": "Low",
-          "normal": "Normal",
-          "not_in_use": "Not in use",
+          "main_power": "On A/C",
+          "on_battery": "Battery",
+          "on_battery_low": "Battery (LOW)",
           "unknown": "Unknown"
         }
       },
@@ -454,8 +454,8 @@
         "name": "Device status",
         "state": {
           "offline": "Offline",
-          "online": "Online",
-          "on_battery": "On battery",
+          "online_ac": "Online",
+          "online_battery": "Online (battery)",
           "unknown": "Unknown"
         }
       },
