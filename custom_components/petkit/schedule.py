@@ -158,22 +158,20 @@ def capabilities_for_feeder(feeder: Any) -> dict[str, Any]:
     device_type = feeder_device_type(feeder)
     compartments = 2 if device_type in DUAL_HOPPER_DEVICES else 1
     amount = amount_config_for_feeder(feeder)
-    today_skip = True
     global_toggle = device_type in _GLOBAL_TOGGLE_TYPES
     actions: dict[str, str] = {
         "set": "petkit.set_feeding_schedule",
         "add": "petkit.add_feeding_schedule_entry",
         "edit": "petkit.edit_feeding_schedule_entry",
         "remove": "petkit.remove_feeding_schedule_entry",
+        "skip_today": "petkit.skip_feeding_today",
+        "unskip_today": "petkit.unskip_feeding_today",
     }
-    if today_skip:
-        actions["skip_today"] = "petkit.skip_feeding_today"
-        actions["unskip_today"] = "petkit.unskip_feeding_today"
     caps: dict[str, Any] = {
         "compartments": compartments,
         "amount": amount,
         "weekly": device_type not in _SHAPE_A_TYPES,
-        "today_skip": today_skip,
+        "today_skip": True,
         "global_toggle": global_toggle,
         "labels": {"required": device_type in _LEGACY_EDITOR_TYPES},
         "actions": actions,
@@ -411,7 +409,7 @@ def _fallback_schedule_pairs(feeder: Any) -> list[tuple[int, int]]:
     """Last-resort slots from feedTimes / records (utils), or empty when standalone."""
     try:
         from .utils import resolve_feed_schedule_pairs
-    except (ImportError, ModuleNotFoundError):
+    except ImportError:
         return []
     return resolve_feed_schedule_pairs(feeder)
 
@@ -463,15 +461,10 @@ def feed_daily_list_from_feeder(feeder: Any) -> list[dict[str, Any]]:
     ]
 
 
-def flatten_schedule(feeder: Any) -> list[dict[str, Any]]:
-    """Flatten OEM plan days into OpenPetBowl rows (ISO weekdays)."""
-    dual = is_dual_hopper(feeder)
-    divisor = _amount_divisor(feeder, feeder_device_type(feeder))
-    days = feed_daily_list_from_feeder(feeder)
-    status_by_time = _today_record_status_by_time(feeder)
-    today_iso = datetime.now().isoweekday()
-    plan_enabled = is_feeding_plan_enabled(feeder)
-
+def _group_items_by_key(
+    days: list[dict[str, Any]], dual: bool, divisor: int
+) -> dict[str, dict[str, Any]]:
+    """Merge the per-day copies of each meal into one group with its OEM days."""
     groups: dict[str, dict[str, Any]] = {}
     for day in days:
         oem_days = parse_oem_repeats(day.get("repeats"))
@@ -495,20 +488,38 @@ def flatten_schedule(feeder: Any) -> list[dict[str, Any]]:
                 groups[key] = group
             if not day_suspended:
                 group["suspended"] = False
-            for oem in oem_days:
-                group["oem_days"].add(oem)
+            group["oem_days"].update(oem_days)
+    return groups
+
+
+def _row_status(
+    plan_enabled: bool, suspended: bool, rec: tuple[str, str | None] | None
+) -> tuple[str, str | None]:
+    """Status for a row: disabled, today's record status, or pending."""
+    if not plan_enabled or suspended:
+        return "disabled", None
+    if rec:
+        return rec[0], rec[1]
+    return "pending", None
+
+
+def flatten_schedule(feeder: Any) -> list[dict[str, Any]]:
+    """Flatten OEM plan days into OpenPetBowl rows (ISO weekdays)."""
+    dual = is_dual_hopper(feeder)
+    divisor = _amount_divisor(feeder, feeder_device_type(feeder))
+    days = feed_daily_list_from_feeder(feeder)
+    status_by_time = _today_record_status_by_time(feeder)
+    today_iso = datetime.now().isoweekday()
+    plan_enabled = is_feeding_plan_enabled(feeder)
+    groups = _group_items_by_key(days, dual, divisor)
 
     rows: list[dict[str, Any]] = []
     for group in groups.values():
         iso_days = sorted(oem_weekday_to_iso(o) for o in group["oem_days"])
         time_sec = group["hour"] * 3600 + group["minute"] * 60
-        rec = status_by_time.get(time_sec)
-        if not plan_enabled or group["suspended"]:
-            status, native = "disabled", None
-        elif rec:
-            status, native = rec[0], rec[1]
-        else:
-            status, native = "pending", None
+        status, native = _row_status(
+            plan_enabled, group["suspended"], status_by_time.get(time_sec)
+        )
         # D1/Mini: the card has no per-meal weekday UI, because the app has
         # none either — the mask is one plan-level Repeat control. Rows carry no
         # weekdays, but ``today`` still reports whether the plan runs today, so
@@ -605,7 +616,7 @@ def _item_from_row(
         item["amount1"] = int(values[0]) if len(values) > 0 else 0
         item["amount2"] = int(values[1]) if len(values) > 1 else 0
     else:
-        item["amount"] = _to_wire_amount(values[0], divisor) if values else 0
+        item["amount"] = _to_wire_amount(values[0], divisor) if len(values) > 0 else 0
         item["amount1"] = 0
         item["amount2"] = 0
     return item
@@ -638,15 +649,7 @@ def schedule_to_feed_daily_list(
 
     days = _empty_oem_week()
     if previous:
-        by_oem = {}
-        for day in previous:
-            oem_days = parse_oem_repeats(day.get("repeats"))
-            for oem in oem_days:
-                by_oem[oem] = day
-        for oem in range(1, 8):
-            prev_day = by_oem.get(oem)
-            if prev_day is not None:
-                days[oem - 1]["suspended"] = _coerce_int(prev_day.get("suspended"), 0)
+        _carry_suspended(days, previous)
 
     for row in schedule:
         iso_days = row.get("weekdays") or [1, 2, 3, 4, 5, 6, 7]
@@ -658,23 +661,40 @@ def schedule_to_feed_daily_list(
             day = days[oem - 1]
             day["items"].append(dict(item))
     for day in days:
-        day["items"].sort(key=lambda it: it.get("time") or 0)
-        day["count"] = len(day["items"])
-        if dual:
-            day["totalAmount"] = 0
-            day["totalAmount1"] = sum(
-                _coerce_int(it.get("amount1"), 0) for it in day["items"]
-            )
-            day["totalAmount2"] = sum(
-                _coerce_int(it.get("amount2"), 0) for it in day["items"]
-            )
-        else:
-            day["totalAmount"] = sum(
-                _coerce_int(it.get("amount"), 0) for it in day["items"]
-            )
-            day["totalAmount1"] = 0
-            day["totalAmount2"] = 0
+        _finalize_day(day, dual)
     return days
+
+
+def _carry_suspended(
+    days: list[dict[str, Any]], previous: list[dict[str, Any]]
+) -> None:
+    """Copy each weekday's suspended flag from the previous plan."""
+    by_oem = {}
+    for day in previous:
+        for oem in parse_oem_repeats(day.get("repeats")):
+            by_oem[oem] = day
+    for oem, prev_day in by_oem.items():
+        if 1 <= oem <= 7:
+            days[oem - 1]["suspended"] = _coerce_int(prev_day.get("suspended"), 0)
+
+
+def _finalize_day(day: dict[str, Any], dual: bool) -> None:
+    """Sort a day's items and recompute its count and totals."""
+    items = day["items"]
+    items.sort(key=lambda it: it.get("time") or 0)
+    day["count"] = len(items)
+
+    def total(field: str) -> int:
+        return sum(_coerce_int(it.get(field), 0) for it in items)
+
+    if dual:
+        day["totalAmount"] = 0
+        day["totalAmount1"] = total("amount1")
+        day["totalAmount2"] = total("amount2")
+    else:
+        day["totalAmount"] = total("amount")
+        day["totalAmount1"] = 0
+        day["totalAmount2"] = 0
 
 
 def _next_mini_id(days: list[dict[str, Any]]) -> int:
@@ -686,6 +706,21 @@ def _next_mini_id(days: list[dict[str, Any]]) -> int:
             except (TypeError, ValueError):
                 continue
     return max(max_id + 1, _MINI_PLAN_ITEM_ID_START)
+
+
+def _existing_times(
+    days: list[dict[str, Any]], oem_want: set[int], skip_key: str | None
+) -> list[int]:
+    """Times of meals on any of ``oem_want`` days, minus the one being edited."""
+    times: list[int] = []
+    for day in days:
+        if not set(parse_oem_repeats(day.get("repeats"))).intersection(oem_want):
+            continue
+        for item in day.get("items") or []:
+            if skip_key is not None and _item_key(item) == str(skip_key):
+                continue
+            times.append(_coerce_int(item.get("time"), 0))
+    return times
 
 
 def validate_row(
@@ -708,15 +743,7 @@ def validate_row(
     time_sec = hour * 3600 + minute * 60
     iso_days = weekdays or [1, 2, 3, 4, 5, 6, 7]
     oem_want = {iso_weekday_to_oem(i) for i in iso_days}
-    existing_times: list[int] = []
-    for day in days:
-        oem_days = set(parse_oem_repeats(day.get("repeats")))
-        if not oem_days.intersection(oem_want):
-            continue
-        for item in day.get("items") or []:
-            if skip_key is not None and _item_key(item) == str(skip_key):
-                continue
-            existing_times.append(_coerce_int(item.get("time"), 0))
+    existing_times = _existing_times(days, oem_want, skip_key)
     if time_sec in existing_times:
         raise ValueError("duplicate hour+minute on the same weekday set")
     # The app applies the 5-minute gap check ungated in the editor that serves
@@ -846,31 +873,50 @@ def edit_schedule_entry(
     )
     oem_want = {iso_weekday_to_oem(i) for i in iso_days}
     if is_shape_a(feeder):
-        existing_items, existing_oem, suspended = _shape_a_items_and_mask(days)
-        kept = [it for it in existing_items if _item_key(it) != str(key)]
-        if len(kept) == len(existing_items):
-            raise ValueError(f"schedule key {key!r} not found")
-        kept.append(dict(new_item))
-        mask = existing_oem if weekdays is None else oem_want
-        if not mask:
-            mask = oem_want
-        return _expand_shape_a_days(kept, mask, suspended)
+        return _edit_shape_a(
+            days, str(key), new_item, oem_want, keep_mask=weekdays is None
+        )
     found = False
     for day in days:
-        kept_day: list[dict[str, Any]] = []
-        for item in day.get("items") or []:
-            if _item_key(item) == str(key):
-                found = True
-                continue
-            kept_day.append(item)
-        day["items"] = kept_day
-        oem = parse_oem_repeats(day.get("repeats"))
-        if oem and oem[0] in oem_want:
-            day["items"].append(dict(new_item))
-        day["count"] = len(day["items"])
+        found = _replace_in_day(day, str(key), new_item, oem_want) or found
     if not found:
         raise ValueError(f"schedule key {key!r} not found")
     return days
+
+
+def _edit_shape_a(
+    days: list[dict[str, Any]],
+    key: str,
+    new_item: dict[str, Any],
+    oem_want: set[int],
+    *,
+    keep_mask: bool,
+) -> list[dict[str, Any]]:
+    """Swap ``key`` for ``new_item`` in a D1/Mini plan and re-expand the week."""
+    existing_items, existing_oem, suspended = _shape_a_items_and_mask(days)
+    kept = [it for it in existing_items if _item_key(it) != key]
+    if len(kept) == len(existing_items):
+        raise ValueError(f"schedule key {key!r} not found")
+    kept.append(dict(new_item))
+    mask = (existing_oem if keep_mask else oem_want) or oem_want
+    return _expand_shape_a_days(kept, mask, suspended)
+
+
+def _replace_in_day(
+    day: dict[str, Any], key: str, new_item: dict[str, Any], oem_want: set[int]
+) -> bool:
+    """Drop ``key`` from the day, re-add ``new_item`` if the day is wanted.
+
+    Returns whether ``key`` was present.
+    """
+    items = day.get("items") or []
+    kept = [it for it in items if _item_key(it) != key]
+    oem = parse_oem_repeats(day.get("repeats"))
+    if oem and oem[0] in oem_want:
+        kept.append(dict(new_item))
+    day["items"] = kept
+    day["count"] = len(kept)
+    return any(_item_key(it) == key for it in items)
 
 
 def remove_schedule_entry(feeder: Any, key: str) -> list[dict[str, Any]]:
