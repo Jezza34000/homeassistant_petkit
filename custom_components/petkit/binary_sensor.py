@@ -62,11 +62,6 @@ def get_pump_running_status(device):
 
 COMMON_ENTITIES = [
     PetKitBinarySensorDesc(
-        key="Camera status",
-        translation_key="camera_status",
-        value=lambda device: device.state.camera_status,
-    ),
-    PetKitBinarySensorDesc(
         key="Care plus subscription",
         translation_key="care_plus_subscription",
         entity_category=EntityCategory.DIAGNOSTIC,
