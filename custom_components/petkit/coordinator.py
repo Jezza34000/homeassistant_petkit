@@ -40,6 +40,7 @@ from .const import (
     CONF_MEDIA_DL_VIDEO,
     CONF_MEDIA_EV_TYPE,
     CONF_MEDIA_PATH,
+    COORDINATOR_REFRESH_TIMEOUT,
     DEFAULT_BLUETOOTH_RELAY,
     DEFAULT_DELETE_AFTER,
     DEFAULT_DL_IMAGE,
@@ -110,10 +111,15 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
         self,
     ) -> dict[int, Feeder | Litter | WaterFountain | Purifier | Pet]:
         """Update data via library."""
-        await self._update_smart_polling()
-
         try:
-            await self.config_entry.runtime_data.client.get_devices_data()
+            # The timeout is what makes a stalled refresh VISIBLE. Without it a
+            # request that never returns raises nothing, so last_update_success
+            # keeps its previous True, entities keep their last values and the
+            # config entry stays state=loaded / reason=None - the integration
+            # reports healthy while it has silently stopped updating.
+            async with asyncio.timeout(COORDINATOR_REFRESH_TIMEOUT):
+                await self._update_smart_polling()
+                await self.config_entry.runtime_data.client.get_devices_data()
         except (
             PetkitSessionExpiredError,
             PetkitSessionError,
@@ -121,6 +127,11 @@ class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
             PetkitRegionalServerNotFoundError,
         ) as exception:
             raise ConfigEntryAuthFailed(exception) from exception
+        except TimeoutError as exception:
+            raise UpdateFailed(
+                f"Timeout of {COORDINATOR_REFRESH_TIMEOUT}s exceeded while refreshing "
+                "PetKit data; the previous refresh never completed"
+            ) from exception
         except PypetkitError as exception:
             raise UpdateFailed(exception) from exception
         else:

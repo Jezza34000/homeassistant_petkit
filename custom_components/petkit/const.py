@@ -91,6 +91,16 @@ MEDIA_ROOT = "/media/local"
 SCAN_INTERVAL_FAST = 5
 SCAN_INTERVAL_SLOW = 190
 
+# Hard ceiling on a single coordinator refresh, in seconds.
+#
+# Chosen so it cannot fire on a merely slow-but-healthy poll: a healthy refresh has
+# to finish inside DEFAULT_SCAN_INTERVAL (60s) for polling to keep up at all, and
+# Home Assistant already warns when a refresh overruns its update interval. 120s is
+# twice that, so reaching it means something pathological rather than slow. It also
+# sits below SCAN_INTERVAL_SLOW (190s), so even in the slowest polling mode a stalled
+# refresh surfaces before the next scheduled one and at most one interval is lost.
+COORDINATOR_REFRESH_TIMEOUT = 120
+
 # Messages constants
 NO_ERROR = "No error"
 
