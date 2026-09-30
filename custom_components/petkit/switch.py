@@ -329,7 +329,7 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
         PetKitSwitchDesc(
             key="Move notif",
             translation_key="move_notif",
-            value=lambda device: device.settings.move_detection,
+            value=lambda device: device.settings.move_notify,
             entity_category=EntityCategory.CONFIG,
             turn_on=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"moveNotify": 1}
@@ -907,7 +907,7 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
         PetKitSwitchDesc(
             key="Pet notify",
             translation_key="pet_notify",
-            value=lambda device: device.settings.pet_in_notify,
+            value=lambda device: device.settings.pet_notify,
             entity_category=EntityCategory.CONFIG,
             turn_on=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"petNotify": 1}
@@ -917,21 +917,9 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             ),
         ),
         PetKitSwitchDesc(
-            key="Drink detection",
-            translation_key="drink_detection",
-            value=lambda device: device.settings.pet_in_notify,
-            entity_category=EntityCategory.CONFIG,
-            turn_on=lambda api, device: api.send_api_request(
-                device.id, DeviceCommand.UPDATE_SETTING, {"drinkDetection": 1}
-            ),
-            turn_off=lambda api, device: api.send_api_request(
-                device.id, DeviceCommand.UPDATE_SETTING, {"drinkDetection": 0}
-            ),
-        ),
-        PetKitSwitchDesc(
             key="Flush notify",
             translation_key="flush_notify",
-            value=lambda device: device.settings.pet_in_notify,
+            value=lambda device: device.settings.flush_notify,
             entity_category=EntityCategory.CONFIG,
             turn_on=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"flushNotify": 1}
@@ -943,7 +931,7 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
         PetKitSwitchDesc(
             key="Water change notify",
             translation_key="water_change_notify",
-            value=lambda device: device.settings.pet_in_notify,
+            value=lambda device: device.settings.water_change_notify,
             entity_category=EntityCategory.CONFIG,
             turn_on=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"waterChangeNotify": 1}
