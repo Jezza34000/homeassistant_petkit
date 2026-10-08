@@ -414,6 +414,9 @@
       "last_connection": {
         "default": "mdi:bluetooth"
       },
+      "last_drink_pet": {
+        "default": "mdi:paw"
+      },
       "last_eat_event": {
         "default": "mdi:calendar-star"
       },
@@ -508,6 +511,9 @@
         "default": "mdi:hydraulic-oil-level"
       },
       "raw_distribution_data": {
+        "default": "mdi:format-list-bulleted-type"
+      },
+      "raw_drink_data": {
         "default": "mdi:format-list-bulleted-type"
       },
       "rssi": {
