@@ -1,8 +1,10 @@
 """Util functions for the Petkit integration."""
 
 from datetime import datetime
+from typing import Any
 
-from pypetkitapi import LitterRecord, RecordsItems, WorkState
+from pypetkitapi import FOUNTAIN_WITH_CAMERA, LitterRecord, RecordsItems, WorkState
+from pypetkitapi.water_fountain_container import WaterFountainRecord
 
 from .const import EVENT_MAPPING, LOGGER
 
@@ -296,6 +298,112 @@ def map_litter_event(litter_event: list[LitterRecord | None]) -> str | None:
     except KeyError:
         LOGGER.debug("Unknown event type result: %s", event_type)
         return f"event_type_{event_type}_unknown"
+
+
+DRINK_EVENT = "drink_over"
+
+
+def _is_camera_fountain(fountain) -> bool:
+    """Return True for fountains that report typed, per-pet event records."""
+    device_type = getattr(getattr(fountain, "device_nfo", None), "device_type", None)
+    return bool(device_type) and device_type.lower() in FOUNTAIN_WITH_CAMERA
+
+
+def _get_fountain_records(fountain) -> list[WaterFountainRecord] | None:
+    """Return the fountain records as a list, or None if they were never fetched.
+
+    When the API has no record to return, the response is not unwrapped into a
+    list and ends up as a single empty WaterFountainRecord. That case means
+    "no events", not "unsupported", so it is normalised to an empty list.
+    """
+    records = getattr(fountain, "device_records", None)
+    if isinstance(records, list):
+        return [record for record in records if record is not None]
+    if isinstance(records, WaterFountainRecord):
+        return [records] if records.enum_event_type else []
+    return None
+
+
+def get_drink_events(fountain) -> list[WaterFountainRecord] | None:
+    """Return the drink events of a camera fountain, newest first.
+
+    Records also hold other event types (e.g. `add_water_over` refills), which
+    are filtered out here.
+    """
+    records = _get_fountain_records(fountain)
+    if records is None:
+        return None
+    return sorted(
+        (record for record in records if record.enum_event_type == DRINK_EVENT),
+        key=lambda record: record.timestamp or 0,
+        reverse=True,
+    )
+
+
+def count_drink_events(fountain) -> int | None:
+    """Return the number of drink events held in the fountain records.
+
+    Returns 0 (not None) when the records are empty, so the entity is not
+    dropped by `is_supported()` when no pet has drunk yet.
+    """
+    if not _is_camera_fountain(fountain):
+        # Other fountains report untyped work records: keep counting them all.
+        records = getattr(fountain, "device_records", None)
+        return len(records) if isinstance(records, list) else None
+
+    events = get_drink_events(fountain)
+    return None if events is None else len(events)
+
+
+def get_raw_drink_data(fountain) -> dict[str, Any] | None:
+    """Get the drink events of a camera fountain, with the pet who drank.
+
+    Returns a dict suitable for extra_state_attributes. Only the fields needed
+    to build a per-pet history are exposed: `aes_key`, `user_id` and the signed
+    `preview` / `media_api` URLs are deliberately left out of the state machine.
+    """
+    events = get_drink_events(fountain)
+    if events is None:
+        return None
+
+    return {
+        "device_id": fountain.id,
+        "count": len(events),
+        "events": [
+            {
+                "timestamp": event.timestamp,
+                "pet_id": event.pet_id,
+                "pet_name": event.pet_name,
+                "event_id": event.event_id,
+            }
+            for event in events
+        ],
+    }
+
+
+def get_last_drink_pet(fountain) -> str | None:
+    """Return the name of the pet who drank last.
+
+    Returns "Unknown" when the fountain could not identify the pet, and None
+    when there is no drink event in the records.
+    """
+    events = get_drink_events(fountain)
+    if not events:
+        return None
+    return events[0].pet_name or "Unknown"
+
+
+def get_last_drink_attributes(fountain) -> dict[str, Any] | None:
+    """Return the details of the last drink event."""
+    events = get_drink_events(fountain)
+    if not events:
+        return None
+    last = events[0]
+    return {
+        "timestamp": last.timestamp,
+        "pet_id": last.pet_id,
+        "event_id": last.event_id,
+    }
 
 
 def get_dispense_status(

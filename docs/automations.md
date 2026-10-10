@@ -192,3 +192,53 @@ trigger-template snapshot, which only fires at 23:55 each day. So the
 median stays `unknown` until at least one snapshot has been recorded
 (i.e., the day after you install the package). Low/high alerts won't
 fire while the median is `unknown`.
+
+---
+
+## Per-pet drinking (camera fountains)
+
+Fountains with a camera (Eversweet Ultra AI) identify which pet is drinking.
+Two sensors expose that:
+
+| Entity                                | State                                 | Attributes                                                                                    |
+| ------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `sensor.<fountain>_last_pet_to_drink` | Name of the pet who drank last.       | `timestamp`, `pet_id`, `event_id` of that drink.                                              |
+| `sensor.<fountain>_raw_drink_data`    | Number of drink events in the record. | `events`: one `timestamp` / `pet_id` / `pet_name` / `event_id` entry per drink, newest first. |
+
+The state of _Last pet to drink_ is `Unknown` when the fountain could not
+identify the pet. Refills are not counted as drinks.
+
+PetKit only keeps these records for a limited time (longer with Care+), so
+the `events` list is a rolling window, and it is not stored by the recorder.
+
+### Refill after a specific pet drank
+
+The pet name does not change when the same pet drinks twice in a row, so
+trigger on the `timestamp` attribute and check the name in a condition:
+
+```yaml
+triggers:
+  - trigger: state
+    entity_id: sensor.fountain_last_pet_to_drink
+    attribute: timestamp
+conditions:
+  - condition: state
+    entity_id: sensor.fountain_last_pet_to_drink
+    state: "Rex"
+actions:
+  - action: button.press
+    target:
+      entity_id: button.fountain_refill
+```
+
+### Drinks per pet
+
+```yaml
+template:
+  - sensor:
+      - name: "Moon drinks"
+        state: >
+          {{ state_attr('sensor.fountain_raw_drink_data', 'events')
+             | default([], true)
+             | selectattr('pet_name', 'eq', 'Moon') | list | count }}
+```
