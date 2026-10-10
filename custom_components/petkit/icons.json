@@ -707,6 +707,13 @@
           "on": "mdi:bell-check"
         }
       },
+      "feeding_schedule": {
+        "default": "mdi:calendar-clock",
+        "state": {
+          "off": "mdi:calendar-remove",
+          "on": "mdi:calendar-clock"
+        }
+      },
       "heater_switch": {
         "default": "mdi:water-boiler-off",
         "state": {

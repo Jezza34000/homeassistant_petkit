@@ -928,6 +928,9 @@
       },
       "ai_yowling": {
         "name": "AI Yowling detection"
+      },
+      "feeding_schedule": {
+        "name": "Feeding schedule"
       }
     },
     "light": {
