@@ -716,9 +716,6 @@
       },
       "pet_meals_today": {
         "name": "Meals today"
-      },
-      "feeding_plan": {
-        "name": "Feeding plan"
       }
     },
     "switch": {
@@ -889,9 +886,6 @@
       },
       "shortage_alarm": {
         "name": "Shortage alarm"
-      },
-      "feeding_plan": {
-        "name": "Feeding plan"
       },
       "surplus_control": {
         "name": "Surplus control"

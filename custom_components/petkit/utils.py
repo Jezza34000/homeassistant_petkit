@@ -24,6 +24,7 @@ def find_scheduled_feed(feeder, day: int, seconds: int) -> RecordsItems | None:
                 return item
     return None
 
+
 def _int_time_key(raw: Any) -> int | None:
     try:
         return int(raw)

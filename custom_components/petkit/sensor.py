@@ -60,7 +60,6 @@ from .const import (
     POWER_OPTIONS,
 )
 from .entity import PetKitDescSensorBase, PetkitEntity
-from .schedule import get_openpetbowl_attributes, is_feeding_plan_enabled
 from .utils import (
     get_raw_feed_plan_from_schedule,
     get_raw_schedule,
@@ -173,14 +172,6 @@ COMMON_ENTITIES = [
 SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
     Feeder: [
         *COMMON_ENTITIES,
-        PetKitSensorDesc(
-            key="Feeding plan",
-            translation_key="feeding_plan",
-            value=lambda device: "on" if is_feeding_plan_enabled(device) else "off",
-            attributes=get_openpetbowl_attributes,
-            force_add=[D4S, D4H, D4SH],
-            only_for_types=[D4S, D4H, D4SH],
-        ),
         PetKitSensorDesc(
             key="Desiccant left days",
             translation_key="desiccant_left_days",

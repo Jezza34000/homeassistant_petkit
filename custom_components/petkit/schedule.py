@@ -164,8 +164,8 @@ def capabilities_for_feeder(feeder: Any) -> dict[str, Any]:
         "add": "petkit.add_feeding_schedule_entry",
         "edit": "petkit.edit_feeding_schedule_entry",
         "remove": "petkit.remove_feeding_schedule_entry",
-        "skip_today": "petkit.skip_feeding_today",
-        "unskip_today": "petkit.unskip_feeding_today",
+        "skip_today": "petkit.skip_scheduled_feed",
+        "unskip_today": "petkit.restore_scheduled_feed",
     }
     caps: dict[str, Any] = {
         "compartments": compartments,
@@ -941,16 +941,3 @@ def remove_schedule_entry(feeder: Any, key: str) -> list[dict[str, Any]]:
     if not found:
         raise ValueError(f"schedule key {key!r} not found")
     return days
-
-
-def daily_record_id_for_key(feeder: Any, key: str) -> str | None:
-    """Today's daily-feed id for skip/unskip, matched by schedule key time."""
-    rows = flatten_schedule(feeder)
-    match = next((r for r in rows if r["key"] == str(key)), None)
-    if match is None:
-        return None
-    time_sec = match["hour"] * 3600 + match["minute"] * 60
-    rec = _today_record_status_by_time(feeder).get(time_sec)
-    if rec is None:
-        return None
-    return rec[2]

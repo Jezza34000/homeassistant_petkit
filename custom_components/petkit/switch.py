@@ -52,12 +52,14 @@ def feeding_plan_active(device: Feeder) -> int | None:
 
     The app toggles the whole plan with suspendFeed/restoreFeed, which sets
     `suspended` on every day of it. None when the feeder reports no plan, so
-    the switch is not created for a feeder without one.
+    the switch is not created for a feeder without one. Feeder and Feeder Mini
+    carry no multi_feed_item; their plan comes from GET {prefix}/feed.
     """
     multi = device.multi_feed_item
-    if multi is None or not multi.feed_daily_list:
+    has_days = multi is not None and bool(multi.feed_daily_list)
+    if getattr(device, "feed_plan", None) is None and not has_days:
         return None
-    return int(any(day.suspended != 1 for day in multi.feed_daily_list))
+    return int(is_feeding_plan_enabled(device))
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -238,20 +240,6 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
     Feeder: [
         *COMMON_ENTITIES,
         PetKitSwitchDesc(
-            key="Feeding plan",
-            translation_key="feeding_plan",
-            value=is_feeding_plan_enabled,
-            attributes=get_openpetbowl_attributes,
-            turn_on=lambda api, device: api.send_api_request(
-                device.id, FeederCommand.RESTORE_FEED
-            ),
-            turn_off=lambda api, device: api.send_api_request(
-                device.id, FeederCommand.SUSPEND_FEED
-            ),
-            force_add=[FEEDER, FEEDER_MINI, D3, D4],
-            only_for_types=[FEEDER, FEEDER_MINI, D3, D4],
-        ),
-        PetKitSwitchDesc(
             key="Shortage alarm",
             translation_key="shortage_alarm",
             value=lambda device: device.settings.food_warn,
@@ -429,14 +417,16 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             key="Feeding schedule",
             translation_key="feeding_schedule",
             value=feeding_plan_active,
+            attributes=get_openpetbowl_attributes,
             turn_on=lambda api, device: api.send_api_request(
                 device.id, FeederCommand.RESTORE_FEED
             ),
             turn_off=lambda api, device: api.send_api_request(
                 device.id, FeederCommand.SUSPEND_FEED
             ),
-            # Feeder Mini has no suspendFeed/restoreFeed endpoint in the app
-            only_for_types=[FEEDER, D3, D4, D4S, D4H, D4SH],
+            # Feeder and Feeder Mini send suspend_feed/restore_feed, the
+            # snake_case pair pypetkitapi picks for them
+            only_for_types=[FEEDER, FEEDER_MINI, D3, D4, D4S, D4H, D4SH],
         ),
     ],
     Litter: [

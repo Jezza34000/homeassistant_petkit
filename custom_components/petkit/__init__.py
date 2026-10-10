@@ -6,7 +6,18 @@ from datetime import datetime, time as dt_time, timedelta
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
 
-from pypetkitapi import D3, D4, D4H, D4S, D4SH, Feeder, PetKitClient, PypetkitError
+from pypetkitapi import (
+    D3,
+    D4,
+    D4H,
+    D4S,
+    D4SH,
+    FEEDER,
+    FEEDER_MINI,
+    Feeder,
+    PetKitClient,
+    PypetkitError,
+)
 from pypetkitapi.command import FeederCommand
 import voluptuous as vol
 
@@ -70,7 +81,6 @@ from .iot_mqtt import PetkitIotMqttListener
 from .notifications import PetkitNotificationManager
 from .schedule import (
     add_schedule_entry,
-    daily_record_id_for_key,
     edit_schedule_entry,
     feed_daily_list_from_feeder,
     remove_schedule_entry,
@@ -109,10 +119,10 @@ SERVICE_SET_FEEDING_SCHEDULE = "set_feeding_schedule"
 SERVICE_SKIP_SCHEDULED_FEED = "skip_scheduled_feed"
 SERVICE_RESTORE_SCHEDULED_FEED = "restore_scheduled_feed"
 
-# Types whose app client calls <type>/removeDailyFeed and restoreDailyFeed.
-# Feeder and Feeder Mini use remove_dailyfeed/restore_dailyfeed instead,
-# which pypetkitapi does not send yet.
-DAILY_FEED_TYPES = (D3, D4, D4S, D4H, D4SH)
+# Types whose app client can skip/restore a planned meal for today. D3 and up
+# call <type>/removeDailyFeed and restoreDailyFeed; Feeder and Feeder Mini call
+# remove_dailyfeed/restore_dailyfeed, which pypetkitapi picks for them.
+DAILY_FEED_TYPES = (FEEDER, FEEDER_MINI, D3, D4, D4S, D4H, D4SH)
 
 
 def _time_to_seconds(value: int | str | dt_time) -> int:
@@ -122,21 +132,27 @@ def _time_to_seconds(value: int | str | dt_time) -> int:
     return int(value)
 
 
-SERVICE_SCHEDULED_FEED_SCHEMA = vol.Schema(
-    {
-        vol.Required("device_id"): vol.Coerce(int),
-        vol.Required("time"): vol.All(
-            vol.Any(cv.time, vol.All(vol.Coerce(int), vol.Range(min=0, max=86399))),
-            _time_to_seconds,
-        ),
-    }
+SERVICE_SCHEDULED_FEED_SCHEMA = vol.All(
+    vol.Schema(
+        {
+            vol.Required("device_id"): vol.Coerce(int),
+            vol.Exclusive("time", "slot"): vol.All(
+                vol.Any(cv.time, vol.All(vol.Coerce(int), vol.Range(min=0, max=86399))),
+                _time_to_seconds,
+            ),
+            # The OpenPetBowl row key, which is the time in seconds. The card
+            # sends this rather than a time.
+            vol.Exclusive("key", "slot"): vol.All(
+                vol.Coerce(int), vol.Range(min=0, max=86399)
+            ),
+        }
+    ),
+    cv.has_at_least_one_key("time", "key"),
 )
 
 SERVICE_ADD_FEEDING_SCHEDULE_ENTRY = "add_feeding_schedule_entry"
 SERVICE_EDIT_FEEDING_SCHEDULE_ENTRY = "edit_feeding_schedule_entry"
 SERVICE_REMOVE_FEEDING_SCHEDULE_ENTRY = "remove_feeding_schedule_entry"
-SERVICE_SKIP_FEEDING_TODAY = "skip_feeding_today"
-SERVICE_UNSKIP_FEEDING_TODAY = "unskip_feeding_today"
 SERVICE_SET_FEEDING_PLAN_WEEKDAYS = "set_feeding_plan_weekdays"
 
 FEED_ITEM_SCHEMA = vol.Schema(
@@ -197,13 +213,6 @@ SERVICE_EDIT_ENTRY_SCHEMA = SERVICE_ADD_ENTRY_SCHEMA.extend(
 )
 
 SERVICE_REMOVE_ENTRY_SCHEMA = vol.Schema(
-    {
-        vol.Required("device_id"): vol.Coerce(int),
-        vol.Required("key"): cv.string,
-    }
-)
-
-SERVICE_SKIP_TODAY_SCHEMA = vol.Schema(
     {
         vol.Required("device_id"): vol.Coerce(int),
         vol.Required("key"): cv.string,
@@ -298,7 +307,7 @@ async def _async_handle_scheduled_feed(
 ) -> None:
     """Skip or restore one of today's feeding-plan entries."""
     device_id = call.data["device_id"]
-    seconds = call.data["time"]
+    seconds = call.data["time"] if "time" in call.data else call.data["key"]
     at = f"{seconds // 3600:02d}:{seconds % 3600 // 60:02d}"
 
     for entry in hass.config_entries.async_entries(DOMAIN):
@@ -339,6 +348,7 @@ async def _async_handle_scheduled_feed(
     except PypetkitError as err:
         raise HomeAssistantError(f"PetKit refused the request: {err}") from err
     await runtime.coordinator.async_request_refresh()
+
 
 async def _async_handle_set_feeding_schedule(
     hass: HomeAssistant, call: ServiceCall
@@ -394,23 +404,6 @@ async def _async_handle_remove_entry(hass: HomeAssistant, call: ServiceCall) -> 
     client, feeder = _find_feeder_client(hass, device_id)
     days = remove_schedule_entry(feeder, call.data["key"])
     await _save_feed_days(client, device_id, days)
-
-
-async def _async_handle_skip_today(
-    hass: HomeAssistant, call: ServiceCall, *, restore: bool
-) -> None:
-    """Skip or restore today's occurrence of a plan row."""
-    device_id = call.data["device_id"]
-    client, feeder = _find_feeder_client(hass, device_id)
-    feed_id = daily_record_id_for_key(feeder, call.data["key"])
-    if not feed_id:
-        raise ValueError(
-            "No today's meal id for that schedule key; wait for the daily feed list."
-        )
-    action = (
-        FeederCommand.RESTORE_DAILY_FEED if restore else FeederCommand.REMOVE_DAILY_FEED
-    )
-    await client.send_api_request(device_id, action, {"feed_id": feed_id})
 
 
 async def _async_handle_set_plan_weekdays(
@@ -564,12 +557,6 @@ async def async_setup_entry(
         async def handle_remove_entry(call: ServiceCall) -> None:
             await _async_handle_remove_entry(hass, call)
 
-        async def handle_skip_today(call: ServiceCall) -> None:
-            await _async_handle_skip_today(hass, call, restore=False)
-
-        async def handle_unskip_today(call: ServiceCall) -> None:
-            await _async_handle_skip_today(hass, call, restore=True)
-
         async def handle_set_plan_weekdays(call: ServiceCall) -> None:
             await _async_handle_set_plan_weekdays(hass, call)
 
@@ -602,18 +589,6 @@ async def async_setup_entry(
             SERVICE_SET_FEEDING_PLAN_WEEKDAYS,
             handle_set_plan_weekdays,
             schema=SERVICE_SET_PLAN_WEEKDAYS_SCHEMA,
-        )
-        hass.services.async_register(
-            DOMAIN,
-            SERVICE_SKIP_FEEDING_TODAY,
-            handle_skip_today,
-            schema=SERVICE_SKIP_TODAY_SCHEMA,
-        )
-        hass.services.async_register(
-            DOMAIN,
-            SERVICE_UNSKIP_FEEDING_TODAY,
-            handle_unskip_today,
-            schema=SERVICE_SKIP_TODAY_SCHEMA,
         )
 
     if not hass.services.has_service(DOMAIN, SERVICE_SKIP_SCHEDULED_FEED):
