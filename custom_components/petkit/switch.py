@@ -9,13 +9,17 @@ from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
 from pypetkitapi import (
+    D3,
+    D4,
     DEVICES_LITTER_BOX,
+    FEEDER,
     FEEDER_MINI,
     LITTER_WITH_CAMERA,
     T7,
     DeviceAction,
     DeviceCommand,
     Feeder,
+    FeederCommand,
     Litter,
     Pet,
     Purifier,
@@ -28,6 +32,7 @@ from homeassistant.const import EntityCategory
 
 from .const import LOGGER, POWER_ONLINE_STATE, SCAN_INTERVAL_FAST
 from .entity import PetKitDescSensorBase, PetkitEntity
+from .schedule import get_openpetbowl_attributes, is_feeding_plan_enabled
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -214,6 +219,20 @@ COMMON_ENTITIES = [
 SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
     Feeder: [
         *COMMON_ENTITIES,
+        PetKitSwitchDesc(
+            key="Feeding plan",
+            translation_key="feeding_plan",
+            value=is_feeding_plan_enabled,
+            attributes=get_openpetbowl_attributes,
+            turn_on=lambda api, device: api.send_api_request(
+                device.id, FeederCommand.RESTORE_FEED
+            ),
+            turn_off=lambda api, device: api.send_api_request(
+                device.id, FeederCommand.SUSPEND_FEED
+            ),
+            force_add=[FEEDER, FEEDER_MINI, D3, D4],
+            only_for_types=[FEEDER, FEEDER_MINI, D3, D4],
+        ),
         PetKitSwitchDesc(
             key="Shortage alarm",
             translation_key="shortage_alarm",
@@ -1064,6 +1083,15 @@ class PetkitSwitch(PetkitEntity, SwitchEntity):
         updated_device = self.coordinator.data.get(self.device.id)
         if updated_device and self.entity_description.value:
             return bool(self.entity_description.value(updated_device))
+        return None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """Return extra state attributes."""
+        if self.entity_description.attributes:
+            updated_device = self.coordinator.data.get(self.device.id)
+            if updated_device:
+                return self.entity_description.attributes(updated_device)
         return None
 
     async def async_turn_on(self, **_: Any) -> None:

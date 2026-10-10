@@ -13,7 +13,6 @@ from pypetkitapi import (
     D4S,
     D4SH,
     DEVICES_LITTER_BOX,
-    FEEDER_WITH_CAMERA,
     K2,
     K3,
     LITTER_WITH_CAMERA,
@@ -61,6 +60,7 @@ from .const import (
     POWER_OPTIONS,
 )
 from .entity import PetKitDescSensorBase, PetkitEntity
+from .schedule import get_openpetbowl_attributes, is_feeding_plan_enabled
 from .utils import (
     get_raw_feed_plan_from_schedule,
     get_raw_schedule,
@@ -168,18 +168,19 @@ COMMON_ENTITIES = [
             ).days,
         ),
     ),
-    PetKitSensorDesc(
-        key="Device ID",
-        translation_key="device_id",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        value=lambda device: device.device_nfo.device_id,
-        only_for_types=[*LITTER_WITH_CAMERA, *FEEDER_WITH_CAMERA],
-    ),
 ]
 
 SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
     Feeder: [
         *COMMON_ENTITIES,
+        PetKitSensorDesc(
+            key="Feeding plan",
+            translation_key="feeding_plan",
+            value=lambda device: "on" if is_feeding_plan_enabled(device) else "off",
+            attributes=get_openpetbowl_attributes,
+            force_add=[D4S, D4H, D4SH],
+            only_for_types=[D4S, D4H, D4SH],
+        ),
         PetKitSensorDesc(
             key="Desiccant left days",
             translation_key="desiccant_left_days",
