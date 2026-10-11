@@ -2,12 +2,16 @@
 
 Cloud ``repeats`` stay 1=Sunday inside OEM helpers. ISO 1=Monday…7=Sunday is the
 entity/card contract.
+
+PetKit stores feeding plans in two shapes. "Shape A" (Fresh Element D1 and
+Fresh Element Mini) is one weekly plan: a single meal list, a shared weekday
+mask and a whole-plan ``suspended`` flag. "Shape B" (D3, D4, D4S, D4H, D4SH) is
+seven per-day entries, each with its own meals and ``suspended`` flag.
 """
 
 from __future__ import annotations
 
-from datetime import datetime
-from itertools import pairwise
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 D4S = "d4s"
@@ -19,17 +23,17 @@ FEEDER = "feeder"
 FEEDER_MINI = "feedermini"
 DUAL_HOPPER_DEVICES = (D4S, D4SH)
 
-# D1/D2 client-generated meal ids (wiki D2_PLAN_ITEM_ID).
+# D1/Mini meal ids are allocated by the client from a local counter that
+# starts here; the cloud does not issue them.
 _MINI_PLAN_ITEM_ID_START = 100001
-_D2_MIN_GAP_SECS = 300
+# Every meal editor in the app keeps meals at least five minutes apart.
+_MIN_GAP_SECS = 300
 
 _SHAPE_A_TYPES = {FEEDER, FEEDER_MINI}
-# App editors call suspendFeed/restoreFeed only for types 4/6/9/11. D4s/D4sh/D4h
-# pause per day via the feedDailyList ``suspended`` flag instead.
-_GLOBAL_TOGGLE_TYPES = {FEEDER, FEEDER_MINI, D3, D4}
-# The app's plan editor for types 4/6/9/11 enforces both a non-empty name
-# and the 5-minute gap for all of them.
-_LEGACY_EDITOR_TYPES = {FEEDER, FEEDER_MINI, D3, D4}
+# D1, Mini, D3 and D4 pause the whole plan with suspendFeed/restoreFeed. On
+# D4S, D4H and D4SH the app has no whole-plan call: it marks every day
+# ``suspended`` and saves the plan again, which ``set_plan_suspended`` does.
+PER_DAY_PAUSE_TYPES = {D4S, D4H, D4SH}
 # surplusControl skip is a ``state.result`` value, and it differs by family:
 # the app reads 6 on D3 and 8 on D4sh/D4h.
 _SURPLUS_RESULT_BY_TYPE = {D3: 6, D4SH: 8, D4H: 8}
@@ -158,7 +162,6 @@ def capabilities_for_feeder(feeder: Any) -> dict[str, Any]:
     device_type = feeder_device_type(feeder)
     compartments = 2 if device_type in DUAL_HOPPER_DEVICES else 1
     amount = amount_config_for_feeder(feeder)
-    global_toggle = device_type in _GLOBAL_TOGGLE_TYPES
     actions: dict[str, str] = {
         "set": "petkit.set_feeding_schedule",
         "add": "petkit.add_feeding_schedule_entry",
@@ -172,8 +175,10 @@ def capabilities_for_feeder(feeder: Any) -> dict[str, Any]:
         "amount": amount,
         "weekly": device_type not in _SHAPE_A_TYPES,
         "today_skip": True,
-        "global_toggle": global_toggle,
-        "labels": {"required": device_type in _LEGACY_EDITOR_TYPES},
+        # Every family can pause the whole plan; see PER_DAY_PAUSE_TYPES.
+        "global_toggle": True,
+        # Every meal editor in the app refuses an empty name.
+        "labels": {"required": True},
         "actions": actions,
     }
     return caps
@@ -268,10 +273,10 @@ def _real_amount(state: Any) -> int:
 
 
 def _shape_a_status(state: Any, src: int) -> tuple[str, str | None]:
-    """D1/D2 have no ``result``: success is empty errCode + a completedAt.
+    """D1/Mini have no ``result``: success is an empty errCode plus a completedAt.
 
-    ``FeederItemDataViewHolder`` — errCode is a string there ("ia-1", "em-1"),
-    and manual-offline meals (src 4) report no completedAt.
+    errCode is a string on these families ("ia-1", "em-1"), and manual-offline
+    meals (src 4) report no completedAt.
     """
     err = _state_attr(state, "err_code", "errCode")
     if err is not None and str(err).strip() not in ("", "0"):
@@ -309,7 +314,7 @@ def _status_from_record(
     if status_val == 1:
         return "skipped", "cancelled"
     if status_val == 2:
-        # Overdue today, resumes tomorrow (Feeder_item_not_start_prompt).
+        # Overdue today; the app shows it as "not started", resumes tomorrow.
         return "unknown", "past_unknown"
 
     if state is None:
@@ -332,8 +337,7 @@ def _today_record_status_by_time(
     if not feed:
         return out
     device_type = feeder_device_type(feeder)
-    now = datetime.now()
-    now_secs = now.hour * 3600 + now.minute * 60 + now.second
+    now_secs = _seconds_of_day(device_now(feeder))
     for block in feed:
         for item in getattr(block, "items", None) or []:
             time_sec = _coerce_int(_item_attr(item, "time"), -1)
@@ -349,6 +353,83 @@ def _today_record_status_by_time(
                 None if daily_id is None else str(daily_id),
             )
     return out
+
+
+def device_now(feeder: Any) -> datetime:
+    """The current time where the feeder stands.
+
+    The cloud reports the device's UTC offset in hours as ``timezone``; the
+    app judges "today" and "already passed" by that clock, not the phone's.
+    Falls back to the local clock when the offset is missing.
+    """
+    offset = getattr(feeder, "timezone", None)
+    try:
+        hours = float(offset)
+    except (TypeError, ValueError):
+        return datetime.now()
+    return datetime.now(timezone(timedelta(hours=hours)))
+
+
+def _seconds_of_day(moment: datetime) -> int:
+    return moment.hour * 3600 + moment.minute * 60 + moment.second
+
+
+def find_scheduled_feed(feeder: Any, day: int, seconds: int) -> Any | None:
+    """Find the feeding-plan entry scheduled at ``seconds`` on ``day`` (YYYYMMDD).
+
+    Reads the feeder's daily records, which is where the app takes the id it
+    sends to removeDailyFeed/restoreDailyFeed. Manual feeds are ignored:
+    only src 1 (feeding plan) can be skipped or restored.
+    """
+    records = getattr(feeder, "device_records", None)
+    for record_day in getattr(records, "feed", None) or []:
+        if _coerce_int(getattr(record_day, "day", None), -1) != day:
+            continue
+        for item in getattr(record_day, "items", None) or []:
+            if (
+                _coerce_int(_item_attr(item, "src"), 0) == 1
+                and _coerce_int(_item_attr(item, "time"), -1) == seconds
+            ):
+                return item
+    return None
+
+
+def scheduled_feed_refusal(item: Any, *, skip: bool, now_secs: int) -> str | None:
+    """Why today's meal cannot be skipped or restored right now, or None.
+
+    Mirrors when the app hides its skip checkbox: once the meal is dispensing
+    (status 3), was carried over because it never started (status 2), has a
+    result, or its time has passed on the device's clock. ``now_secs`` is the
+    device-local time of day.
+    """
+    status = _coerce_int(_item_attr(item, "status"), 0)
+    if status == 3:
+        return "is being dispensed"
+    if status == 2:
+        return "did not start and has been moved to tomorrow"
+    if _item_attr(item, "state", None) is not None:
+        return "has already run"
+    if _coerce_int(_item_attr(item, "time"), 0) < now_secs:
+        return "has already passed"
+    if skip and status == 1:
+        return "is already skipped"
+    if not skip and status != 1:
+        return "is not skipped"
+    return None
+
+
+def feeding_plan_state(feeder: Any) -> int | None:
+    """1 while the feeding plan runs, 0 once it is suspended, None without a plan.
+
+    None keeps the switch from being created for a feeder that reports no
+    plan at all. D1 and Mini carry no multi_feed_item; their plan comes from
+    POST {prefix}/feed, which the library attaches as ``feed_plan``.
+    """
+    multi = getattr(feeder, "multi_feed_item", None)
+    has_days = multi is not None and bool(getattr(multi, "feed_daily_list", None))
+    if getattr(feeder, "feed_plan", None) is None and not has_days:
+        return None
+    return int(is_feeding_plan_enabled(feeder))
 
 
 def is_feeding_plan_enabled(feeder: Any) -> bool:
@@ -389,6 +470,8 @@ def _days_from_feed_plan(plan: Any) -> list[dict[str, Any]] | None:
     items = [_serialize_item(it) for it in items_raw]
     mask = set(parse_oem_repeats(getattr(plan, "repeats", None)))
     suspended = _coerce_int(getattr(plan, "suspended", 0), 0)
+    # Days outside the mask carry an empty ``repeats`` so the mask can be read
+    # back from the days alone, even when the plan holds no meals yet.
     out = []
     for oem in range(1, 8):
         if oem in mask:
@@ -401,7 +484,7 @@ def _days_from_feed_plan(plan: Any) -> list[dict[str, Any]] | None:
                 }
             )
         else:
-            out.append({"repeats": oem, "suspended": 0, "count": 0, "items": []})
+            out.append({"repeats": "", "suspended": suspended, "count": 0, "items": []})
     return out
 
 
@@ -509,7 +592,7 @@ def flatten_schedule(feeder: Any) -> list[dict[str, Any]]:
     divisor = _amount_divisor(feeder, feeder_device_type(feeder))
     days = feed_daily_list_from_feeder(feeder)
     status_by_time = _today_record_status_by_time(feeder)
-    today_iso = datetime.now().isoweekday()
+    today_iso = device_now(feeder).isoweekday()
     plan_enabled = is_feeding_plan_enabled(feeder)
     groups = _group_items_by_key(days, dual, divisor)
 
@@ -586,6 +669,22 @@ def get_openpetbowl_attributes(feeder: Any) -> dict[str, Any]:
     if plan_weekdays is not None:
         attributes["plan_weekdays"] = plan_weekdays
     return attributes
+
+
+def set_plan_suspended(feeder: Any, suspended: bool) -> list[dict[str, Any]]:
+    """The current plan with every day paused or resumed, ready to save.
+
+    This is the whole-plan pause on D4S, D4H and D4SH, which have no
+    suspendFeed/restoreFeed in the app: it flips ``suspended`` on all seven
+    days and saves the plan again.
+    """
+    days = feed_daily_list_from_feeder(feeder)
+    dual = is_dual_hopper(feeder)
+    flag = 1 if suspended else 0
+    for day in days:
+        day["suspended"] = flag
+        _finalize_day(day, dual)
+    return days
 
 
 def _empty_oem_week() -> list[dict[str, Any]]:
@@ -732,45 +831,53 @@ def validate_row(
     weekdays: list[int],
     *,
     skip_key: str | None = None,
+    label: str | None = None,
 ) -> None:
-    """Reject duplicate times, D2 gaps, and dual arity mismatches."""
+    """Apply the app's meal checks to one new or edited row.
+
+    Every family's editor refuses an empty name, a zero amount, a time another
+    meal on the same day already uses, and a time within five minutes of one.
+    Only the meal being saved is checked against the others, as the app does.
+    """
     caps = capabilities_for_feeder(feeder)
     if len(values) != caps["compartments"]:
         raise ValueError(
             f"values length {len(values)} does not match compartments "
             f"{caps['compartments']}"
         )
+    if not (label or "").strip():
+        raise ValueError("a meal needs a name")
+    if all(_coerce_int(v, 0) <= 0 for v in values):
+        raise ValueError("a meal needs an amount above zero")
     time_sec = hour * 3600 + minute * 60
     iso_days = weekdays or [1, 2, 3, 4, 5, 6, 7]
     oem_want = {iso_weekday_to_oem(i) for i in iso_days}
     existing_times = _existing_times(days, oem_want, skip_key)
     if time_sec in existing_times:
         raise ValueError("duplicate hour+minute on the same weekday set")
-    # The app applies the 5-minute gap check ungated in the editor that serves
-    # types 4/6/9/11, so D1, D3 and D4 get the rule too, not only the Mini.
-    if feeder_device_type(feeder) in _LEGACY_EDITOR_TYPES:
-        merged = sorted({*existing_times, time_sec})
-        for left, right in pairwise(merged):
-            if right - left < _D2_MIN_GAP_SECS:
-                raise ValueError("meals must be at least 300 seconds apart")
+    if any(abs(other - time_sec) < _MIN_GAP_SECS for other in existing_times):
+        raise ValueError("meals must be at least 300 seconds apart")
 
 
 def _shape_a_items_and_mask(
     days: list[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], set[int], int]:
-    """Deduplicate Shape A items, and collect the mask and the pause flag."""
+    """Deduplicate Shape A items, and collect the mask and the pause flag.
+
+    The mask comes from the days that carry a ``repeats`` value, so it survives
+    a plan with no meals in it. Days outside the mask carry an empty one.
+    """
     items: list[dict[str, Any]] = []
     seen: set[str] = set()
     mask: set[int] = set()
     suspended = 0
     for day in days:
-        slot = day.get("items") or []
-        if not slot:
-            continue
-        mask.update(parse_oem_repeats(day.get("repeats")))
+        raw = day.get("repeats")
+        if raw not in (None, ""):
+            mask.update(parse_oem_repeats(raw))
         if _coerce_int(day.get("suspended"), 0):
             suspended = 1
-        for item in slot:
+        for item in day.get("items") or []:
             key = _item_key(item)
             if key in seen:
                 continue
@@ -794,7 +901,7 @@ def add_schedule_entry(
         _existing_items, existing_oem, _susp = _shape_a_items_and_mask(days)
         if existing_oem:
             iso_days = [oem_weekday_to_iso(o) for o in existing_oem]
-    validate_row(feeder, days, hour, minute, values, iso_days)
+    validate_row(feeder, days, hour, minute, values, iso_days, label=label)
     dual = is_dual_hopper(feeder)
     allocate = _next_mini_id(days) if is_shape_a(feeder) else None
     item = _item_from_row(
@@ -862,7 +969,9 @@ def edit_schedule_entry(
         _items, existing_oem, _susp = _shape_a_items_and_mask(days)
         if existing_oem:
             iso_days = [oem_weekday_to_iso(o) for o in existing_oem]
-    validate_row(feeder, days, hour, minute, values, iso_days, skip_key=key)
+    validate_row(
+        feeder, days, hour, minute, values, iso_days, skip_key=key, label=label
+    )
     dual = is_dual_hopper(feeder)
     # Keep the server id of the meal being edited; only its fields change.
     new_item = _item_from_row(

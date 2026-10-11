@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, time as dt_time, timedelta
+from datetime import time as dt_time, timedelta
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
 
@@ -81,13 +81,15 @@ from .iot_mqtt import PetkitIotMqttListener
 from .notifications import PetkitNotificationManager
 from .schedule import (
     add_schedule_entry,
+    device_now,
     edit_schedule_entry,
     feed_daily_list_from_feeder,
+    find_scheduled_feed,
     remove_schedule_entry,
     schedule_to_feed_daily_list,
+    scheduled_feed_refusal,
     set_plan_weekdays,
 )
-from .utils import find_scheduled_feed
 from .whep_proxy import (
     PetkitDirectWhepProxySessionView,
     PetkitDirectWhepProxyView,
@@ -204,7 +206,8 @@ SERVICE_ADD_ENTRY_SCHEMA = vol.Schema(
         vol.Optional("weekdays"): vol.All(
             cv.ensure_list, [vol.All(int, vol.Range(min=1, max=7))]
         ),
-        vol.Optional("label"): cv.string,
+        # Every meal editor in the app requires a name.
+        vol.Required("label"): cv.string,
     }
 )
 
@@ -324,26 +327,27 @@ async def _async_handle_scheduled_feed(
             f"Device {device_id} does not support skipping scheduled feeds"
         )
 
-    # pypetkitapi stamps the request with datetime.now() too, so both agree
-    today = int(datetime.now().strftime("%Y%m%d"))
+    # "Today" and "already passed" follow the device's clock, as in the app.
+    now = device_now(device)
+    today = int(now.strftime("%Y%m%d"))
     item = find_scheduled_feed(device, today, seconds)
     if item is None:
         raise ServiceValidationError(f"No scheduled feed at {at} today")
-    if skip and item.status == 1:
-        raise ServiceValidationError(f"The {at} feed is already skipped")
-    if skip and item.state is not None:
-        raise ServiceValidationError(f"The {at} feed has already run")
-    if not skip and item.status != 1:
-        raise ServiceValidationError(f"The {at} feed is not skipped")
+    refusal = scheduled_feed_refusal(
+        item, skip=skip, now_secs=now.hour * 3600 + now.minute * 60 + now.second
+    )
+    if refusal is not None:
+        raise ServiceValidationError(f"The {at} feed {refusal}")
 
     command = (
         FeederCommand.REMOVE_DAILY_FEED if skip else FeederCommand.RESTORE_DAILY_FEED
     )
     # An object with feed_id, not a dict: pypetkitapi <= 1.29.0 reads the id
-    # as an attribute, and later versions accept both.
+    # as an attribute, and later versions accept both. ``day`` is the record's
+    # own day; older versions ignore it and stamp the local date.
     try:
         await runtime.client.send_api_request(
-            device_id, command, SimpleNamespace(feed_id=item.id)
+            device_id, command, SimpleNamespace(feed_id=item.id, day=today)
         )
     except PypetkitError as err:
         raise HomeAssistantError(f"PetKit refused the request: {err}") from err
@@ -377,7 +381,7 @@ async def _async_handle_add_entry(hass: HomeAssistant, call: ServiceCall) -> Non
         minute=call.data["minute"],
         values=list(call.data["values"]),
         weekdays=call.data.get("weekdays"),
-        label=call.data.get("label"),
+        label=call.data["label"],
     )
     await _save_feed_days(client, device_id, days)
 
@@ -393,7 +397,7 @@ async def _async_handle_edit_entry(hass: HomeAssistant, call: ServiceCall) -> No
         minute=call.data["minute"],
         values=list(call.data["values"]),
         weekdays=call.data.get("weekdays"),
-        label=call.data.get("label"),
+        label=call.data["label"],
     )
     await _save_feed_days(client, device_id, days)
 

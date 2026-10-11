@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import importlib.util
 from pathlib import Path
 import sys
@@ -32,6 +32,11 @@ plan_weekdays_iso = _mod.plan_weekdays_iso
 set_plan_weekdays = _mod.set_plan_weekdays
 get_openpetbowl_attributes = _mod.get_openpetbowl_attributes
 validate_row = _mod.validate_row
+device_now = _mod.device_now
+feeding_plan_state = _mod.feeding_plan_state
+find_scheduled_feed = _mod.find_scheduled_feed
+scheduled_feed_refusal = _mod.scheduled_feed_refusal
+set_plan_suspended = _mod.set_plan_suspended
 _status_from_record = _mod._status_from_record  # noqa: SLF001
 
 
@@ -246,8 +251,12 @@ class TestInterpolators(unittest.TestCase):
         )
         feeder = _feeder(device_type="d4s", plan=plan)
         with pytest.raises(ValueError):
-            add_schedule_entry(feeder, hour=8, minute=0, values=[3], weekdays=[1])
-        days = add_schedule_entry(feeder, hour=8, minute=0, values=[3, 4], weekdays=[1])
+            add_schedule_entry(
+                feeder, hour=8, minute=0, values=[3], weekdays=[1], label="A"
+            )
+        days = add_schedule_entry(
+            feeder, hour=8, minute=0, values=[3, 4], weekdays=[1], label="A"
+        )
         mon = next(d for d in days if str(d["repeats"]) in ("2", 2))
         assert mon["items"][0]["amount1"] == 3
         assert mon["items"][0]["amount2"] == 4
@@ -300,7 +309,9 @@ class TestInterpolators(unittest.TestCase):
         assert len(mon["items"]) == 1
         assert mon["items"][0]["time"] == 21600
         assert mon["items"][0]["id"] == 100001
-        days = edit_schedule_entry(feeder, key="18000", hour=7, minute=0, values=[10])
+        days = edit_schedule_entry(
+            feeder, key="18000", hour=7, minute=0, values=[10], label="A"
+        )
         mon = next(d for d in days if str(d["repeats"]) in ("2", 2))
         assert mon["items"][0]["time"] == 25200
         # The edited meal keeps its server id.
@@ -344,12 +355,13 @@ class TestCapabilities(unittest.TestCase):
         assert caps["global_toggle"]
         assert "min_gap_seconds" not in caps
 
-    def test_d4s_hides_global_toggle(self):
-        """Dual hoppers and D4h pause per day, so they hide the global toggle."""
+    def test_d4s_keeps_global_toggle_and_requires_labels(self):
+        """D4S/D4SH/D4H pause by re-saving every day, so the toggle stays."""
         for device_type in ("d4s", "d4sh", "d4h"):
             caps = capabilities_for_feeder(_feeder(device_type=device_type))
-            assert not caps["global_toggle"], device_type
+            assert caps["global_toggle"], device_type
             assert caps["weekly"], device_type
+            assert caps["labels"] == {"required": True}, device_type
             assert "shared_weekdays" not in caps
 
     def test_d4_keeps_global_toggle(self):
@@ -541,40 +553,216 @@ class TestAmountScaling(unittest.TestCase):
         assert (amount["min"], amount["max"], amount["step"]) == (0, 10, 1)
 
 
-class TestGapRule(unittest.TestCase):
-    """The 5-minute gap rule is ungated in the editor serving 4/6/9/11."""
+class TestRowValidation(unittest.TestCase):
+    """Every family's meal editor applies the same four checks."""
 
     DAYS = [
         {"repeats": "2", "suspended": 0, "items": [{"id": 1, "time": 18000}]},
     ]
 
-    def _assert_gap_enforced(self, device_type, values):
-        with pytest.raises(ValueError):
-            validate_row(
-                _feeder(device_type=device_type),
-                self.DAYS,
-                hour=5,
-                minute=2,
-                values=values,
-                weekdays=[1],
-            )
+    def _validate(self, device_type, values, **kw):
+        kw.setdefault("hour", 5)
+        kw.setdefault("minute", 2)
+        kw.setdefault("label", "Meal")
+        validate_row(
+            _feeder(device_type=device_type),
+            self.DAYS,
+            values=values,
+            weekdays=[1],
+            **kw,
+        )
 
-    def test_gap_applies_to_d1_d3_and_d4_too(self):
-        """The 5-minute gap covers every legacy-editor family."""
-        for device_type in ("feeder", "feedermini", "d3", "d4"):
-            with self.subTest(device_type=device_type):
-                self._assert_gap_enforced(device_type, [10])
+    def test_gap_applies_to_every_family(self):
+        """A meal inside the 5-minute window is refused on all seven families."""
+        for device_type, values in (
+            ("feeder", [10]),
+            ("feedermini", [10]),
+            ("d3", [10]),
+            ("d4", [10]),
+            ("d4h", [10]),
+            ("d4s", [1, 1]),
+            ("d4sh", [1, 1]),
+        ):
+            with self.subTest(device_type=device_type), pytest.raises(ValueError):
+                self._validate(device_type, values)
 
-    def test_dual_hoppers_have_no_gap_rule(self):
-        """Dual hoppers accept meals inside the 5-minute window."""
+    def test_only_the_new_meal_is_checked(self):
+        """Two existing meals already close together do not block an add."""
+        days = [
+            {
+                "repeats": "2",
+                "suspended": 0,
+                "items": [{"id": 1, "time": 18000}, {"id": 2, "time": 18060}],
+            },
+        ]
         validate_row(
             _feeder(device_type="d4s"),
-            self.DAYS,
-            hour=5,
-            minute=2,
+            days,
+            hour=12,
+            minute=0,
             values=[1, 1],
             weekdays=[1],
+            label="Noon",
         )
+
+    def test_meal_needs_a_name(self):
+        """A missing or blank name is refused on every family."""
+        for label in (None, "", "  "):
+            with self.subTest(label=label), pytest.raises(ValueError):
+                self._validate("d4s", [1, 1], hour=12, minute=0, label=label)
+        self._validate("d4s", [1, 1], hour=12, minute=0, label="Lunch")
+
+    def test_zero_amount_is_refused(self):
+        """A meal must dispense something from at least one hopper."""
+        with pytest.raises(ValueError):
+            self._validate("d4s", [0, 0], hour=12, minute=0)
+        with pytest.raises(ValueError):
+            self._validate("d3", [0], hour=12, minute=0)
+        self._validate("d4s", [0, 2], hour=12, minute=0)
+
+
+class TestEmptyPlanMask(unittest.TestCase):
+    """A D1/Mini plan with no meals still remembers its weekday mask."""
+
+    def _empty_mini(self, repeats="2,4,6"):
+        return _feeder(
+            device_type="feedermini", plan=_shape_a_plan([], repeats=repeats)
+        )
+
+    def test_mask_is_read_from_an_empty_plan(self):
+        """The mask reads back as ISO weekdays with no meals present."""
+        assert plan_weekdays_iso(self._empty_mini()) == [1, 3, 5]
+
+    def test_first_add_keeps_the_mask(self):
+        """The first meal added to an empty plan joins the existing mask."""
+        days = add_schedule_entry(
+            self._empty_mini(), hour=8, minute=0, values=[2], label="A"
+        )
+        in_mask = sorted(str(d["repeats"]) for d in days if d["items"])
+        assert in_mask == ["2", "4", "6"]
+        assert len([d for d in days if d["repeats"] == ""]) == 4
+
+
+class TestPlanPause(unittest.TestCase):
+    """The feeding-schedule switch: its state and the per-day pause."""
+
+    @staticmethod
+    def _per_day_plan(suspended):
+        item = SimpleNamespace(
+            id=0, time=28800, name="A", amount=0, amount1=2, amount2=1
+        )
+        return SimpleNamespace(
+            items=None,
+            repeats=None,
+            suspended=None,
+            feed_daily_list=[
+                SimpleNamespace(repeats=str(n), suspended=suspended, items=[item])
+                for n in range(1, 8)
+            ],
+        )
+
+    def test_state_is_none_without_a_plan(self):
+        """No plan means no switch."""
+        assert feeding_plan_state(_feeder(device_type="d4s", plan=None)) is None
+
+    def test_state_follows_the_days(self):
+        """All days paused reads 0; any open day reads 1."""
+        assert (
+            feeding_plan_state(_feeder(device_type="d4s", plan=self._per_day_plan(1)))
+            == 0
+        )
+        assert (
+            feeding_plan_state(_feeder(device_type="d4s", plan=self._per_day_plan(0)))
+            == 1
+        )
+
+    def test_shape_a_state_follows_the_plan_flag(self):
+        """D1/Mini carry one whole-plan flag."""
+        plan = _shape_a_plan([{"id": 100001, "time": 18000, "name": "A", "amount": 10}])
+        plan.suspended = 1
+        assert feeding_plan_state(_feeder(device_type="feedermini", plan=plan)) == 0
+
+    def test_pause_marks_every_day_and_recomputes_totals(self):
+        """Pausing sets ``suspended`` on all seven days and keeps the meals."""
+        feeder = _feeder(device_type="d4s", plan=self._per_day_plan(0))
+        days = set_plan_suspended(feeder, True)
+        assert len(days) == 7
+        assert all(d["suspended"] == 1 for d in days)
+        assert all(d["count"] == 1 for d in days)
+        assert days[0]["totalAmount1"] == 2
+        assert days[0]["totalAmount2"] == 1
+        assert days[0]["items"][0]["time"] == 28800
+
+    def test_resume_clears_every_day(self):
+        """Resuming clears ``suspended`` on all seven days."""
+        feeder = _feeder(device_type="d4h", plan=self._per_day_plan(1))
+        assert all(d["suspended"] == 0 for d in set_plan_suspended(feeder, False))
+
+
+def _records(day, *items):
+    return SimpleNamespace(feed=[SimpleNamespace(day=day, items=list(items))])
+
+
+class TestSkipGuard(unittest.TestCase):
+    """Skip/restore is refused whenever the app would hide its checkbox."""
+
+    def test_finds_todays_plan_meal_by_time(self):
+        """Only today's src-1 meal at that time matches."""
+        meal = _record(id="s1", src=1, time=18000, status=0)
+        manual = _record(id="m1", src=2, time=18000, status=0)
+        feeder = _feeder(
+            device_type="d4",
+            records=SimpleNamespace(
+                feed=[
+                    SimpleNamespace(day=20260101, items=[meal]),
+                    SimpleNamespace(day=20260102, items=[manual]),
+                ]
+            ),
+        )
+        assert find_scheduled_feed(feeder, 20260101, 18000) is meal
+        assert find_scheduled_feed(feeder, 20260102, 18000) is None
+        assert find_scheduled_feed(feeder, 20260101, 18060) is None
+
+    def test_pending_meal_can_be_skipped_but_not_restored(self):
+        """A waiting meal skips; restoring it makes no sense."""
+        meal = _record(src=1, time=18000, status=0)
+        assert scheduled_feed_refusal(meal, skip=True, now_secs=10000) is None
+        assert scheduled_feed_refusal(meal, skip=False, now_secs=10000)
+
+    def test_skipped_meal_can_be_restored_but_not_skipped_again(self):
+        """A cancelled meal restores; skipping it again is refused."""
+        meal = _record(src=1, time=18000, status=1)
+        assert scheduled_feed_refusal(meal, skip=False, now_secs=10000) is None
+        assert scheduled_feed_refusal(meal, skip=True, now_secs=10000)
+
+    def test_overdue_and_dispensing_meals_are_untouchable(self):
+        """Status 2 (not started) and 3 (dispensing) refuse both actions."""
+        for status in (2, 3):
+            meal = _record(src=1, time=18000, status=status)
+            for skip in (True, False):
+                with self.subTest(status=status, skip=skip):
+                    assert scheduled_feed_refusal(meal, skip=skip, now_secs=10000)
+
+    def test_past_time_is_refused_even_without_a_result(self):
+        """Once the device clock passes the meal time, the app hides the toggle."""
+        meal = _record(src=1, time=18000, status=0)
+        assert scheduled_feed_refusal(meal, skip=True, now_secs=18001)
+        cancelled = _record(src=1, time=18000, status=1)
+        assert scheduled_feed_refusal(cancelled, skip=False, now_secs=18001)
+
+    def test_meal_with_a_result_has_run(self):
+        """A record with a state has already run."""
+        meal = _record(src=1, time=18000, status=0, state=SimpleNamespace(result=0))
+        assert scheduled_feed_refusal(meal, skip=True, now_secs=10000)
+
+    def test_device_clock_uses_the_reported_offset(self):
+        """``timezone`` is the device's UTC offset in hours."""
+        feeder = _feeder(device_type="d4")
+        feeder.timezone = 5.5
+        now = device_now(feeder)
+        assert now.utcoffset() == timedelta(hours=5, minutes=30)
+        feeder.timezone = None
+        assert device_now(feeder).utcoffset() is None
 
 
 class TestShapeAToday(unittest.TestCase):
