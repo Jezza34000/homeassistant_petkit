@@ -37,6 +37,12 @@ from homeassistant.exceptions import HomeAssistantError
 
 from .const import LOGGER, POWER_ONLINE_STATE, SCAN_INTERVAL_FAST
 from .entity import PetKitDescSensorBase, PetkitEntity
+from .schedule import (
+    PER_DAY_PAUSE_TYPES,
+    feeding_plan_state,
+    get_openpetbowl_attributes,
+    set_plan_suspended,
+)
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -46,17 +52,20 @@ if TYPE_CHECKING:
     from .data import PetkitConfigEntry, PetkitDevices
 
 
-def feeding_plan_active(device: Feeder) -> int | None:
-    """Return 1 while the feeding plan runs, 0 once it is suspended.
+def set_feeding_plan_enabled(api: Any, device: Feeder, enabled: bool) -> Any:
+    """Resume or pause the whole feeding plan the way the app does.
 
-    The app toggles the whole plan with suspendFeed/restoreFeed, which sets
-    `suspended` on every day of it. None when the feeder reports no plan, so
-    the switch is not created for a feeder without one.
+    D1, Mini, D3 and D4 have a whole-plan call (suspend_feed/restore_feed for
+    the first two, suspendFeed/restoreFeed for the others, which pypetkitapi
+    picks). D4S, D4H and D4SH have none in the app: it marks every day
+    ``suspended`` and saves the plan again.
     """
-    multi = device.multi_feed_item
-    if multi is None or not multi.feed_daily_list:
-        return None
-    return int(any(day.suspended != 1 for day in multi.feed_daily_list))
+    if device.device_nfo.device_type in PER_DAY_PAUSE_TYPES:
+        return api.send_api_request(
+            device.id, FeederCommand.SAVE_FEED, set_plan_suspended(device, not enabled)
+        )
+    command = FeederCommand.RESTORE_FEED if enabled else FeederCommand.SUSPEND_FEED
+    return api.send_api_request(device.id, command)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -413,15 +422,11 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
         PetKitSwitchDesc(
             key="Feeding schedule",
             translation_key="feeding_schedule",
-            value=feeding_plan_active,
-            turn_on=lambda api, device: api.send_api_request(
-                device.id, FeederCommand.RESTORE_FEED
-            ),
-            turn_off=lambda api, device: api.send_api_request(
-                device.id, FeederCommand.SUSPEND_FEED
-            ),
-            # Feeder Mini has no suspendFeed/restoreFeed endpoint in the app
-            only_for_types=[FEEDER, D3, D4, D4S, D4H, D4SH],
+            value=feeding_plan_state,
+            attributes=get_openpetbowl_attributes,
+            turn_on=lambda api, device: set_feeding_plan_enabled(api, device, True),
+            turn_off=lambda api, device: set_feeding_plan_enabled(api, device, False),
+            only_for_types=[FEEDER, FEEDER_MINI, D3, D4, D4S, D4H, D4SH],
         ),
     ],
     Litter: [
@@ -1099,6 +1104,15 @@ class PetkitSwitch(PetkitEntity, SwitchEntity):
         updated_device = self.coordinator.data.get(self.device.id)
         if updated_device and self.entity_description.value:
             return bool(self.entity_description.value(updated_device))
+        return None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """Return extra state attributes."""
+        if self.entity_description.attributes:
+            updated_device = self.coordinator.data.get(self.device.id)
+            if updated_device:
+                return self.entity_description.attributes(updated_device)
         return None
 
     async def async_turn_on(self, **_: Any) -> None:

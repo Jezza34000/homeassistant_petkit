@@ -2,11 +2,22 @@
 
 from __future__ import annotations
 
-from datetime import datetime, time as dt_time, timedelta
+from datetime import time as dt_time, timedelta
 from types import SimpleNamespace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from pypetkitapi import D3, D4, D4H, D4S, D4SH, Feeder, PetKitClient, PypetkitError
+from pypetkitapi import (
+    D3,
+    D4,
+    D4H,
+    D4S,
+    D4SH,
+    FEEDER,
+    FEEDER_MINI,
+    Feeder,
+    PetKitClient,
+    PypetkitError,
+)
 from pypetkitapi.command import FeederCommand
 import voluptuous as vol
 
@@ -68,7 +79,17 @@ from .coordinator import (
 from .data import PetkitData
 from .iot_mqtt import PetkitIotMqttListener
 from .notifications import PetkitNotificationManager
-from .utils import find_scheduled_feed
+from .schedule import (
+    add_schedule_entry,
+    device_now,
+    edit_schedule_entry,
+    feed_daily_list_from_feeder,
+    find_scheduled_feed,
+    remove_schedule_entry,
+    schedule_to_feed_daily_list,
+    scheduled_feed_refusal,
+    set_plan_weekdays,
+)
 from .whep_proxy import (
     PetkitDirectWhepProxySessionView,
     PetkitDirectWhepProxyView,
@@ -100,10 +121,10 @@ SERVICE_SET_FEEDING_SCHEDULE = "set_feeding_schedule"
 SERVICE_SKIP_SCHEDULED_FEED = "skip_scheduled_feed"
 SERVICE_RESTORE_SCHEDULED_FEED = "restore_scheduled_feed"
 
-# Types whose app client calls <type>/removeDailyFeed and restoreDailyFeed.
-# Feeder and Feeder Mini use remove_dailyfeed/restore_dailyfeed instead,
-# which pypetkitapi does not send yet.
-DAILY_FEED_TYPES = (D3, D4, D4S, D4H, D4SH)
+# Types whose app client can skip/restore a planned meal for today. D3 and up
+# call <type>/removeDailyFeed and restoreDailyFeed; Feeder and Feeder Mini call
+# remove_dailyfeed/restore_dailyfeed, which pypetkitapi picks for them.
+DAILY_FEED_TYPES = (FEEDER, FEEDER_MINI, D3, D4, D4S, D4H, D4SH)
 
 
 def _time_to_seconds(value: int | str | dt_time) -> int:
@@ -113,15 +134,28 @@ def _time_to_seconds(value: int | str | dt_time) -> int:
     return int(value)
 
 
-SERVICE_SCHEDULED_FEED_SCHEMA = vol.Schema(
-    {
-        vol.Required("device_id"): vol.Coerce(int),
-        vol.Required("time"): vol.All(
-            vol.Any(cv.time, vol.All(vol.Coerce(int), vol.Range(min=0, max=86399))),
-            _time_to_seconds,
-        ),
-    }
+SERVICE_SCHEDULED_FEED_SCHEMA = vol.All(
+    vol.Schema(
+        {
+            vol.Required("device_id"): vol.Coerce(int),
+            vol.Exclusive("time", "slot"): vol.All(
+                vol.Any(cv.time, vol.All(vol.Coerce(int), vol.Range(min=0, max=86399))),
+                _time_to_seconds,
+            ),
+            # The OpenPetBowl row key, which is the time in seconds. The card
+            # sends this rather than a time.
+            vol.Exclusive("key", "slot"): vol.All(
+                vol.Coerce(int), vol.Range(min=0, max=86399)
+            ),
+        }
+    ),
+    cv.has_at_least_one_key("time", "key"),
 )
+
+SERVICE_ADD_FEEDING_SCHEDULE_ENTRY = "add_feeding_schedule_entry"
+SERVICE_EDIT_FEEDING_SCHEDULE_ENTRY = "edit_feeding_schedule_entry"
+SERVICE_REMOVE_FEEDING_SCHEDULE_ENTRY = "remove_feeding_schedule_entry"
+SERVICE_SET_FEEDING_PLAN_WEEKDAYS = "set_feeding_plan_weekdays"
 
 FEED_ITEM_SCHEMA = vol.Schema(
     {
@@ -130,6 +164,7 @@ FEED_ITEM_SCHEMA = vol.Schema(
         vol.Optional("amount", default=0): vol.Coerce(int),
         vol.Optional("amount1", default=0): vol.Coerce(int),
         vol.Optional("amount2", default=0): vol.Coerce(int),
+        vol.Optional("id"): vol.Coerce(int),
     }
 )
 
@@ -141,92 +176,132 @@ FEED_DAY_SCHEMA = vol.Schema(
     }
 )
 
+SCHEDULE_ROW_SCHEMA = vol.Schema(
+    {
+        vol.Optional("key"): cv.string,
+        vol.Required("hour"): vol.All(int, vol.Range(min=0, max=23)),
+        vol.Required("minute"): vol.All(int, vol.Range(min=0, max=59)),
+        vol.Required("values"): vol.All(cv.ensure_list, [vol.Coerce(int)]),
+        vol.Optional("weekdays"): vol.All(
+            cv.ensure_list, [vol.All(int, vol.Range(min=1, max=7))]
+        ),
+        vol.Optional("label"): cv.string,
+    }
+)
+
 SERVICE_SET_FEEDING_SCHEDULE_SCHEMA = vol.Schema(
     {
         vol.Required("device_id"): vol.Coerce(int),
-        vol.Required("feed_daily_list"): vol.All(cv.ensure_list, [FEED_DAY_SCHEMA]),
+        vol.Optional("schedule"): vol.All(cv.ensure_list, [SCHEDULE_ROW_SCHEMA]),
+        vol.Optional("feed_daily_list"): vol.All(cv.ensure_list, [FEED_DAY_SCHEMA]),
+    }
+)
+
+SERVICE_ADD_ENTRY_SCHEMA = vol.Schema(
+    {
+        vol.Required("device_id"): vol.Coerce(int),
+        vol.Required("hour"): vol.All(int, vol.Range(min=0, max=23)),
+        vol.Required("minute"): vol.All(int, vol.Range(min=0, max=59)),
+        vol.Required("values"): vol.All(cv.ensure_list, [vol.Coerce(int)]),
+        vol.Optional("weekdays"): vol.All(
+            cv.ensure_list, [vol.All(int, vol.Range(min=1, max=7))]
+        ),
+        # Every meal editor in the app requires a name.
+        vol.Required("label"): cv.string,
+    }
+)
+
+SERVICE_EDIT_ENTRY_SCHEMA = SERVICE_ADD_ENTRY_SCHEMA.extend(
+    {vol.Required("key"): cv.string}
+)
+
+SERVICE_REMOVE_ENTRY_SCHEMA = vol.Schema(
+    {
+        vol.Required("device_id"): vol.Coerce(int),
+        vol.Required("key"): cv.string,
+    }
+)
+
+SERVICE_SET_PLAN_WEEKDAYS_SCHEMA = vol.Schema(
+    {
+        vol.Required("device_id"): vol.Coerce(int),
+        # The selector hands back strings, automations hand back ints.
+        vol.Required("weekdays"): vol.All(
+            cv.ensure_list,
+            [vol.All(vol.Coerce(int), vol.Range(min=1, max=7))],
+            vol.Length(min=1),
+        ),
     }
 )
 
 
-def _build_feed_daily_list(feed_daily_list: list[dict]) -> list[dict]:
-    """Transform the user-friendly service call data into the Petkit API format.
+def _coerce_amount(value: Any) -> int:
+    """Unused hopper fields come back as None on the cloud models."""
+    if value is None:
+        return 0
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
 
-    Adds computed fields (count, totalAmount, totalAmount1, totalAmount2) and
-    normalizes each feed item to include all required API fields with defaults.
+
+def _build_feed_daily_list(feed_daily_list: list[dict]) -> list[dict]:
+    """Add the computed day-level fields the app sends.
+
+    Items are passed through with their ids and ``petAmount`` intact; the
+    library normalises them onto the wire shape (real ``deviceId``, family
+    ``deviceType``, and the id-from-time rewrite for newly added meals).
     """
     result = []
     for day in feed_daily_list:
-        items = []
-        total_amount = 0
-        total_amount1 = 0
-        total_amount2 = 0
-        for item in day["items"]:
-            amount = item.get("amount", 0)
-            amount1 = item.get("amount1", 0)
-            amount2 = item.get("amount2", 0)
-            total_amount += amount
-            total_amount1 += amount1
-            total_amount2 += amount2
-            items.append(
-                {
-                    "amount": amount,
-                    "amount1": amount1,
-                    "amount2": amount2,
-                    "deviceId": 0,
-                    "deviceType": 0,
-                    "id": item["time"],
-                    "name": item["name"],
-                    "petAmount": [],
-                    "time": item["time"],
-                }
-            )
+        items = [dict(item) for item in day.get("items") or []]
+        totals = [0, 0, 0]
+        for item in items:
+            for index, key in enumerate(("amount", "amount1", "amount2")):
+                value = _coerce_amount(item.get(key))
+                item[key] = value
+                totals[index] += value
         result.append(
             {
                 "count": len(items),
                 "items": items,
-                "repeats": str(day["repeats"]),
-                "suspended": day.get("suspended", 0),
-                "totalAmount": total_amount,
-                "totalAmount1": total_amount1,
-                "totalAmount2": total_amount2,
+                "repeats": str(day.get("repeats", "")),
+                "suspended": _coerce_amount(day.get("suspended")),
+                "totalAmount": totals[0],
+                "totalAmount1": totals[1],
+                "totalAmount2": totals[2],
             }
         )
     return result
 
 
-async def _async_handle_set_feeding_schedule(
-    hass: HomeAssistant, call: ServiceCall
-) -> None:
-    """Handle the set_feeding_schedule service call."""
-    device_id = call.data["device_id"]
-    feed_daily_list = call.data["feed_daily_list"]
-
-    # Find the client that owns this device
-    client: PetKitClient | None = None
+def _find_feeder_client(
+    hass: HomeAssistant, device_id: int
+) -> tuple[PetKitClient, Feeder]:
+    """Return the PetKit client and feeder entity for a numeric device id."""
     for entry in hass.config_entries.async_entries(DOMAIN):
         if hasattr(entry, "runtime_data") and entry.runtime_data:
             candidate = entry.runtime_data.client
             if device_id in candidate.petkit_entities:
                 device = candidate.petkit_entities[device_id]
                 if isinstance(device, Feeder):
-                    client = candidate
-                    break
+                    return candidate, device
+    raise ValueError(
+        f"Feeder with device_id {device_id} not found. "
+        "Ensure the device_id matches a registered Petkit feeder."
+    )
 
-    if client is None:
-        raise ValueError(
-            f"Feeder with device_id {device_id} not found. "
-            "Ensure the device_id matches a registered Petkit feeder."
-        )
 
-    api_payload = _build_feed_daily_list(feed_daily_list)
-
+async def _save_feed_days(
+    client: PetKitClient, device_id: int, days: list[dict]
+) -> None:
+    """POST SAVE_FEED with a 7-day OEM list (library reshapes Mini)."""
+    api_payload = _build_feed_daily_list(days)
     LOGGER.debug(
         "Setting feeding schedule for device %s with %d day(s)",
         device_id,
         len(api_payload),
     )
-
     await client.send_api_request(device_id, FeederCommand.SAVE_FEED, api_payload)
 
 
@@ -235,7 +310,7 @@ async def _async_handle_scheduled_feed(
 ) -> None:
     """Skip or restore one of today's feeding-plan entries."""
     device_id = call.data["device_id"]
-    seconds = call.data["time"]
+    seconds = call.data["time"] if "time" in call.data else call.data["key"]
     at = f"{seconds // 3600:02d}:{seconds % 3600 // 60:02d}"
 
     for entry in hass.config_entries.async_entries(DOMAIN):
@@ -252,30 +327,109 @@ async def _async_handle_scheduled_feed(
             f"Device {device_id} does not support skipping scheduled feeds"
         )
 
-    # pypetkitapi stamps the request with datetime.now() too, so both agree
-    today = int(datetime.now().strftime("%Y%m%d"))
+    # "Today" and "already passed" follow the device's clock, as in the app.
+    now = device_now(device)
+    today = int(now.strftime("%Y%m%d"))
     item = find_scheduled_feed(device, today, seconds)
     if item is None:
         raise ServiceValidationError(f"No scheduled feed at {at} today")
-    if skip and item.status == 1:
-        raise ServiceValidationError(f"The {at} feed is already skipped")
-    if skip and item.state is not None:
-        raise ServiceValidationError(f"The {at} feed has already run")
-    if not skip and item.status != 1:
-        raise ServiceValidationError(f"The {at} feed is not skipped")
+    refusal = scheduled_feed_refusal(
+        item, skip=skip, now_secs=now.hour * 3600 + now.minute * 60 + now.second
+    )
+    if refusal is not None:
+        raise ServiceValidationError(f"The {at} feed {refusal}")
 
     command = (
         FeederCommand.REMOVE_DAILY_FEED if skip else FeederCommand.RESTORE_DAILY_FEED
     )
     # An object with feed_id, not a dict: pypetkitapi <= 1.29.0 reads the id
-    # as an attribute, and later versions accept both.
+    # as an attribute, and later versions accept both. ``day`` is the record's
+    # own day; older versions ignore it and stamp the local date.
     try:
         await runtime.client.send_api_request(
-            device_id, command, SimpleNamespace(feed_id=item.id)
+            device_id, command, SimpleNamespace(feed_id=item.id, day=today)
         )
     except PypetkitError as err:
         raise HomeAssistantError(f"PetKit refused the request: {err}") from err
     await runtime.coordinator.async_request_refresh()
+
+
+async def _async_handle_set_feeding_schedule(
+    hass: HomeAssistant, call: ServiceCall
+) -> None:
+    """Handle the set_feeding_schedule service call."""
+    device_id = call.data["device_id"]
+    client, feeder = _find_feeder_client(hass, device_id)
+    if call.data.get("schedule") is not None:
+        previous = feed_daily_list_from_feeder(feeder)
+        days = schedule_to_feed_daily_list(call.data["schedule"], feeder, previous)
+        await _save_feed_days(client, device_id, days)
+        return
+    feed_daily_list = call.data.get("feed_daily_list")
+    if not feed_daily_list:
+        raise ValueError("set_feeding_schedule requires schedule or feed_daily_list")
+    await _save_feed_days(client, device_id, feed_daily_list)
+
+
+async def _async_handle_add_entry(hass: HomeAssistant, call: ServiceCall) -> None:
+    """Merge one OpenPetBowl row then SAVE_FEED."""
+    device_id = call.data["device_id"]
+    client, feeder = _find_feeder_client(hass, device_id)
+    days = add_schedule_entry(
+        feeder,
+        hour=call.data["hour"],
+        minute=call.data["minute"],
+        values=list(call.data["values"]),
+        weekdays=call.data.get("weekdays"),
+        label=call.data["label"],
+    )
+    await _save_feed_days(client, device_id, days)
+
+
+async def _async_handle_edit_entry(hass: HomeAssistant, call: ServiceCall) -> None:
+    """Patch one OpenPetBowl row then SAVE_FEED."""
+    device_id = call.data["device_id"]
+    client, feeder = _find_feeder_client(hass, device_id)
+    days = edit_schedule_entry(
+        feeder,
+        key=call.data["key"],
+        hour=call.data["hour"],
+        minute=call.data["minute"],
+        values=list(call.data["values"]),
+        weekdays=call.data.get("weekdays"),
+        label=call.data["label"],
+    )
+    await _save_feed_days(client, device_id, days)
+
+
+async def _async_handle_remove_entry(hass: HomeAssistant, call: ServiceCall) -> None:
+    """Drop one OpenPetBowl row then SAVE_FEED."""
+    device_id = call.data["device_id"]
+    client, feeder = _find_feeder_client(hass, device_id)
+    days = remove_schedule_entry(feeder, call.data["key"])
+    await _save_feed_days(client, device_id, days)
+
+
+async def _async_handle_set_plan_weekdays(
+    hass: HomeAssistant, call: ServiceCall
+) -> None:
+    """Re-save the D1/Mini plan on a new weekday mask.
+
+    This is the app's plan-level Repeat control. It covers every meal at once —
+    the family has no per-meal weekday — so it is a service rather than part of
+    the schedule rows.
+    """
+    device_id = call.data["device_id"]
+    client, feeder = _find_feeder_client(hass, device_id)
+    repeats = set_plan_weekdays(feeder, list(call.data["weekdays"]))
+    LOGGER.debug(
+        "Setting feeding plan weekdays for device %s to %s (1=Sunday)",
+        device_id,
+        repeats,
+    )
+    await client.send_api_request(
+        device_id, FeederCommand.SET_PLAN_REPEATS, {"repeats": repeats}
+    )
 
 
 async def async_setup_entry(
@@ -398,11 +552,47 @@ async def async_setup_entry(
             """Wrapper so HA detects this as a coroutine function."""
             await _async_handle_set_feeding_schedule(hass, call)
 
+        async def handle_add_entry(call: ServiceCall) -> None:
+            await _async_handle_add_entry(hass, call)
+
+        async def handle_edit_entry(call: ServiceCall) -> None:
+            await _async_handle_edit_entry(hass, call)
+
+        async def handle_remove_entry(call: ServiceCall) -> None:
+            await _async_handle_remove_entry(hass, call)
+
+        async def handle_set_plan_weekdays(call: ServiceCall) -> None:
+            await _async_handle_set_plan_weekdays(hass, call)
+
         hass.services.async_register(
             DOMAIN,
             SERVICE_SET_FEEDING_SCHEDULE,
             handle_set_feeding_schedule,
             schema=SERVICE_SET_FEEDING_SCHEDULE_SCHEMA,
+        )
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_ADD_FEEDING_SCHEDULE_ENTRY,
+            handle_add_entry,
+            schema=SERVICE_ADD_ENTRY_SCHEMA,
+        )
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_EDIT_FEEDING_SCHEDULE_ENTRY,
+            handle_edit_entry,
+            schema=SERVICE_EDIT_ENTRY_SCHEMA,
+        )
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_REMOVE_FEEDING_SCHEDULE_ENTRY,
+            handle_remove_entry,
+            schema=SERVICE_REMOVE_ENTRY_SCHEMA,
+        )
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SET_FEEDING_PLAN_WEEKDAYS,
+            handle_set_plan_weekdays,
+            schema=SERVICE_SET_PLAN_WEEKDAYS_SCHEMA,
         )
 
     if not hass.services.has_service(DOMAIN, SERVICE_SKIP_SCHEDULED_FEED):
