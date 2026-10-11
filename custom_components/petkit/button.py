@@ -281,11 +281,9 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
                 device.id, FountainAction.PAUSE
             ),
             only_for_types=DEVICES_WATER_FOUNTAIN,
+            # Pause/resume switch the fountain off/on, as in the app; the mode is kept
             is_available=lambda device: (
-                device.status
-                and device.status.run_status is not None
-                and device.status.run_status > 0
-                and device.status.power_status == 1
+                device.status is not None and device.status.power_status == 1
             ),
             ignore_types=[W7H],
         ),
@@ -297,10 +295,7 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
             ),
             only_for_types=DEVICES_WATER_FOUNTAIN,
             is_available=lambda device: (
-                device.status
-                and device.status.run_status is not None
-                and device.status.run_status == 0
-                and device.status.power_status == 1
+                device.status is not None and device.status.power_status == 0
             ),
             ignore_types=[W7H],
         ),

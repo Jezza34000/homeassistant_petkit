@@ -10,6 +10,7 @@ from pypetkitapi import (
     D4H,
     D4SH,
     T7,
+    W5,
     W7H,
     DeviceCommand,
     Feeder,
@@ -18,6 +19,7 @@ from pypetkitapi import (
     Purifier,
     WaterFountain,
 )
+from pypetkitapi.command import FountainAction
 
 from homeassistant.components.select import SelectEntity, SelectEntityDescription
 from homeassistant.const import EntityCategory
@@ -26,6 +28,7 @@ from .const import (
     CLEANING_INTERVAL_OPT,
     FOUNTAIN_DRAIN_FLUSH_CYCLE,
     FOUNTAIN_DRAIN_REFILL_CYCLE,
+    FOUNTAIN_WORKING_MODE_W5,
     FOUNTAIN_WORKING_MODE_W7H,
     IA_DETECTION_SENSITIVITY_OPT,
     LITTER_TYPE_OPT,
@@ -101,6 +104,32 @@ async def _handle_drain_and_flush(api, device, opt_value):
             DeviceCommand.UPDATE_SETTING,
             {"autoFlush": 1, "flushCycle": selected_key},
         )
+
+
+async def _handle_fountain_mode(api, device, opt_value):
+    """Pause the fountain or switch its mode, as the app does."""
+    key = next(k for k, v in FOUNTAIN_WORKING_MODE_W5.items() if v == opt_value)
+    action = {
+        0: FountainAction.PAUSE,
+        1: FountainAction.MODE_NORMAL,
+        2: FountainAction.MODE_SMART,
+    }[key]
+    if not await api.bluetooth_manager.send_ble_command(device.id, action):
+        return
+    # The cloud only reflects the change after the relay syncs, so show it now;
+    # the next poll confirms it.
+    fountain = api.petkit_entities.get(device.id)
+    if fountain is not None and fountain.status is not None:
+        fountain.status.power_status = 0 if key == 0 else 1
+        if key:
+            fountain.mode = key
+
+
+def _fountain_mode(device) -> str | None:
+    """Return Pause while the fountain is off, otherwise its mode."""
+    if device.status is not None and device.status.power_status == 0:
+        return FOUNTAIN_WORKING_MODE_W5[0]
+    return FOUNTAIN_WORKING_MODE_W5.get(device.mode)
 
 
 COMMON_ENTITIES = []
@@ -229,6 +258,14 @@ SELECT_MAPPING: dict[type[PetkitDevices], list[PetKitSelectDesc]] = {
     WaterFountain: [
         *COMMON_ENTITIES,
         PetKitSelectDesc(
+            key="Working mode",
+            translation_key="working_mode",
+            current_option=_fountain_mode,
+            options=lambda: list(FOUNTAIN_WORKING_MODE_W5.values()),
+            action=_handle_fountain_mode,
+            only_for_types=[W5],
+        ),
+        PetKitSelectDesc(
             key="Flow",
             translation_key="flow",
             current_option=lambda device: FOUNTAIN_WORKING_MODE_W7H.get(
@@ -351,3 +388,4 @@ class PetkitSelect(PetkitEntity, SelectEntity):
         await self.entity_description.action(
             self.coordinator.config_entry.runtime_data.client, self.device, value
         )
+        self.async_write_ha_state()
