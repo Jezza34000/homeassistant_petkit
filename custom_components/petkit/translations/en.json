@@ -462,6 +462,12 @@
       "drink_times": {
         "name": "Drink times"
       },
+      "last_drink_pet": {
+        "name": "Last pet to drink"
+      },
+      "raw_drink_data": {
+        "name": "RAW drink data"
+      },
       "end_date_care_plus_subscription": {
         "name": "Care+ remaining days"
       },
