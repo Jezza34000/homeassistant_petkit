@@ -19,6 +19,7 @@ import hmac
 import json
 import logging
 import re
+import ssl
 from typing import Any
 
 from pypetkitapi.client import PetKitClient
@@ -39,8 +40,46 @@ except ImportError:
     CallbackAPIVersion = None
 
 
+# Official Alibaba Cloud IoT Platform Root CA certificate for port 8883 (valid until 2053).
+# Aliyun IoT brokers on port 8883 present a certificate chain signed by this private Root CA,
+# which is not included in standard OS/certifi trust stores.
+_ALIYUN_IOT_ROOT_CA = """-----BEGIN CERTIFICATE-----
+MIID3zCCAsegAwIBAgISfiX6mTa5RMUTGSC3rQhnestIMA0GCSqGSIb3DQEBCwUA
+MHcxCzAJBgNVBAYTAkNOMREwDwYDVQQIDAhaaGVqaWFuZzERMA8GA1UEBwwISGFu
+Z3pob3UxEzARBgNVBAoMCkFsaXl1biBJb1QxEDAOBgNVBAsMB1Jvb3QgQ0ExGzAZ
+BgNVBAMMEkFsaXl1biBJb1QgUm9vdCBDQTAgFw0yMzA3MDQwNjM2NThaGA8yMDUz
+MDcwNDA2MzY1OFowdzELMAkGA1UEBhMCQ04xETAPBgNVBAgMCFpoZWppYW5nMREw
+DwYDVQQHDAhIYW5nemhvdTETMBEGA1UECgwKQWxpeXVuIElvVDEQMA4GA1UECwwH
+Um9vdCBDQTEbMBkGA1UEAwwSQWxpeXVuIElvVCBSb290IENBMIIBIjANBgkqhkiG
+9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoK//6vc2oXhnvJD7BVhj6grj7PMlN2N4iNH4
+GBmLmMdkF1z9eQLjksYc4Zid/FX67ypWFtdycOei5ec0X00m53Gvy4zLGBo2uKgi
+T9IxMudmt95bORZbaph4VK82gPNU4ewbiI1q2loRZEHRdyPORTPpvNLHu8DrYBnY
+Vg5feEYLLyhxg5M1UTrT/30RggHpaa0BYIPxwsKyylQ1OskOsyZQeOyPe8t8r2D4
+RBpUGc5ix4j537HYTKSyK3Hv57R7w1NzKtXoOioDOm+YySsz9sTLFajZkUcQci4X
+aedyEeguDLAIUKiYicJhRCZWljVlZActorTgjCY4zRajodThrQIDAQABo2MwYTAO
+BgNVHQ8BAf8EBAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUkWHoKi2h
+DlS1/rYpcT/Ue+aKhP8wHwYDVR0jBBgwFoAUkWHoKi2hDlS1/rYpcT/Ue+aKhP8w
+DQYJKoZIhvcNAQELBQADggEBADrrLcBY7gDXN8/0KHvPbGwMrEAJcnF9z4MBxRvt
+rEoRxhlvRZzPi7w/868xbipwwnksZsn0QNIiAZ6XzbwvIFG01ONJET+OzDy6ZqUb
+YmJI09EOe9/Hst8Fac2D14Oyw0+6KTqZW7WWrP2TAgv8/Uox2S05pCWNfJpRZxOv
+Lr4DZmnXBJCMNMY/X7xpcjylq+uCj118PBobfH9Oo+iAJ4YyjOLmX3bflKIn1Oat
+vdJBtXCj3phpfuf56VwKxoxEVR818GqPAHnz9oVvye4sQqBp/2ynrKFxZKUaJtk0
+7UeVbtecwnQTrlcpWM7ACQC0OO0M9+uNjpKIbksv1s11xu0=
+-----END CERTIFICATE-----"""
+
+
+def _create_mqtt_ssl_context() -> ssl.SSLContext:
+    """Create a secure SSL context for the Petkit IoT MQTT connection."""
+    ssl_context = ssl.create_default_context()
+    ssl_context.load_verify_locations(cadata=_ALIYUN_IOT_ROOT_CA)
+    ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
+    return ssl_context
+
+
+_SSL_CONTEXT = _create_mqtt_ssl_context()
+
 _HOST_PORT_RE = re.compile(r"^(?P<host>.+?)(?::(?P<port>\d+))?$")
-_SCHEME_RE = re.compile(r"^(?:tcp|ssl|mqtt|mqtts)://", re.IGNORECASE)
+_SCHEME_RE = re.compile(r"^(?:tcp|ssl|mqtt|mqtts|tls)://", re.IGNORECASE)
 
 
 class MqttConnectionStatus(StrEnum):
@@ -103,7 +142,7 @@ def _aliyun_mqtt_sign(
     """Compute Aliyun IoT MQTT credentials (clientId, username, password).
 
     Follows the Alibaba Cloud IoT authentication protocol:
-    - clientId: ``{clientId}|securemode=3,signmethod=hmacsha256|``
+    - clientId: ``{clientId}|securemode=2,signmethod=hmacsha256|``
     - username: ``{deviceName}&{productKey}``
     - password: HMAC-SHA256(deviceSecret, content) where content is
       ``clientId{cid}deviceName{dn}productKey{pk}`` (keys sorted alphabetically).
@@ -112,22 +151,22 @@ def _aliyun_mqtt_sign(
     sign = hmac.new(
         device_secret.encode(), content.encode(), hashlib.sha256
     ).hexdigest()
-    mqtt_client_id = f"{client_id}|securemode=3,signmethod=hmacsha256|"
+    mqtt_client_id = f"{client_id}|securemode=2,signmethod=hmacsha256|"
     mqtt_username = f"{device_name}&{product_key}"
     return mqtt_client_id, mqtt_username, sign
 
 
-def _parse_mqtt_host(raw: str, *, default_port: int = 1883) -> _MqttEndpoint:
+def _parse_mqtt_host(raw: str, *, default_port: int = 8883) -> _MqttEndpoint:
     """Parse `host[:port]` as returned by Petkit's IoT endpoint."""
     raw = (raw or "").strip()
     if not raw:
         raise ValueError("Empty mqtt host")
 
-    # Strip URI scheme prefixes (tcp://, ssl://, mqtt://, mqtts://)
+    # Strip URI scheme prefixes (tcp://, ssl://, mqtt://, mqtts://, tls://)
     raw = _SCHEME_RE.sub("", raw)
 
     # Very small parser; Petkit appears to return host:port for IPv4/hostname.
-    # If we ever encounter IPv6 literals, we can extend this to handle [::1]:1883.
+    # If we ever encounter IPv6 literals, we can extend this to handle [::1]:8883.
     match = _HOST_PORT_RE.match(raw)
     if not match:
         raise ValueError(f"Invalid mqtt host: {raw!r}")
@@ -135,6 +174,8 @@ def _parse_mqtt_host(raw: str, *, default_port: int = 1883) -> _MqttEndpoint:
     host = (match.group("host") or "").strip()
     port_raw = match.group("port")
     port = int(port_raw) if port_raw else default_port
+    if port == 1883 and default_port == 8883:
+        port = 8883
 
     if not host:
         raise ValueError(f"Invalid mqtt host: {raw!r}")
@@ -301,6 +342,7 @@ class PetkitIotMqttListener:
             clean_session=False,
             protocol=mqtt.MQTTv311,
         )
+        paho_client.tls_set_context(_SSL_CONTEXT)
         paho_client.username_pw_set(mqtt_username, mqtt_password)
         paho_client.will_set(
             f"{base}/update", payload='{"status":"offline"}', qos=0, retain=False
@@ -317,6 +359,17 @@ class PetkitIotMqttListener:
 
         self._mqtt_client = paho_client
         self._connection_status = MqttConnectionStatus.CONNECTING
+
+        LOGGER.debug(
+            "MQTT connection details - host: %s, protocol: %s, port: %s, username: %s, password: %s, client_id: %s, topics: %s",
+            endpoint.host,
+            "MQTTv311 (TLS)",
+            endpoint.port,
+            mqtt_username,
+            mqtt_password,
+            mqtt_client_id,
+            self._subscribe_topics,
+        )
 
         try:
             paho_client.connect_async(endpoint.host, endpoint.port, keepalive=60)
