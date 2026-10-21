@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import datetime
+import datetime as dt
 from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
@@ -205,7 +205,7 @@ class PetkitImage(PetkitEntity, ImageEntity):
         )
 
         image_path = latest_media_file.full_file_path
-        self._attr_image_last_updated = datetime.datetime.fromtimestamp(
+        self._attr_image_last_updated = dt.datetime.fromtimestamp(
             latest_media_file.timestamp
         )
         self._last_image_file = image_path

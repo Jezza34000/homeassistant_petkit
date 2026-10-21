@@ -1,6 +1,6 @@
 repos:
   - repo: https://gitlab.com/vojko.pribudic.foss/pre-commit-update
-    rev: v0.9.0
+    rev: v0.10.0
     hooks:
       - id: pre-commit-update
         stages: [manual]
@@ -29,19 +29,19 @@ repos:
     hooks:
       - id: codespell
         args:
-          - --ignore-words-list=astroid,checkin,currenty,hass,iif,incomfort,lookin,nam,NotIn,informations,medias
+          - --ignore-words-list=astroid,checkin,currenty,hass,iif,incomfort,lookin,nam,NotIn,informations,medias,Ue
           - --skip="./.*,*.csv,*.json,*.ambr"
           - --quiet-level=2
         exclude_types: [csv, json, html, markdown]
         exclude: ^tests/fixtures/|homeassistant/generated/|tests/components/.*/snapshots/|.github|const.py
 
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 26.10.0
+    rev: 26.10.1
     hooks:
       - id: black
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.10
+    rev: v0.17.1
     hooks:
       - id: ruff
         args:
@@ -60,7 +60,7 @@ repos:
         exclude: ./translations/|renovate.json
 
   - repo: https://github.com/cdce8p/python-typing-update
-    rev: v0.8.1
+    rev: v0.9.0
     hooks:
       # Run `python-typing-update` hook manually from time to time
       # to update python typing syntax.
@@ -74,7 +74,7 @@ repos:
           - --keep-updates
 
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: 44.138.0
+    rev: 44.175.0
     hooks:
       - id: renovate-config-validator
 

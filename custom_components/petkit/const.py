@@ -146,6 +146,14 @@ FOUNTAIN_WORKING_MODE_CTW3 = {
     3: "Battery",
 }
 
+# W5: Pause and the two modes, as on the app's home screen. Pause is
+# power_status 0; the mode is kept while paused.
+FOUNTAIN_WORKING_MODE_W5 = {
+    0: "Pause",
+    1: "Normal",
+    2: "Smart",
+}
+
 FOUNTAIN_WORKING_MODE_W7H = {
     0: "Do not flow",
     1: "Continuous",

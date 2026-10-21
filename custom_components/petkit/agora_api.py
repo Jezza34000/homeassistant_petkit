@@ -455,7 +455,6 @@ class AgoraAPIClient:
             url,
             data=form_data,
             timeout=aiohttp.ClientTimeout(total=10),
-            ssl=False,
         ) as response:
             if response.status != 200:
                 raise ValueError(

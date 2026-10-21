@@ -10,7 +10,7 @@ on:
 
 permissions:
   actions: write
-  contents: write
+  contents: read
 
 jobs:
   tests:

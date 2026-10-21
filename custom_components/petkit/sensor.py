@@ -173,13 +173,6 @@ COMMON_ENTITIES = [
             ).days,
         ),
     ),
-    PetKitSensorDesc(
-        key="Device ID",
-        translation_key="device_id",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        value=lambda device: device.device_nfo.device_id,
-        only_for_types=[*LITTER_WITH_CAMERA, *FEEDER_WITH_CAMERA],
-    ),
 ]
 
 SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
@@ -745,7 +738,9 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             translation_key="next_flush_time",
             device_class=SensorDeviceClass.TIMESTAMP,
             value=lambda device: (
-                datetime.strptime(device.next_flush_time, "%Y/%m/%d %H:%M")
+                datetime.strptime(device.next_flush_time, "%Y/%m/%d %H:%M").replace(
+                    tzinfo=UTC
+                )
                 if device.next_flush_time
                 else None
             ),
@@ -755,7 +750,9 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             translation_key="next_water_change_time",
             device_class=SensorDeviceClass.TIMESTAMP,
             value=lambda device: (
-                datetime.strptime(device.next_water_change_time, "%Y/%m/%d %H:%M")
+                datetime.strptime(
+                    device.next_water_change_time, "%Y/%m/%d %H:%M"
+                ).replace(tzinfo=UTC)
                 if device.next_water_change_time
                 else None
             ),
