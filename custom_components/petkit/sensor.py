@@ -13,7 +13,6 @@ from pypetkitapi import (
     D4S,
     D4SH,
     DEVICES_LITTER_BOX,
-    FEEDER_WITH_CAMERA,
     FOUNTAIN_WITH_CAMERA,
     K2,
     K3,
