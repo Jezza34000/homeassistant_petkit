@@ -11,6 +11,10 @@ on:
     branches:
       - "main"
 
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   hassfest:
     name: "Hassfest Validation"
