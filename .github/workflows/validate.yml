@@ -12,13 +12,15 @@ on:
       - "main"
 
 permissions:
-  actions: write
   contents: read
 
 jobs:
   hassfest:
     name: "Hassfest Validation"
     runs-on: "ubuntu-latest"
+    permissions:
+      actions: write
+      contents: read
     steps:
       - name: "Checkout the repository"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Version 7.0.1
@@ -29,6 +31,9 @@ jobs:
   hacs:
     name: "HACS Validation"
     runs-on: "ubuntu-latest"
+    permissions:
+      actions: write
+      contents: read
     steps:
       - name: "Checkout the repository"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Version 7.0.1
