@@ -206,6 +206,7 @@ BUTTON_MAPPING: dict[type[PetkitDevices], list[PetKitButtonDesc]] = {
                 DeviceCommand.CONTROL_DEVICE,
                 {DeviceAction.START: LBCommand.ODOR_REMOVAL},
             ),
+            only_for_types=[T3],
             force_add=[T3],
         ),
         PetKitButtonDesc(
