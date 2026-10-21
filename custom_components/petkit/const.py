@@ -97,23 +97,15 @@ NO_ERROR = "No error"
 # Status mapping
 POWER_ONLINE_STATE = [1, 2]
 
-# Values are translation keys, not display strings: Home Assistant only applies
-# `state` translations to sensors declared with SensorDeviceClass.ENUM, so these
-# must match the keys under entity.sensor.<translation_key>.state in strings.json.
 DEVICE_STATUS_MAP = {
     0: "offline",
-    1: "online",
-    2: "on_battery",
+    1: "online_ac",
+    2: "online_battery",
 }
+DEVICE_STATUS_OPTIONS = ["offline", "online_ac", "online_battery", "unknown"]
 
-DEVICE_STATUS_OPTIONS = ["offline", "online", "on_battery", "unknown"]
-
-BATTERY_LEVEL_MAP = {
-    "0": "low",
-    "1": "normal",
-}
-
-BATTERY_LEVEL_OPTIONS = ["low", "normal", "not_in_use", "unknown"]
+POWER_MAP = {0: "main_power", 1: "on_battery", 2: "on_battery_low"}
+POWER_OPTIONS = ["main_power", "on_battery", "on_battery_low", "unknown"]
 
 # Select list mapping
 SURPLUS_FOOD_LEVEL_OPT = {0: "Disabled", 1: "Less", 2: "Moderate", 3: "Full"}
@@ -152,6 +144,14 @@ FOUNTAIN_WORKING_MODE_CTW3 = {
     1: "Standard",
     2: "Intermittent",
     3: "Battery",
+}
+
+# W5: Pause and the two modes, as on the app's home screen. Pause is
+# power_status 0; the mode is kept while paused.
+FOUNTAIN_WORKING_MODE_W5 = {
+    0: "Pause",
+    1: "Normal",
+    2: "Smart",
 }
 
 FOUNTAIN_WORKING_MODE_W7H = {

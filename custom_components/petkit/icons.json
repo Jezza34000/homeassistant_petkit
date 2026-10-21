@@ -339,9 +339,10 @@
       "battery_level": {
         "default": "mdi:battery",
         "state": {
-          "low": "mdi:battery-low",
-          "normal": "mdi:battery-high",
-          "not_in_use": "mdi:battery-unknown"
+          "0": "mdi:battery-off-outline",
+          "100": "mdi:battery-high",
+          "25": "mdi:battery-low",
+          "75": "mdi:battery-medium"
         }
       },
       "battery_power": {
@@ -412,6 +413,9 @@
       },
       "last_connection": {
         "default": "mdi:bluetooth"
+      },
+      "last_drink_pet": {
+        "default": "mdi:paw"
       },
       "last_eat_event": {
         "default": "mdi:calendar-star"
@@ -489,6 +493,14 @@
       "planned_dispensed_hopper_2": {
         "default": "mdi:food-drumstick"
       },
+      "power_type": {
+        "default": "mdi:power-plug-battery",
+        "state": {
+          "low_battery": "mdi:battery-alert",
+          "main_power": "mdi:power-plug",
+          "on_battery": "mdi:battery"
+        }
+      },
       "purification_n60_left_days": {
         "default": "mdi:air-filter"
       },
@@ -499,6 +511,9 @@
         "default": "mdi:hydraulic-oil-level"
       },
       "raw_distribution_data": {
+        "default": "mdi:format-list-bulleted-type"
+      },
+      "raw_drink_data": {
         "default": "mdi:format-list-bulleted-type"
       },
       "rssi": {
@@ -696,6 +711,13 @@
         "state": {
           "off": "mdi:bell-off",
           "on": "mdi:bell-check"
+        }
+      },
+      "feeding_schedule": {
+        "default": "mdi:calendar-clock",
+        "state": {
+          "off": "mdi:calendar-remove",
+          "on": "mdi:calendar-clock"
         }
       },
       "heater_switch": {

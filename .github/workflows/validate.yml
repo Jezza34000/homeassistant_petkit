@@ -11,20 +11,29 @@ on:
     branches:
       - "main"
 
+permissions:
+  contents: read
+
 jobs:
   hassfest:
     name: "Hassfest Validation"
     runs-on: "ubuntu-latest"
+    permissions:
+      actions: write
+      contents: read
     steps:
       - name: "Checkout the repository"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Version 7.0.1
 
       - name: "Run hassfest validation"
-        uses: home-assistant/actions/hassfest@58bff37c8947f690ace498be413a9b78d6f30f93 # Version 11 September 2025
+        uses: home-assistant/actions/hassfest@cd6f3635a740c84d8a14f6121a90068b8ece6bf6 # Version 11 September 2025
 
   hacs:
     name: "HACS Validation"
     runs-on: "ubuntu-latest"
+    permissions:
+      actions: write
+      contents: read
     steps:
       - name: "Checkout the repository"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Version 7.0.1

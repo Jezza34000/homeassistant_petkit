@@ -62,11 +62,6 @@ def get_pump_running_status(device):
 
 COMMON_ENTITIES = [
     PetKitBinarySensorDesc(
-        key="Camera status",
-        translation_key="camera_status",
-        value=lambda device: device.state.camera_status,
-    ),
-    PetKitBinarySensorDesc(
         key="Care plus subscription",
         translation_key="care_plus_subscription",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -87,13 +82,6 @@ BINARY_SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitBinarySensorDesc]] =
             device_class=BinarySensorDeviceClass.RUNNING,
             value=lambda device: device.state.feeding,
             enable_fast_poll=True,
-        ),
-        PetKitBinarySensorDesc(
-            key="Battery installed",
-            translation_key="battery_installed",
-            entity_category=EntityCategory.DIAGNOSTIC,
-            value=lambda device: device.state.battery_power,
-            ignore_types=[D3],  # D3 had a buit-in battery
         ),
         PetKitBinarySensorDesc(
             key="Eating",

@@ -176,7 +176,7 @@ class PetkitText(PetkitEntity, TextEntity):
 
         if self.entity_description.valid_values is not None:
             values = self.entity_description.valid_values(self.device)
-            return f"^({'|'.join(str(value) for value in values)})$"
+            return f"^({'|'.join(str(value) for value in values)}|0)$"
         return self.entity_description.pattern
 
     @property

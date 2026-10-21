@@ -9,25 +9,40 @@ from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
 from pypetkitapi import (
+    D3,
+    D4,
+    D4H,
+    D4S,
+    D4SH,
     DEVICES_LITTER_BOX,
+    FEEDER,
     FEEDER_MINI,
     LITTER_WITH_CAMERA,
     T7,
     DeviceAction,
     DeviceCommand,
     Feeder,
+    FeederCommand,
     Litter,
     Pet,
     Purifier,
+    PypetkitError,
     WaterFountain,
 )
 from pypetkitapi.command import FountainAction
 
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.const import EntityCategory
+from homeassistant.exceptions import HomeAssistantError
 
 from .const import LOGGER, POWER_ONLINE_STATE, SCAN_INTERVAL_FAST
 from .entity import PetKitDescSensorBase, PetkitEntity
+from .schedule import (
+    PER_DAY_PAUSE_TYPES,
+    feeding_plan_state,
+    get_openpetbowl_attributes,
+    set_plan_suspended,
+)
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -35,6 +50,22 @@ if TYPE_CHECKING:
 
     from .coordinator import PetkitDataUpdateCoordinator
     from .data import PetkitConfigEntry, PetkitDevices
+
+
+def set_feeding_plan_enabled(api: Any, device: Feeder, enabled: bool) -> Any:
+    """Resume or pause the whole feeding plan the way the app does.
+
+    D1, Mini, D3 and D4 have a whole-plan call (suspend_feed/restore_feed for
+    the first two, suspendFeed/restoreFeed for the others, which pypetkitapi
+    picks). D4S, D4H and D4SH have none in the app: it marks every day
+    ``suspended`` and saves the plan again.
+    """
+    if device.device_nfo.device_type in PER_DAY_PAUSE_TYPES:
+        return api.send_api_request(
+            device.id, FeederCommand.SAVE_FEED, set_plan_suspended(device, not enabled)
+        )
+    command = FeederCommand.RESTORE_FEED if enabled else FeederCommand.SUSPEND_FEED
+    return api.send_api_request(device.id, command)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -387,6 +418,15 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
                 device.id, DeviceCommand.UPDATE_SETTING, {"settings.desiccantNotify": 0}
             ),
             only_for_types=[FEEDER_MINI],
+        ),
+        PetKitSwitchDesc(
+            key="Feeding schedule",
+            translation_key="feeding_schedule",
+            value=feeding_plan_state,
+            attributes=get_openpetbowl_attributes,
+            turn_on=lambda api, device: set_feeding_plan_enabled(api, device, True),
+            turn_off=lambda api, device: set_feeding_plan_enabled(api, device, False),
+            only_for_types=[FEEDER, FEEDER_MINI, D3, D4, D4S, D4H, D4SH],
         ),
     ],
     Litter: [
@@ -1054,20 +1094,37 @@ class PetkitSwitch(PetkitEntity, SwitchEntity):
             return bool(self.entity_description.value(updated_device))
         return None
 
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """Return extra state attributes."""
+        if self.entity_description.attributes:
+            updated_device = self.coordinator.data.get(self.device.id)
+            if updated_device:
+                return self.entity_description.attributes(updated_device)
+        return None
+
     async def async_turn_on(self, **_: Any) -> None:
         """Turn on the switch."""
         LOGGER.debug("Turn ON")
-        res = await self.entity_description.turn_on(
-            self.coordinator.config_entry.runtime_data.client, self.device
-        )
-        await self._update_coordinator_data(res)
+        await self._send(self.entity_description.turn_on)
 
     async def async_turn_off(self, **_: Any) -> None:
         """Turn off the switch."""
         LOGGER.debug("Turn OFF")
-        res = await self.entity_description.turn_off(
-            self.coordinator.config_entry.runtime_data.client, self.device
-        )
+        await self._send(self.entity_description.turn_off)
+
+    async def _send(self, command: Callable) -> None:
+        """Send a command, surfacing PetKit's own refusal to the user.
+
+        Without this a rejected request (e.g. code 1514 "Your operation is
+        too frequently") reaches the frontend as "Unexpected exception".
+        """
+        try:
+            res = await command(
+                self.coordinator.config_entry.runtime_data.client, self.device
+            )
+        except PypetkitError as err:
+            raise HomeAssistantError(f"PetKit refused the request: {err}") from err
         await self._update_coordinator_data(res)
 
     async def _update_coordinator_data(self, result: bool) -> None:

@@ -63,8 +63,8 @@
       "spray": {
         "name": "Désodorisant"
       },
-      "battery_installed": {
-        "name": "Batterie installée"
+      "battery_power": {
+        "name": "Niveau batterie"
       },
       "camera_status": {
         "name": "État de la caméra"
@@ -325,13 +325,7 @@
         "name": "Temps de repas moyen"
       },
       "battery_level": {
-        "name": "Niveau de la batterie",
-        "state": {
-          "low": "Faible",
-          "normal": "Normal",
-          "not_in_use": "Non utilisé",
-          "unknown": "Inconnu"
-        }
+        "name": "Niveau de batterie"
       },
       "odor_eliminator_n50_left_days": {
         "name": "Jours restants éliminateur d'odeurs N50"
@@ -349,8 +343,8 @@
         "name": "État de l'appareil",
         "state": {
           "offline": "Hors ligne",
-          "online": "En ligne",
-          "on_battery": "Sur batterie",
+          "online_ac": "Connecté",
+          "online_battery": "Connecté (batterie)",
           "unknown": "Inconnu"
         }
       },
@@ -365,6 +359,15 @@
       },
       "battery": {
         "name": "Batterie"
+      },
+      "power_type": {
+        "name": "Type d'alimentation",
+        "state": {
+          "main_power": "Prise",
+          "on_battery": "Batterie",
+          "on_battery_low": "Batterie faible",
+          "unknown": "Inconnu"
+        }
       },
       "error_message": {
         "name": "Erreur",

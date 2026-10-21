@@ -13,7 +13,7 @@ from pypetkitapi import (
     D4S,
     D4SH,
     DEVICES_LITTER_BOX,
-    FEEDER_WITH_CAMERA,
+    FOUNTAIN_WITH_CAMERA,
     K2,
     K3,
     LITTER_WITH_CAMERA,
@@ -52,16 +52,20 @@ from homeassistant.const import (
 )
 
 from .const import (
-    BATTERY_LEVEL_MAP,
-    BATTERY_LEVEL_OPTIONS,
     DEVICE_STATUS_MAP,
     DEVICE_STATUS_OPTIONS,
     DOMAIN,
     LOGGER,
     NO_ERROR,
+    POWER_MAP,
+    POWER_OPTIONS,
 )
 from .entity import PetKitDescSensorBase, PetkitEntity
 from .utils import (
+    count_drink_events,
+    get_last_drink_attributes,
+    get_last_drink_pet,
+    get_raw_drink_data,
     get_raw_feed_plan_from_schedule,
     get_raw_schedule,
     map_litter_event,
@@ -169,13 +173,6 @@ COMMON_ENTITIES = [
             ).days,
         ),
     ),
-    PetKitSensorDesc(
-        key="Device ID",
-        translation_key="device_id",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        value=lambda device: device.device_nfo.device_id,
-        only_for_types=[*LITTER_WITH_CAMERA, *FEEDER_WITH_CAMERA],
-    ),
 ]
 
 SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
@@ -189,15 +186,25 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             value=lambda device: device.state.desiccant_left_days,
         ),
         PetKitSensorDesc(
+            key="Power type",
+            translation_key="power_type",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            device_class=SensorDeviceClass.ENUM,
+            options=POWER_OPTIONS,
+            value=lambda device: (
+                POWER_MAP.get(device.state.battery_status, "unknown")
+            ),
+        ),
+        PetKitSensorDesc(
             key="Battery level",
             translation_key="battery_level",
             entity_category=EntityCategory.DIAGNOSTIC,
-            device_class=SensorDeviceClass.ENUM,
-            options=BATTERY_LEVEL_OPTIONS,
+            device_class=SensorDeviceClass.BATTERY,
+            native_unit_of_measurement=PERCENTAGE,
             value=lambda device: (
-                BATTERY_LEVEL_MAP.get(device.state.battery_status, "unknown")
-                if device.state.pim == 2
-                else "not_in_use"
+                device.state.battery_power * 25
+                if device.state.battery_power is not None
+                else None
             ),
         ),
         PetKitSensorDesc(
@@ -625,11 +632,26 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             key="Drink times",
             translation_key="drink_times",
             state_class=SensorStateClass.TOTAL,
-            value=lambda device: (
-                len(device.device_records)
-                if isinstance(device.device_records, list)
-                else None
-            ),
+            value=lambda device: count_drink_events(device),
+            force_add=FOUNTAIN_WITH_CAMERA,
+        ),
+        PetKitSensorDesc(
+            key="Last drink pet",
+            translation_key="last_drink_pet",
+            value=lambda device: get_last_drink_pet(device),
+            attributes=lambda device: get_last_drink_attributes(device),
+            restore_state=True,
+            only_for_types=FOUNTAIN_WITH_CAMERA,
+            force_add=FOUNTAIN_WITH_CAMERA,
+        ),
+        PetKitSensorDesc(
+            key="RAW drink data",
+            translation_key="raw_drink_data",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            value=lambda device: count_drink_events(device),
+            attributes=lambda device: get_raw_drink_data(device),
+            only_for_types=FOUNTAIN_WITH_CAMERA,
+            force_add=FOUNTAIN_WITH_CAMERA,
         ),
         PetKitSensorDesc(
             key="Battery",
@@ -988,6 +1010,9 @@ class PetkitSensor(PetkitEntity, RestoreSensor):
 
     entity_description: PetKitSensorDesc
     _restored_native_value: Any = None
+    # The drink event list can outgrow the recorder attribute size limit, and
+    # every event is already kept by the device: don't store it in the database.
+    _unrecorded_attributes = frozenset({"events"})
 
     def __init__(
         self,

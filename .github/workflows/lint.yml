@@ -9,13 +9,16 @@ on:
       - "main"
 
 permissions:
-  actions: write
-  contents: write
+  contents: read
 
 jobs:
   tests:
     name: "Python ${{ matrix.python-version }}"
     runs-on: "ubuntu-latest"
+
+    permissions:
+      actions: write
+      contents: read
 
     strategy:
       matrix:
