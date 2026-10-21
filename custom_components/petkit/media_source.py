@@ -56,9 +56,9 @@ class PetkitMediaSource(MediaSource):
             )
         )
         if raw.is_absolute():
-            self.media_path = raw
+            self.media_path = raw.resolve()
         else:
-            self.media_path = Path(DEFAULT_MEDIA_PATH) / raw
+            self.media_path = (Path(DEFAULT_MEDIA_PATH) / raw).resolve()
 
     def get_coordinator(self):
         """Retrieve the integration's coordinator."""
@@ -67,17 +67,30 @@ class PetkitMediaSource(MediaSource):
         LOGGER.error("Petkit coordinator not found in hass.data.")
         return None
 
+    def _resolve_media_path(self, identifier: str | None) -> Path:
+        """Resolve and validate a media identifier against path traversal (CWE-22)."""
+        base_path = self.media_path.resolve()
+        raw_id = (identifier or "").strip()
+        if Path(raw_id).is_absolute():
+            raise ValueError(f"Invalid media identifier: {identifier!r}")
+
+        resolved = (base_path / raw_id).resolve()
+        if not resolved.is_relative_to(base_path):
+            raise ValueError(f"Path traversal detected for identifier: {identifier!r}")
+
+        return resolved
+
     async def async_resolve_media(self, item: MediaSourceItem) -> PlayMedia:
         """Resolve media to a URL/path."""
-        file_path = self.media_path / Path(item.identifier)
-        if not file_path.exists():
+        file_path = self._resolve_media_path(item.identifier)
+        if not file_path.exists() or not file_path.is_file():
             raise ValueError(f"File not found: {file_path}")
         LOGGER.debug("Media Source: Resolving media %s", file_path)
         # Convert absolute FS path to URL under /media/local/<relative>.
         # This only works for files stored under /media; paths outside /media
         # (e.g. /config/...) cannot be served via HA's media browser URL.
         try:
-            rel = file_path.relative_to(Path(DEFAULT_MEDIA_PATH))
+            rel = file_path.relative_to(Path(DEFAULT_MEDIA_PATH).resolve())
         except ValueError as err:
             raise ValueError(
                 f"Cannot serve '{file_path}' via the HA media browser: "
@@ -97,19 +110,22 @@ class PetkitMediaSource(MediaSource):
 
     async def async_browse_media(self, item: MediaSourceItem) -> BrowseMediaSource:
         """Browse the media source."""
-        # Avoid duplicating the base path when identifier is empty.
-        identifier = item.identifier or ""
-        current_path = self.media_path / Path(identifier)
+        current_path = self._resolve_media_path(item.identifier)
 
         if not current_path.exists() or not current_path.is_dir():
             raise ValueError(f"Invalid path: {current_path}")
         LOGGER.debug("Media Source: Browsing %s", current_path)
 
         children = await asyncio.to_thread(self._get_children_from_path, current_path)
+        rel_identifier = (
+            ""
+            if current_path == self.media_path
+            else str(current_path.relative_to(self.media_path))
+        )
 
         return BrowseMediaSource(
             domain=DOMAIN,
-            identifier=str(current_path),
+            identifier=rel_identifier,
             title=DOMAIN.capitalize(),
             media_class=MediaClass.DIRECTORY,
             media_content_type=MediaType.PLAYLIST,
@@ -154,7 +170,7 @@ class PetkitMediaSource(MediaSource):
         """Build a file media item."""
         # Build thumbnail URL under /media/local/<relative>
         rel_snapshot_parent = child.parent.relative_to(
-            Path(DEFAULT_MEDIA_PATH)
+            Path(DEFAULT_MEDIA_PATH).resolve()
         ).with_name("snapshot")
         thumbnail_path = (
             Path(MEDIA_ROOT)
