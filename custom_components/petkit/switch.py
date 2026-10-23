@@ -18,6 +18,10 @@ from pypetkitapi import (
     FEEDER,
     FEEDER_MINI,
     LITTER_WITH_CAMERA,
+    T3,
+    T4,
+    T5,
+    T6,
     T7,
     DeviceAction,
     DeviceCommand,
@@ -443,6 +447,7 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             turn_off=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"autoRefresh": 0}
             ),
+            only_for_types=[T3, T4],
         ),
         PetKitSwitchDesc(
             # For T5/T6 only
@@ -456,6 +461,7 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             turn_off=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"autoSpray": 0}
             ),
+            only_for_types=[T5, T6],
         ),
         PetKitSwitchDesc(
             key="Auto clean",
@@ -505,6 +511,7 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             turn_off=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"fixedTimeRefresh": 0}
             ),
+            only_for_types=[T3, T4],
         ),
         PetKitSwitchDesc(
             # For T5/T6 only
@@ -518,6 +525,7 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             turn_off=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"fixedTimeSpray": 0}
             ),
+            only_for_types=[T5, T6],
         ),
         PetKitSwitchDesc(
             key="Kitten mode",
@@ -954,18 +962,6 @@ SWITCH_MAPPING: dict[type[PetkitDevices], list[PetKitSwitchDesc]] = {
             ),
             turn_off=lambda api, device: api.send_api_request(
                 device.id, DeviceCommand.UPDATE_SETTING, {"petNotify": 0}
-            ),
-        ),
-        PetKitSwitchDesc(
-            key="Drink detection",
-            translation_key="drink_detection",
-            value=lambda device: device.settings.pet_in_notify,
-            entity_category=EntityCategory.CONFIG,
-            turn_on=lambda api, device: api.send_api_request(
-                device.id, DeviceCommand.UPDATE_SETTING, {"drinkDetection": 1}
-            ),
-            turn_off=lambda api, device: api.send_api_request(
-                device.id, DeviceCommand.UPDATE_SETTING, {"drinkDetection": 0}
             ),
         ),
         PetKitSwitchDesc(

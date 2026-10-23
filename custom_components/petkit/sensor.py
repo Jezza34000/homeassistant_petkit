@@ -16,6 +16,7 @@ from pypetkitapi import (
     FOUNTAIN_WITH_CAMERA,
     K2,
     K3,
+    LITTER_NO_CAMERA,
     LITTER_WITH_CAMERA,
     T3,
     T4,
@@ -469,7 +470,7 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
                 if device.device_stats.statistic_info
                 else None
             ),
-            force_add=[T3, T4],
+            force_add=LITTER_NO_CAMERA,
             restore_state=True,
         ),
         PetKitSensorDesc(
