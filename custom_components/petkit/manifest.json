@@ -1,6 +1,7 @@
 {
   "domain": "petkit",
   "name": "Petkit",
+  "integration_type": "service",
   "after_dependencies": ["web_rtc", "go2rtc"],
   "codeowners": ["@Jezza34000"],
   "config_flow": true,
