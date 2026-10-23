@@ -12,6 +12,7 @@ from pypetkitapi import (
     D4H,
     D4S,
     D4SH,
+    DEVICES_FEEDER,
     DEVICES_LITTER_BOX,
     FOUNTAIN_WITH_CAMERA,
     K2,
@@ -203,9 +204,10 @@ SENSOR_MAPPING: dict[type[PetkitDevices], list[PetKitSensorDesc]] = {
             native_unit_of_measurement=PERCENTAGE,
             value=lambda device: (
                 device.state.battery_power * 25
-                if device.state.battery_power is not None
+                if device.state.pim == 2 and device.state.battery_power is not None
                 else None
             ),
+            force_add=DEVICES_FEEDER,
         ),
         PetKitSensorDesc(
             key="Times dispensed",
