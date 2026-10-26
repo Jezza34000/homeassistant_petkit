@@ -1,0 +1,1038 @@
+{
+  "config": {
+    "error": {
+      "account_exists": "มีบัญชีนี้อยู่แล้ว",
+      "connection": "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้",
+      "unknown": "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ กรุณาตรวจสอบ log",
+      "invalid_auth": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+      "invalid_region": "ไม่พบบัญชีที่ใช้อีเมลนี้ คุณเลือกภูมิภาคถูกต้องหรือไม่?",
+      "cannot_connect": "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ของ PetKit ได้",
+      "session_error": "เซสชันผิดพลาด กรุณาลองใหม่อีกครั้ง",
+      "server_busy": "เซิร์ฟเวอร์ไม่ว่าง กรุณาลองใหม่อีกครั้ง"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "password": "รหัสผ่าน",
+          "username": "ชื่อผู้ใช้"
+        },
+        "data_description": {
+          "username": "{username_hint}"
+        },
+        "description": "กรอกบัญชี PetKit ที่ Home Assistant จะใช้เชื่อมต่อกับ cloud ของ PetKit\n\n**สำคัญ:** บัญชีนี้ต้อง**แยก**จากบัญชีที่ใช้ล็อกอินในแอปมือถือ เพราะ PetKit อนุญาตให้ล็อกอินค้างได้ครั้งละ 1 session ต่อบัญชีเท่านั้น หากล็อกอินที่นี่ด้วยบัญชีหลัก จะทำให้ถูกออกจากระบบในแอป (และในทางกลับกัน)\n\n**ขั้นตอนการตั้งค่า:**\n1. สร้างบัญชี PetKit บัญชีที่สอง (ใช้อีเมลคนละตัว)\n2. ในแอปมือถือ PetKit ที่ล็อกอินด้วยบัญชีหลัก เปิด **Family Management** แล้วสร้างครอบครัว (family)\n3. เชิญบัญชีที่สองให้เข้าร่วมเป็นสมาชิกครอบครัว แล้วกดยอมรับคำเชิญ\n4. กรอกข้อมูลบัญชีที่สองด้านล่างนี้\n\nคู่มือฉบับเต็ม: [Configuration wiki]({wiki_url})",
+        "sections": {
+          "advanced_options": {
+            "data": {
+              "region": "ภูมิภาค",
+              "time_zone": "เขตเวลา"
+            },
+            "data_description": {
+              "region": "ตรวจจับอัตโนมัติจาก Home Assistant เปลี่ยนเฉพาะกรณีที่บัญชี PetKit ของคุณลงทะเบียนไว้กับเซิร์ฟเวอร์ภูมิภาคอื่น",
+              "time_zone": "ตรวจจับอัตโนมัติจาก Home Assistant เปลี่ยนได้หากต้องการ"
+            },
+            "description": "ภูมิภาคและเขตเวลาตรวจจับอัตโนมัติจาก Home Assistant ขยายส่วนนี้เฉพาะเมื่อต้องการเปลี่ยนค่าเอง",
+            "name": "ขั้นสูง"
+          }
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "yowling_detected": {
+        "name": "ตรวจพบเสียงร้องผิดปกติ"
+      },
+      "litter_tray_installed": {
+        "name": "ติดตั้งถาดทรายแล้ว"
+      },
+      "abnormal_ph_detected": {
+        "name": "ตรวจพบค่า pH ผิดปกติ"
+      },
+      "soft_stool_detected": {
+        "name": "ตรวจพบอุจจาระเหลว"
+      },
+      "battery": {
+        "name": "แบตเตอรี่"
+      },
+      "water_pump_running": {
+        "name": "ปั๊มน้ำกำลังทำงาน"
+      },
+      "clean_water_tank_low": {
+        "name": "ถังน้ำสะอาดใกล้หมด"
+      },
+      "clean_water_tank_empty": {
+        "name": "ถังน้ำสะอาดหมด"
+      },
+      "waste_tank_full": {
+        "name": "ถังขยะเต็ม"
+      },
+      "add_water_state": {
+        "name": "กำลังเติมน้ำ"
+      },
+      "heater_installed": {
+        "name": "ติดตั้งเครื่องทำความร้อนแล้ว"
+      },
+      "waste_tank_installed": {
+        "name": "ติดตั้งถังขยะแล้ว"
+      },
+      "clean_water_tank_installed": {
+        "name": "ติดตั้งถังน้ำสะอาดแล้ว"
+      },
+      "recirculation_tray_low": {
+        "name": "ถาดหมุนเวียนน้ำใกล้หมด"
+      },
+      "flush_state": {
+        "name": "กำลังล้างทำความสะอาด"
+      },
+      "disinfect_state": {
+        "name": "กำลังฆ่าเชื้อ"
+      },
+      "weight_error": {
+        "name": "น้ำหนักผิดพลาด"
+      },
+      "pet_error": {
+        "name": "สัตว์เลี้ยงผิดพลาด"
+      },
+      "light": {
+        "name": "ไฟ"
+      },
+      "spray": {
+        "name": "พ่นสเปรย์"
+      },
+      "camera_status": {
+        "name": "สถานะกล้อง"
+      },
+      "n60_deodorize_presence": {
+        "name": "สถานะโมดูลดับกลิ่น N60"
+      },
+      "care_plus_subscription": {
+        "name": "สมาชิก Care+"
+      },
+      "deodorizer": {
+        "name": "ตัวดับกลิ่น"
+      },
+      "deodorization_running": {
+        "name": "กำลังดับกลิ่น"
+      },
+      "do_not_disturb_state": {
+        "name": "ห้ามรบกวน"
+      },
+      "eating": {
+        "name": "กำลังกิน"
+      },
+      "feeding": {
+        "name": "กำลังให้อาหาร"
+      },
+      "food_level": {
+        "name": "ระดับอาหาร"
+      },
+      "food_level_1": {
+        "name": "ระดับอาหารช่องที่ 1"
+      },
+      "food_level_2": {
+        "name": "ระดับอาหารช่องที่ 2"
+      },
+      "frequent_use": {
+        "name": "ตรวจพบการใช้งานถี่"
+      },
+      "lack_warning": {
+        "name": "แจ้งเตือนน้ำใกล้หมด"
+      },
+      "pet_detected": {
+        "name": "สัตว์เลี้ยงกำลังดื่มน้ำ"
+      },
+      "pump_running": {
+        "name": "ปั๊ม"
+      },
+      "liquid_lack": {
+        "name": "ระดับของเหลว"
+      },
+      "litter": {
+        "name": "ทราย"
+      },
+      "low_battery": {
+        "name": "แบตเตอรี่ใกล้หมด"
+      },
+      "low_power": {
+        "name": "พลังงาน"
+      },
+      "manually_paused": {
+        "name": "หยุดชั่วคราวด้วยตนเอง"
+      },
+      "on_ac_power": {
+        "name": "ใช้ไฟ AC"
+      },
+      "pura_air_liquid": {
+        "name": "น้ำยา Pura Air"
+      },
+      "replace_filter": {
+        "name": "ต้องเปลี่ยนไส้กรอง"
+      },
+      "sand_lack": {
+        "name": "ทรายใกล้หมด"
+      },
+      "toilet_occupied": {
+        "name": "มีสัตว์เลี้ยงอยู่ในห้องน้ำ"
+      },
+      "waste_bin": {
+        "name": "ถังขยะเต็ม"
+      },
+      "waste_bin_presence": {
+        "name": "มีถังขยะติดตั้งอยู่"
+      },
+      "water_level": {
+        "name": "ระดับน้ำ"
+      }
+    },
+    "button": {
+      "refill": {
+        "name": "เติม"
+      },
+      "drain": {
+        "name": "ระบายน้ำ"
+      },
+      "drain_and_flush": {
+        "name": "ระบายและล้างน้ำ"
+      },
+      "action_continue": {
+        "name": "การทำงาน: ทำต่อ"
+      },
+      "action_pause": {
+        "name": "การทำงาน: หยุดชั่วคราว"
+      },
+      "pause": {
+        "name": "หยุดชั่วคราว"
+      },
+      "resume": {
+        "name": "ทำงานต่อ"
+      },
+      "action_reset": {
+        "name": "การทำงาน: รีเซ็ต"
+      },
+      "call_pet": {
+        "name": "เรียกสัตว์เลี้ยง"
+      },
+      "play_sound": {
+        "name": "เล่นเสียง"
+      },
+      "cancel_manual_feed": {
+        "name": "ยกเลิกการให้อาหารด้วยตนเอง"
+      },
+      "deodorize": {
+        "name": "ดับกลิ่น"
+      },
+      "deep_clean": {
+        "name": "ทำความสะอาดแบบล้ำลึก"
+      },
+      "dump_litter": {
+        "name": "เทขยะทราย"
+      },
+      "exit_maintenance": {
+        "name": "โหมดดูแลรักษา: ออก"
+      },
+      "food_replenished": {
+        "name": "เติมอาหารแล้ว"
+      },
+      "reset_desiccant": {
+        "name": "รีเซ็ตสารดูดความชื้น"
+      },
+      "reset_n50_odor_eliminator": {
+        "name": "รีเซ็ตตัวดับกลิ่น N50"
+      },
+      "reset_n60_odor_eliminator": {
+        "name": "รีเซ็ตตัวดับกลิ่น N60"
+      },
+      "start_maintenance": {
+        "name": "โหมดดูแลรักษา: เริ่ม"
+      },
+      "start_scoop": {
+        "name": "ตักทราย"
+      },
+      "level_litter": {
+        "name": "ปรับระดับทราย"
+      },
+      "reset_filter": {
+        "name": "รีเซ็ตไส้กรอง"
+      },
+      "ptz_left": {
+        "name": "หมุนกล้องซ้าย"
+      },
+      "ptz_right": {
+        "name": "หมุนกล้องขวา"
+      },
+      "ptz_stop": {
+        "name": "หยุดหมุนกล้อง"
+      },
+      "ptz_flip": {
+        "name": "กลับด้านกล้อง"
+      }
+    },
+    "fan": {
+      "air_purifier_fan": {
+        "name": "เครื่องฟอกอากาศ"
+      }
+    },
+    "image": {
+      "last_eat_event": {
+        "name": "เหตุการณ์กินล่าสุด"
+      },
+      "last_feed_event": {
+        "name": "เหตุการณ์ให้อาหารล่าสุด"
+      },
+      "last_toileting_event": {
+        "name": "เหตุการณ์เข้าห้องน้ำล่าสุด"
+      },
+      "last_visit_event": {
+        "name": "เหตุการณ์เยี่ยมเยียนล่าสุด"
+      },
+      "dish_before": {
+        "name": "ถาดอาหารก่อนเติม"
+      },
+      "dish_after": {
+        "name": "ถาดอาหารหลังเติม"
+      },
+      "waste_check": {
+        "name": "ตรวจสอบของเสีย"
+      },
+      "last_pet_detect_event": {
+        "name": "เหตุการณ์ตรวจพบสัตว์เลี้ยงล่าสุด"
+      },
+      "last_drink_event": {
+        "name": "เหตุการณ์ดื่มน้ำล่าสุด"
+      }
+    },
+    "number": {
+      "cleaning_delay": {
+        "name": "หน่วงเวลาก่อนทำความสะอาด"
+      },
+      "heater_temp": {
+        "name": "อุณหภูมิเครื่องทำความร้อน"
+      },
+      "fountain_time": {
+        "name": "เวลาทำงานน้ำพุ"
+      },
+      "sleep_time": {
+        "name": "เวลาโหมดพัก"
+      },
+      "pet_notify_interval": {
+        "name": "ความถี่แจ้งเตือนสัตว์เลี้ยง"
+      },
+      "manual_feed": {
+        "name": "ให้อาหารด้วยตนเอง"
+      },
+      "min_eating_duration": {
+        "name": "ระยะเวลากินขั้นต่ำ"
+      },
+      "surplus": {
+        "name": "ปริมาณสำรอง"
+      },
+      "volume": {
+        "name": "ระดับเสียง"
+      }
+    },
+    "select": {
+      "avoid_repeat_cleaning_interval": {
+        "name": "ช่วงเวลาเว้นการทำความสะอาดซ้ำ"
+      },
+      "eat_detection_sensitivity": {
+        "name": "ความไว AI ตรวจจับการกิน"
+      },
+      "litter_type": {
+        "name": "ประเภททราย"
+      },
+      "working_mode": {
+        "name": "โหมดการทำงาน"
+      },
+      "led_brightness": {
+        "name": "ความสว่างไฟ LED"
+      },
+      "move_detection_sensitivity": {
+        "name": "ความไวตรวจจับการเคลื่อนไหว"
+      },
+      "pet_detection_sensitivity": {
+        "name": "ความไว AI ตรวจจับสัตว์เลี้ยง"
+      },
+      "surplus_level": {
+        "name": "ระดับควบคุมปริมาณสำรอง"
+      },
+      "auto_drain_flush": {
+        "name": "ระบายและล้างน้ำอัตโนมัติ"
+      },
+      "auto_drain_refill": {
+        "name": "ระบายและเติมน้ำอัตโนมัติ"
+      },
+      "flow": {
+        "name": "อัตราการไหล"
+      }
+    },
+    "sensor": {
+      "urine_measured_ph": {
+        "name": "ค่า pH ปัสสาวะที่วัดได้"
+      },
+      "device_id": {
+        "name": "รหัสอุปกรณ์"
+      },
+      "pet_last_urination_date": {
+        "name": "ปัสสาวะล่าสุด"
+      },
+      "heater_real_temp": {
+        "name": "อุณหภูมิเครื่องทำความร้อน"
+      },
+      "clean_water_tank_state": {
+        "name": "สถานะถังน้ำสะอาด",
+        "state": {
+          "normal": "ปกติ",
+          "empty": "หมด",
+          "low": "ใกล้หมด",
+          "unknown": "ไม่ทราบ"
+        }
+      },
+      "drink_count": {
+        "name": "จำนวนครั้งที่ดื่มน้ำ"
+      },
+      "drink_time_avg": {
+        "name": "เวลาดื่มน้ำเฉลี่ย"
+      },
+      "filter_left_days": {
+        "name": "จำนวนวันที่ไส้กรองเหลือ"
+      },
+      "next_flush_time": {
+        "name": "การล้างน้ำครั้งถัดไป"
+      },
+      "next_water_change_time": {
+        "name": "การเปลี่ยนน้ำครั้งถัดไป"
+      },
+      "drink_time": {
+        "name": "เวลาดื่มน้ำล่าสุด"
+      },
+      "pet_last_defecation_date": {
+        "name": "ถ่ายอุจจาระล่าสุด"
+      },
+      "air_purified": {
+        "name": "อากาศที่ฟอกแล้ว"
+      },
+      "amount_eaten": {
+        "name": "ปริมาณที่กิน"
+      },
+      "battery_voltage": {
+        "name": "แรงดันแบตเตอรี่"
+      },
+      "supply_voltage": {
+        "name": "แรงดันไฟเลี้ยง"
+      },
+      "average_time": {
+        "name": "ระยะเวลาใช้งานเฉลี่ย"
+      },
+      "avg_eating_time": {
+        "name": "ระยะเวลากินเฉลี่ย"
+      },
+      "battery_level": {
+        "name": "ระดับแบตเตอรี่"
+      },
+      "power_type": {
+        "name": "ประเภทแหล่งพลังงาน",
+        "state": {
+          "main_power": "ใช้ไฟ AC",
+          "on_battery": "ใช้แบตเตอรี่",
+          "on_battery_low": "ใช้แบตเตอรี่ (ใกล้หมด)",
+          "unknown": "ไม่ทราบ"
+        }
+      },
+      "odor_eliminator_n50_left_days": {
+        "name": "จำนวนวันที่ตัวดับกลิ่น N50 เหลือ"
+      },
+      "odor_eliminator_n60_left_days": {
+        "name": "จำนวนวันที่ตัวดับกลิ่น N60 เหลือ"
+      },
+      "deodorizer_level": {
+        "name": "ระดับน้ำยาดับกลิ่น"
+      },
+      "desiccant_left_days": {
+        "name": "จำนวนวันที่สารดูดความชื้นเหลือ"
+      },
+      "device_status": {
+        "name": "สถานะอุปกรณ์",
+        "state": {
+          "offline": "ออฟไลน์",
+          "online_ac": "ออนไลน์",
+          "online_battery": "ออนไลน์ (ใช้แบตเตอรี่)",
+          "unknown": "ไม่ทราบ"
+        }
+      },
+      "drink_times": {
+        "name": "จำนวนครั้งที่ดื่มน้ำ"
+      },
+      "last_drink_pet": {
+        "name": "สัตว์เลี้ยงที่ดื่มน้ำล่าสุด"
+      },
+      "raw_drink_data": {
+        "name": "ข้อมูลการดื่มน้ำดิบ (RAW)"
+      },
+      "end_date_care_plus_subscription": {
+        "name": "จำนวนวันที่ Care+ เหลือ"
+      },
+      "error": {
+        "name": "ข้อผิดพลาด"
+      },
+      "battery": {
+        "name": "แบตเตอรี่"
+      },
+      "error_message": {
+        "name": "ข้อผิดพลาด",
+        "state": {
+          "no_error": "ไม่มีข้อผิดพลาด"
+        }
+      },
+      "feeder_error": {
+        "name": "ข้อผิดพลาดเครื่องให้อาหาร"
+      },
+      "filter_percent": {
+        "name": "ไส้กรองคงเหลือ"
+      },
+      "food_bowl_percentage": {
+        "name": "ปริมาณอาหารในถ้วย"
+      },
+      "food_in_bowl": {
+        "name": "อาหารในถ้วย"
+      },
+      "food_left": {
+        "name": "อาหารคงเหลือ"
+      },
+      "last_connection": {
+        "name": "การเชื่อมต่อ BLE ล่าสุด"
+      },
+      "last_update": {
+        "name": "อัปเดตล่าสุด"
+      },
+      "last_used_by": {
+        "name": "ใช้งานล่าสุดโดย"
+      },
+      "litter_last_event": {
+        "name": "เหตุการณ์ล่าสุด",
+        "state": {
+          "auto_cleaning_canceled": "ยกเลิกการทำความสะอาดอัตโนมัติ",
+          "auto_cleaning_canceled_kitten": "ยกเลิกการทำความสะอาดอัตโนมัติ: โหมดลูกแมว",
+          "auto_cleaning_completed": "ทำความสะอาดอัตโนมัติเสร็จสิ้น",
+          "auto_cleaning_failed_full": "ทำความสะอาดอัตโนมัติล้มเหลว: ถังเต็ม",
+          "auto_cleaning_failed_hall_l": "ทำความสะอาดอัตโนมัติล้มเหลว: hall L",
+          "auto_cleaning_failed_hall_t": "ทำความสะอาดอัตโนมัติล้มเหลว: hall T",
+          "auto_cleaning_terminated": "การทำความสะอาดอัตโนมัติถูกยกเลิกกลางคัน",
+          "auto_odor_failed": "ดับกลิ่นอัตโนมัติล้มเหลว",
+          "clean_over": "ทำความสะอาด",
+          "deodorant_finished": "ดับกลิ่นเสร็จสิ้น",
+          "deodorant_finished_liquid_lack": "ดับกลิ่นเสร็จสิ้น: น้ำยาใกล้หมด",
+          "light_over": "ไฟ",
+          "litter_empty_completed": "เทขยะทรายเสร็จสิ้น",
+          "litter_empty_failed_full": "เทขยะทรายล้มเหลว: ถังเต็ม",
+          "litter_empty_failed_hall_l": "เทขยะทรายล้มเหลว: hall L",
+          "litter_empty_failed_hall_t": "เทขยะทรายล้มเหลว: hall T",
+          "litter_empty_terminated": "การเทขยะทรายถูกยกเลิกกลางคัน",
+          "manual_cleaning_canceled": "ยกเลิกการทำความสะอาดด้วยตนเอง",
+          "manual_cleaning_completed": "ทำความสะอาดด้วยตนเองเสร็จสิ้น",
+          "manual_cleaning_failed_full": "ทำความสะอาดด้วยตนเองล้มเหลว: ถังเต็ม",
+          "manual_cleaning_failed_hall_l": "ทำความสะอาดด้วยตนเองล้มเหลว: hall L",
+          "manual_cleaning_failed_hall_t": "ทำความสะอาดด้วยตนเองล้มเหลว: hall T",
+          "manual_cleaning_terminated": "การทำความสะอาดด้วยตนเองถูกยกเลิกกลางคัน",
+          "manual_odor_completed": "ดับกลิ่นด้วยตนเองเสร็จสิ้น",
+          "manual_odor_completed_liquid_lack": "ดับกลิ่นด้วยตนเองเสร็จสิ้น: น้ำยาใกล้หมด",
+          "manual_odor_failed": "ดับกลิ่นด้วยตนเองล้มเหลว",
+          "periodic_cleaning_canceled": "ยกเลิกการทำความสะอาดตามรอบ",
+          "periodic_cleaning_canceled_kitten": "ยกเลิกการทำความสะอาดตามรอบ: โหมดลูกแมว",
+          "periodic_cleaning_completed": "ทำความสะอาดตามรอบเสร็จสิ้น",
+          "periodic_cleaning_terminated": "การทำความสะอาดตามรอบถูกยกเลิกกลางคัน",
+          "periodic_odor_completed": "ดับกลิ่นตามรอบเสร็จสิ้น",
+          "periodic_odor_completed_liquid_lack": "ดับกลิ่นตามรอบเสร็จสิ้น: น้ำยาใกล้หมด",
+          "periodic_odor_failed": "ดับกลิ่นตามรอบล้มเหลว",
+          "pet_detect": "ตรวจพบสัตว์เลี้ยง",
+          "pet_out": "สัตว์เลี้ยงออกแล้ว",
+          "reset_completed": "รีเซ็ตเสร็จสิ้น",
+          "reset_failed_full": "รีเซ็ตล้มเหลว: ถังเต็ม",
+          "reset_failed_hall_l": "รีเซ็ตล้มเหลว: hall L",
+          "reset_failed_hall_t": "รีเซ็ตล้มเหลว: hall T",
+          "reset_over": "รีเซ็ต",
+          "reset_terminated": "การรีเซ็ตถูกยกเลิกกลางคัน",
+          "scheduled_cleaning_failed_full": "ทำความสะอาดตามกำหนดเวลาล้มเหลว: ถังเต็ม",
+          "scheduled_cleaning_failed_hall_l": "ทำความสะอาดตามกำหนดเวลาล้มเหลว: hall L",
+          "scheduled_cleaning_failed_hall_t": "ทำความสะอาดตามกำหนดเวลาล้มเหลว: hall T",
+          "spray_over": "พ่นดับกลิ่น"
+        }
+      },
+      "litter_level": {
+        "name": "ระดับทราย"
+      },
+      "litter_state": {
+        "name": "สถานะ",
+        "state": {
+          "calibrating": "กำลังปรับเทียบ",
+          "cleaning": "กำลังทำความสะอาด",
+          "cleaning_paused": "หยุดทำความสะอาดชั่วคราว",
+          "cleaning_paused_cover": "หยุดทำความสะอาดชั่วคราว - ฝาปิด",
+          "cleaning_paused_pet_approach": "หยุดทำความสะอาดชั่วคราว - สัตว์เลี้ยงเข้าใกล้",
+          "cleaning_paused_pet_entered": "หยุดทำความสะอาดชั่วคราว - สัตว์เลี้ยงเข้ามา",
+          "cleaning_paused_pet_using": "หยุดทำความสะอาดชั่วคราว - สัตว์เลี้ยงกำลังใช้งาน",
+          "cleaning_paused_system_error": "หยุดทำความสะอาดชั่วคราว - ระบบผิดพลาด",
+          "dumping": "กำลังเทขยะทราย",
+          "dumping_paused": "หยุดเทขยะทรายชั่วคราว",
+          "dumping_paused_cover": "หยุดเทขยะทรายชั่วคราว - ฝาปิด",
+          "dumping_paused_pet_approach": "หยุดเทขยะทรายชั่วคราว - สัตว์เลี้ยงเข้าใกล้",
+          "dumping_paused_pet_entered": "หยุดเทขยะทรายชั่วคราว - สัตว์เลี้ยงเข้ามา",
+          "dumping_paused_pet_using": "หยุดเทขยะทรายชั่วคราว - สัตว์เลี้ยงกำลังใช้งาน",
+          "dumping_paused_system_error": "หยุดเทขยะทรายชั่วคราว - ระบบผิดพลาด",
+          "idle": "ว่าง",
+          "leveling": "กำลังปรับระดับทราย",
+          "maintenance": "กำลังดูแลรักษา",
+          "maintenance_paused": "หยุดดูแลรักษาชั่วคราว",
+          "maintenance_paused_cover": "หยุดดูแลรักษาชั่วคราว - ฝาปิด",
+          "maintenance_paused_pet_approach": "หยุดดูแลรักษาชั่วคราว - สัตว์เลี้ยงเข้าใกล้",
+          "maintenance_paused_pet_entered": "หยุดดูแลรักษาชั่วคราว - สัตว์เลี้ยงเข้ามา",
+          "maintenance_paused_pet_using": "หยุดดูแลรักษาชั่วคราว - สัตว์เลี้ยงกำลังใช้งาน",
+          "maintenance_paused_system_error": "หยุดดูแลรักษาชั่วคราว - ระบบผิดพลาด",
+          "paused": "หยุดชั่วคราว",
+          "paused_cover": "หยุดชั่วคราว - ฝาปิด",
+          "paused_pet_approach": "หยุดชั่วคราว - สัตว์เลี้ยงเข้าใกล้",
+          "paused_pet_entered": "หยุดชั่วคราว - สัตว์เลี้ยงเข้ามา",
+          "paused_pet_using": "หยุดชั่วคราว - สัตว์เลี้ยงกำลังใช้งาน",
+          "paused_system_error": "หยุดชั่วคราว - ระบบผิดพลาด",
+          "resetting": "กำลังรีเซ็ต",
+          "resetting_device": "กำลังรีเซ็ตอุปกรณ์",
+          "unknown": "ไม่ทราบ"
+        }
+      },
+      "litter_weight": {
+        "name": "น้ำหนักทราย"
+      },
+      "manual_dispensed": {
+        "name": "จ่ายอาหารด้วยตนเอง"
+      },
+      "manual_dispensed_hopper_1": {
+        "name": "จ่ายอาหารด้วยตนเองช่องที่ 1"
+      },
+      "manual_dispensed_hopper_2": {
+        "name": "จ่ายอาหารด้วยตนเองช่องที่ 2"
+      },
+      "package_used": {
+        "name": "ถุงอาหารที่ใช้"
+      },
+      "pet_last_device_used": {
+        "name": "ห้องน้ำที่ใช้ล่าสุด"
+      },
+      "pet_last_use_date": {
+        "name": "วันที่ใช้งานล่าสุด"
+      },
+      "connection_state": {
+        "name": "สถานะการเชื่อมต่อ"
+      },
+      "pet_last_use_duration": {
+        "name": "ระยะเวลาใช้งานล่าสุด"
+      },
+      "pet_last_weight_measurement": {
+        "name": "ค่าน้ำหนักที่วัดล่าสุด"
+      },
+      "planned_dispensed": {
+        "name": "กำหนดจ่ายอาหาร"
+      },
+      "planned_dispensed_hopper_1": {
+        "name": "กำหนดจ่ายอาหารช่องที่ 1"
+      },
+      "planned_dispensed_hopper_2": {
+        "name": "กำหนดจ่ายอาหารช่องที่ 2"
+      },
+      "purified_water": {
+        "name": "น้ำที่กรองแล้ว"
+      },
+      "purifier_liquid": {
+        "name": "ระดับของเหลว"
+      },
+      "raw_distribution_data": {
+        "name": "ข้อมูลการจ่ายอาหารดิบ (RAW)"
+      },
+      "rssi": {
+        "name": "RSSI"
+      },
+      "spray_times": {
+        "name": "จำนวนครั้งที่พ่นสเปรย์"
+      },
+      "spray_deodorant_liquid": {
+        "name": "น้ำยาดับกลิ่นสเปรย์"
+      },
+      "times_dispensed": {
+        "name": "จำนวนครั้งที่จ่ายอาหาร"
+      },
+      "times_eaten": {
+        "name": "จำนวนครั้งที่กิน"
+      },
+      "times_used": {
+        "name": "จำนวนครั้งที่ใช้งาน"
+      },
+      "total_dispensed": {
+        "name": "จ่ายอาหารรวม"
+      },
+      "total_dispensed_hopper_1": {
+        "name": "จ่ายอาหารรวมช่องที่ 1"
+      },
+      "total_dispensed_hopper_2": {
+        "name": "จ่ายอาหารรวมช่องที่ 2"
+      },
+      "total_package": {
+        "name": "ถุงอาหารรวม"
+      },
+      "total_planned": {
+        "name": "กำหนดจ่ายอาหารรวม"
+      },
+      "total_planned_hopper_1": {
+        "name": "กำหนดจ่ายอาหารรวมช่องที่ 1"
+      },
+      "total_planned_hopper_2": {
+        "name": "กำหนดจ่ายอาหารรวมช่องที่ 2"
+      },
+      "total_time": {
+        "name": "ระยะเวลาใช้งานรวม"
+      },
+      "garbage_bag_box_state": {
+        "name": "กล่องถุงขยะ",
+        "state": {
+          "normal": "ปกติ",
+          "running_out": "ใกล้หมด",
+          "used_up": "หมดแล้ว",
+          "expired": "หมดอายุ",
+          "not_available": "ไม่พร้อมใช้งาน",
+          "not_installed": "ไม่ได้ติดตั้ง"
+        }
+      },
+      "purification_n60_left_days": {
+        "name": "จำนวนวันที่ตัวฟอก N60 เหลือ"
+      },
+      "last_pack_time": {
+        "name": "เวลาเติมถุงล่าสุด"
+      },
+      "last_bag_replacement_time": {
+        "name": "เปลี่ยนถุงล่าสุด"
+      },
+      "sand_tray_left_days": {
+        "name": "จำนวนวันที่ทรายเหลือ"
+      },
+      "pet_last_meal_date": {
+        "name": "วันที่กินมื้อล่าสุด"
+      },
+      "pet_last_meal_duration": {
+        "name": "ระยะเวลากินมื้อล่าสุด"
+      },
+      "pet_last_feeder_used": {
+        "name": "เครื่องให้อาหารที่ใช้ล่าสุด"
+      },
+      "pet_meals_today": {
+        "name": "จำนวนมื้อวันนี้"
+      }
+    },
+    "switch": {
+      "soft_stool": {
+        "name": "AI ตรวจจับอุจจาระเหลว"
+      },
+      "soft_stool_stop_cleaning": {
+        "name": "หยุดทำความสะอาดเมื่อพบอุจจาระเหลว"
+      },
+      "auto_clean": {
+        "name": "ทำความสะอาดอัตโนมัติ"
+      },
+      "auto_refill": {
+        "name": "เติมอัตโนมัติ"
+      },
+      "heater_switch": {
+        "name": "เครื่องทำความร้อน"
+      },
+      "auto_water_change": {
+        "name": "เปลี่ยนน้ำอัตโนมัติ"
+      },
+      "auto_flush": {
+        "name": "ล้างน้ำอัตโนมัติ"
+      },
+      "pet_detection": {
+        "name": "ตรวจจับสัตว์เลี้ยง"
+      },
+      "drink_detection": {
+        "name": "ตรวจจับการดื่มน้ำ"
+      },
+      "auto_deodor": {
+        "name": "ดับกลิ่นอัตโนมัติ"
+      },
+      "avoid_repeat_clean": {
+        "name": "เว้นการทำความสะอาดซ้ำ"
+      },
+      "camera": {
+        "name": "กล้อง"
+      },
+      "child_lock": {
+        "name": "ล็อกป้องกันเด็ก"
+      },
+      "cont_rotation": {
+        "name": "หมุนต่อเนื่อง"
+      },
+      "deep_cleaning": {
+        "name": "ทำความสะอาดแบบล้ำลึก"
+      },
+      "deodorant_n50_notify": {
+        "name": "แจ้งเตือนเมื่อต้องเปลี่ยน N50"
+      },
+      "deodorant_n60_notify": {
+        "name": "แจ้งเตือนเมื่อต้องเปลี่ยน N60"
+      },
+      "desiccant_notif": {
+        "name": "แจ้งเตือนเมื่อต้องเปลี่ยนสารดูดความชื้น"
+      },
+      "deep_deodor": {
+        "name": "ดับกลิ่นแบบล้ำลึก"
+      },
+      "pet_notify": {
+        "name": "แจ้งเตือนเมื่อพบสัตว์เลี้ยง"
+      },
+      "flush_notify": {
+        "name": "แจ้งเตือนเมื่อล้างน้ำ"
+      },
+      "water_change_notify": {
+        "name": "แจ้งเตือนเมื่อเปลี่ยนน้ำ"
+      },
+      "clean_water_lack_light": {
+        "name": "ไฟเตือนน้ำสะอาดใกล้หมด"
+      },
+      "clean_water_empty_light": {
+        "name": "ไฟเตือนน้ำสะอาดหมด"
+      },
+      "waste_water_full_light": {
+        "name": "ไฟเตือนถังขยะเต็ม"
+      },
+      "dispensing_notif": {
+        "name": "แจ้งเตือนเมื่อจ่ายอาหาร"
+      },
+      "display": {
+        "name": "หน้าจอแสดงผล"
+      },
+      "do_not_disturb": {
+        "name": "ห้ามรบกวน"
+      },
+      "feed_sound": {
+        "name": "เสียงให้อาหาร"
+      },
+      "feed_tone": {
+        "name": "โทนเสียงให้อาหาร"
+      },
+      "highlight": {
+        "name": "ไฮไลต์การติดตามสัตว์เลี้ยง"
+      },
+      "indicator_light": {
+        "name": "ไฟแสดงสถานะ"
+      },
+      "camera_light": {
+        "name": "ไฟแสดงสถานะกล้อง"
+      },
+      "kitten_mode": {
+        "name": "โหมดลูกแมว"
+      },
+      "lack_liquid_notify": {
+        "name": "แจ้งเตือนน้ำยาฟอกใกล้หมด"
+      },
+      "pet_toileting_notif": {
+        "name": "แจ้งเตือนสัตว์เลี้ยงเข้าห้องน้ำ"
+      },
+      "lack_sand_notify": {
+        "name": "แจ้งเตือนทรายใกล้หมด"
+      },
+      "light": {
+        "name": "ไฟ"
+      },
+      "light_assist": {
+        "name": "ไฟช่วยตอนทำความสะอาด"
+      },
+      "light_weight": {
+        "name": "น้ำหนักเบา"
+      },
+      "litter_full_notify": {
+        "name": "แจ้งเตือนถังขยะเต็ม"
+      },
+      "low_battery_notif": {
+        "name": "แจ้งเตือนแบตเตอรี่ใกล้หมด"
+      },
+      "microphone": {
+        "name": "ไมโครโฟน"
+      },
+      "move_notif": {
+        "name": "แจ้งเตือนการเคลื่อนไหว"
+      },
+      "night_vision": {
+        "name": "โหมดกลางคืน"
+      },
+      "periodic_cleaning": {
+        "name": "ทำความสะอาดตามรอบ"
+      },
+      "periodic_deodorizing": {
+        "name": "ดับกลิ่นตามรอบ"
+      },
+      "pet_eat_notif": {
+        "name": "แจ้งเตือนสัตว์เลี้ยงกินอาหาร"
+      },
+      "pet_in_notify": {
+        "name": "แจ้งเตือนสัตว์เลี้ยงเข้าห้องน้ำ"
+      },
+      "pet_tracking": {
+        "name": "ติดตามสัตว์เลี้ยง"
+      },
+      "pet_visit_notif": {
+        "name": "แจ้งเตือนสัตว์เลี้ยงมาเยือน"
+      },
+      "power": {
+        "name": "เปิด/ปิดเครื่อง"
+      },
+      "proximity_sensor": {
+        "name": "โหมดเซนเซอร์"
+      },
+      "refill_notif": {
+        "name": "แจ้งเตือนต้องเติม"
+      },
+      "sand_saving": {
+        "name": "ประหยัดทราย"
+      },
+      "shortage_alarm": {
+        "name": "เตือนของใกล้หมด"
+      },
+      "surplus_control": {
+        "name": "ควบคุมปริมาณสำรอง"
+      },
+      "system_notification": {
+        "name": "เสียงระบบ"
+      },
+      "video_timestamp": {
+        "name": "แสดงเวลาบนวิดีโอ"
+      },
+      "voice_dispense": {
+        "name": "จ่ายอาหารด้วยเสียง"
+      },
+      "waste_covering": {
+        "name": "กลบของเสีย"
+      },
+      "work_log_notify": {
+        "name": "แจ้งเตือนเมื่อทำงานตามตารางเวลา"
+      },
+      "toilet_light": {
+        "name": "ไฟตอนเข้าห้องน้ำ"
+      },
+      "privacy_mode": {
+        "name": "โหมดความเป็นส่วนตัว"
+      },
+      "work_notify": {
+        "name": "แจ้งเตือนเมื่ออุปกรณ์ทำความสะอาด"
+      },
+      "privacy_camera_off": {
+        "name": "ความเป็นส่วนตัว: ปิดกล้อง"
+      },
+      "privacy_camera_inward": {
+        "name": "ความเป็นส่วนตัว: หันกล้องเข้าใน"
+      },
+      "privacy_microphone_off": {
+        "name": "ความเป็นส่วนตัว: ปิดไมโครโฟน"
+      },
+      "ai_ph_detection": {
+        "name": "AI ตรวจจับค่า pH"
+      },
+      "ai_yowling": {
+        "name": "AI ตรวจจับเสียงร้องผิดปกติ"
+      },
+      "feeding_schedule": {
+        "name": "ตารางให้อาหาร"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "ไฟ"
+      }
+    },
+    "camera": {
+      "camera": {
+        "name": "สตรีมกล้อง"
+      }
+    },
+    "text": {
+      "manual_feed_dual_h1": {
+        "name": "ให้อาหารด้วยตนเองช่องที่ 1"
+      },
+      "manual_feed_dual_h2": {
+        "name": "ให้อาหารด้วยตนเองช่องที่ 2"
+      },
+      "manual_feed_single": {
+        "name": "ให้อาหารด้วยตนเอง"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "always_on_stream": "สตรีมถ่ายทอดสัญญาณตลอดเวลา",
+          "region": "ภูมิภาค",
+          "time_zone": "เขตเวลา"
+        },
+        "data_description": {
+          "always_on_stream": "เปิดวอร์มเซสชันถ่ายทอดสัญญาณภายในไว้ล่วงหน้า เพื่อให้การดูผ่านเบราว์เซอร์, WHEP client และผู้รับสัญญาณกล้องตัวอื่น ๆ เชื่อมต่อได้เร็วขึ้น สตรีมนี้ใช้ร่วมกับผู้รับสัญญาณรายอื่นได้ด้วย วิธีนี้จะคงเซสชันต้นทางไว้ตลอดเวลาและใช้ทรัพยากรของอุปกรณ์กับ cloud มากขึ้น"
+        },
+        "sections": {
+          "bluetooth_options": {
+            "data": {
+              "ble_relay_enabled": "เปิดใช้งาน Bluetooth relay",
+              "scan_interval_bluetooth": "ความถี่รีเฟรช Bluetooth (นาที)"
+            },
+            "data_description": {
+              "ble_relay_enabled": "หากปิดใช้งาน ข้อมูลน้ำพุจะอัปเดตเฉพาะตอนรีเฟรชอุปกรณ์ผ่านแอปเท่านั้น"
+            },
+            "description": "ตัวเลือกนี้มีผลเฉพาะเมื่อคุณมีน้ำพุและมีอุปกรณ์อย่างน้อย 1 ชิ้นที่ทำหน้าที่เป็น Bluetooth relay ได้ (เช่น เครื่องให้อาหาร, ห้องน้ำแมว) ดูรายละเอียดเพิ่มเติมได้ในแอป Petkit",
+            "name": "ตัวเลือก Bluetooth"
+          },
+          "medias_options": {
+            "data": {
+              "delete_media_after": "ลบไฟล์สื่อหลังจาก (วัน)",
+              "media_dl_image": "ดึงรูปภาพ",
+              "media_dl_video": "ดึงวิดีโอ",
+              "media_ev_type": "ประเภทเหตุการณ์ที่จะดาวน์โหลด",
+              "media_path": "ตำแหน่งจัดเก็บไฟล์สื่อ",
+              "scan_interval_media": "ความถี่รีเฟรชไฟล์สื่อ (นาที)"
+            },
+            "data_description": {
+              "delete_media_after": "ลบไฟล์สื่อที่ดาวน์โหลดไว้หลังผ่านไปตามจำนวนวันที่กำหนด (0 = ไม่ลบเลย)",
+              "media_dl_image": "ดาวน์โหลดรูปภาพทั้งหมดจากอุปกรณ์ของคุณ กรองตามประเภทเหตุการณ์ที่เลือกด้านล่าง (ไม่ต้องมีสมาชิก Care+)",
+              "media_dl_video": "ดาวน์โหลดวิดีโอทั้งหมดจากอุปกรณ์ของคุณ กรองตามประเภทเหตุการณ์ที่เลือกด้านล่าง (ต้องมีสมาชิก Care+ ที่ใช้งานอยู่)",
+              "media_path": "ตำแหน่งที่จะเก็บไฟล์สื่อ หากไม่ระบุ ไฟล์สื่อจะถูกเก็บไว้ในโฟลเดอร์ /media ของ Home Assistant",
+              "scan_interval_media": "ช่วงเวลาสำหรับดาวน์โหลดไฟล์สื่อใหม่ (รูปภาพและวิดีโอ) จากเซิร์ฟเวอร์ของ Petkit"
+            },
+            "description": "ตัวเลือกนี้มีผลเฉพาะเมื่อคุณมีอุปกรณ์อย่างน้อย 1 ชิ้น (เช่น เครื่องให้อาหาร, ห้องน้ำแมว) ที่สามารถบันทึกภาพและวิดีโอได้",
+            "name": "ตัวเลือกไฟล์สื่อ"
+          },
+          "notifications_options": {
+            "data": {
+              "enabled_notifications": "การแจ้งเตือนที่เปิดใช้งาน"
+            },
+            "data_description": {
+              "enabled_notifications": "เลือกว่าเหตุการณ์ใดของ PetKit ที่จะสร้างการแจ้งเตือนค้างไว้ (persistent notification) ใน Home Assistant ยกเลิกการเลือกหมวดใดเพื่อปิดเสียงแจ้งเตือนในหมวดนั้นบน Home Assistant หมวดเหล่านี้แยกต่างหากจากสวิตช์แจ้งเตือนฝั่งอุปกรณ์ในแอป Petkit"
+            },
+            "description": "กำหนดว่าเหตุการณ์ใดของอุปกรณ์ PetKit จะสร้างการแจ้งเตือนค้างไว้ใน Home Assistant โดยแยกต่างหากจากการตั้งค่าในแอป Petkit",
+            "name": "การแจ้งเตือน"
+          }
+        },
+        "title": "ตั้งค่าการเชื่อมต่อ Petkit"
+      }
+    }
+  },
+  "selector": {
+    "petkit_notification_category": {
+      "options": {
+        "feeder_error": "เครื่องให้อาหาร — อุปกรณ์ผิดพลาด",
+        "feeder_food_low": "เครื่องให้อาหาร — อาหารใกล้หมด",
+        "fountain_cwt_empty": "น้ำพุ — ถังน้ำสะอาดหมด",
+        "fountain_cwt_low": "น้ำพุ — ถังน้ำสะอาดใกล้หมด",
+        "fountain_filter": "น้ำพุ — ต้องเปลี่ยนไส้กรอง",
+        "fountain_water_low": "น้ำพุ — ระดับน้ำใกล้หมด",
+        "fountain_wt_full": "น้ำพุ — ถังขยะเต็ม",
+        "litter_box_full": "ห้องน้ำแมว — ถังขยะเต็ม",
+        "litter_error": "ห้องน้ำแมว — อุปกรณ์ผิดพลาด",
+        "litter_event": "ห้องน้ำแมว — เหตุการณ์ทำความสะอาด / สัตว์เลี้ยงมาเยือน",
+        "litter_sand_low": "ห้องน้ำแมว — ทรายใกล้หมด"
+      }
+    }
+  }
+}
