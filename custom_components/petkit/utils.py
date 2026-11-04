@@ -1,12 +1,36 @@
 """Util functions for the Petkit integration."""
 
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from pypetkitapi import FOUNTAIN_WITH_CAMERA, LitterRecord, RecordsItems, WorkState
 from pypetkitapi.water_fountain_container import WaterFountainRecord
 
+from homeassistant.util import dt as dt_util
+
 from .const import EVENT_MAPPING, LOGGER
+
+
+def parse_device_local_time(
+    value: str | None, tz_offset_hours: float | None
+) -> datetime | None:
+    """Parse a "YYYY/MM/DD HH:MM" wall-clock string sent by a device.
+
+    The API sends these without a zone, but timestamp sensors must be
+    timezone-aware, so the device's own UTC offset is applied (falling back to
+    Home Assistant's zone). An unexpected format yields None rather than an
+    exception on every state write.
+    """
+    if not value:
+        return None
+    try:
+        parsed = datetime.strptime(value, "%Y/%m/%d %H:%M")
+    except ValueError:
+        LOGGER.debug("Unexpected device time format: %s", value)
+        return None
+    if tz_offset_hours is None:
+        return parsed.replace(tzinfo=dt_util.get_default_time_zone())
+    return parsed.replace(tzinfo=timezone(timedelta(hours=tz_offset_hours)))
 
 
 def _int_time_key(raw: Any) -> int | None:
