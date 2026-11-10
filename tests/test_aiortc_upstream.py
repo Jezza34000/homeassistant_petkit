@@ -1,4 +1,5 @@
 """Lifecycle tests for the aiortc upstream stream (no Home Assistant, no network)."""
+
 # ruff: noqa: D102, D107  (fakes mirror aiortc / manager APIs)
 
 from __future__ import annotations
