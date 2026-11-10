@@ -20,6 +20,7 @@ from aiortc import (
     rtcrtpreceiver,
 )
 from aiortc.codecs import CODECS
+from aiortc.jitterbuffer import JitterBuffer
 from aiortc.mediastreams import MediaStreamError
 from aiortc.rtcrtpparameters import RTCRtcpFeedback, RTCRtpCodecParameters
 
@@ -35,7 +36,12 @@ if TYPE_CHECKING:
     from .camera import PetkitWebRTCCamera
 
 # End the HTTP stream when no access unit arrives for this long (stalled session).
-_IDLE_TIMEOUT_SECONDS = 15
+_IDLE_TIMEOUT_SECONDS = 30
+
+# aiortc waits for a missing packet until 512 newer ones arrive (~17 s here);
+# Agora never resends some gaps (e.g. right after joining). 128 packets still
+# hold a full keyframe (~60 packets) plus reordering, but skip a gap in ~4 s.
+_VIDEO_JITTER_CAPACITY = 128
 
 # PetKit cameras publish H.264 High profile (seen: 640033).
 _EXTRA_H264_PROFILES = ("640033",)
@@ -136,7 +142,11 @@ class PetkitAiortcStream:
         # Agora gateways are ICE-lite with public addresses: host candidates suffice.
         pc = RTCPeerConnection(RTCConfiguration(iceServers=[]))
         self._pc = pc
-        pc.addTransceiver("video", direction="recvonly")
+        video = pc.addTransceiver("video", direction="recvonly")
+        # shortcut: replaces a private attribute; revisit on aiortc upgrades.
+        video.receiver._RTCRtpReceiver__jitter_buffer = JitterBuffer(  # noqa: SLF001
+            capacity=_VIDEO_JITTER_CAPACITY, is_video=True
+        )
         pc.addTransceiver("audio", direction="recvonly")
 
         @pc.on("track")

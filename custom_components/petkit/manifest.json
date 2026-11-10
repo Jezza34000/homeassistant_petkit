@@ -18,5 +18,5 @@
     "websockets>=15.0.1",
     "sdp-transform==1.1.0"
   ],
-  "version": "1.29.1"
+  "version": "1.29.2"
 }
