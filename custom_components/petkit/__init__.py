@@ -38,6 +38,7 @@ from homeassistant.helpers import config_validation as cv, device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.loader import async_get_loaded_integration
 
+from .aiortc_upstream import PetkitH264StreamView, async_cleanup_aiortc_streams
 from .const import (
     BT_SECTION,
     CONF_BLE_RELAY_ENABLED,
@@ -443,6 +444,7 @@ async def async_setup_entry(
     hass.http.register_view(PetkitDirectWhepProxySessionView())
     hass.http.register_view(PetkitUpstreamWhepView())
     hass.http.register_view(PetkitUpstreamWhepSessionView())
+    hass.http.register_view(PetkitH264StreamView())
 
     country_from_ha = hass.config.country
     tz_from_ha = hass.config.time_zone
@@ -628,6 +630,7 @@ async def async_unload_entry(
     if mqtt_listener is not None:
         await mqtt_listener.async_stop()
 
+    await async_cleanup_aiortc_streams(hass)
     await async_cleanup_whep_proxy_sessions(hass)
 
     notification_manager = getattr(entry.runtime_data, "notification_manager", None)
