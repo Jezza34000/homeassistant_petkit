@@ -19,10 +19,9 @@ from aiortc import (
     RTCSessionDescription,
     rtcrtpreceiver,
 )
-from aiortc.codecs import CODECS
 from aiortc.jitterbuffer import JitterBuffer
 from aiortc.mediastreams import MediaStreamError
-from aiortc.rtcrtpparameters import RTCRtcpFeedback, RTCRtpCodecParameters
+from aiortc.rtcrtpparameters import RTCRtpCodecParameters
 
 from homeassistant.components.http import HomeAssistantView
 
@@ -43,9 +42,6 @@ _IDLE_TIMEOUT_SECONDS = 30
 # hold a full keyframe (~60 packets) plus reordering, but skip a gap in ~4 s.
 _VIDEO_JITTER_CAPACITY = 128
 
-# PetKit cameras publish H.264 High profile (seen: 640033).
-_EXTRA_H264_PROFILES = ("640033",)
-
 
 class _PassthroughDecoder:
     """Return the depacketized access unit instead of decoding it."""
@@ -55,38 +51,9 @@ class _PassthroughDecoder:
 
 
 def _patch_aiortc() -> None:
-    """Offer High profile H.264 and skip decoding (idempotent)."""
+    """Hand H.264 access units to us instead of decoding them (idempotent)."""
     if getattr(rtcrtpreceiver, "_petkit_patched", False):
         return
-
-    payload_type = 1 + max(
-        codec.payloadType for codecs in CODECS.values() for codec in codecs
-    )
-    for profile_level_id in _EXTRA_H264_PROFILES:
-        CODECS["video"] += [
-            RTCRtpCodecParameters(
-                mimeType="video/H264",
-                clockRate=90000,
-                payloadType=payload_type,
-                rtcpFeedback=[
-                    RTCRtcpFeedback(type="nack"),
-                    RTCRtcpFeedback(type="nack", parameter="pli"),
-                    RTCRtcpFeedback(type="goog-remb"),
-                ],
-                parameters={
-                    "level-asymmetry-allowed": "1",
-                    "packetization-mode": "1",
-                    "profile-level-id": profile_level_id,
-                },
-            ),
-            RTCRtpCodecParameters(
-                mimeType="video/rtx",
-                clockRate=90000,
-                payloadType=payload_type + 1,
-                parameters={"apt": payload_type},
-            ),
-        ]
-        payload_type += 2
 
     original_get_decoder = rtcrtpreceiver.get_decoder
 
