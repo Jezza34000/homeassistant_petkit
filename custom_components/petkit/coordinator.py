@@ -53,6 +53,9 @@ from .const import (
     SCAN_INTERVAL_FAST,
     SCAN_INTERVAL_SLOW,
 )
+from .media_fix import patch_media_manager
+
+patch_media_manager()
 
 
 class PetkitDataUpdateCoordinator(DataUpdateCoordinator):
