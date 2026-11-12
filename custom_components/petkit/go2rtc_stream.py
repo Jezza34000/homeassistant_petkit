@@ -90,7 +90,7 @@ class PetkitGo2RTCStreamManager:
         return f"{rtsp_base}/{self.stream_name(str(camera.device.id))}"
 
     def internal_webrtc_source(self, target) -> str | None:
-        """Return the signed HA WHEP source URL consumed by the shared go2rtc."""
+        """Return the signed HA H.264 source URL consumed by the shared go2rtc."""
         camera = self._resolve_camera(target)
         if camera is None:
             return None
@@ -99,12 +99,14 @@ class PetkitGo2RTCStreamManager:
         if source_base_url is None:
             return None
 
+        # Raw H.264 from the aiortc receiver (see aiortc_upstream.py), not
+        # go2rtc's own WebRTC client, which cannot recover lost packets.
         signed_path = async_sign_path(
             self.hass,
-            f"/api/petkit/whep_upstream/{camera.device.id}",
+            f"/api/petkit/h264/{camera.device.id}",
             _SIGN_EXPIRATION,
         )
-        return f"webrtc:{source_base_url}{signed_path}"
+        return f"{source_base_url}{signed_path}"
 
     async def async_ensure_stream(
         self,

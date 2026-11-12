@@ -13,6 +13,7 @@
   "requirements": [
     "pypetkitapi==1.31.1",
     "aiofiles>=24.1.0",
+    "aiortc==1.16.0",
     "paho-mqtt>=2.1.0",
     "websockets>=15.0.1",
     "sdp-transform==1.1.0"
