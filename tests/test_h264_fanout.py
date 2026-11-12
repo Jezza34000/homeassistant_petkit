@@ -6,6 +6,8 @@ import importlib.util
 from pathlib import Path
 import sys
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 _PATH = ROOT / "custom_components" / "petkit" / "h264_fanout.py"
 _spec = importlib.util.spec_from_file_location("petkit_h264_fanout", _PATH)
@@ -14,6 +16,7 @@ _mod = importlib.util.module_from_spec(_spec)
 sys.modules["petkit_h264_fanout"] = _mod
 _spec.loader.exec_module(_mod)
 
+FramePacer = _mod.FramePacer
 H264Fanout = _mod.H264Fanout
 sps_offset = _mod.sps_offset
 
@@ -65,3 +68,15 @@ def test_close_ends_subscribers_and_allows_new_ones() -> None:
     fresh = fanout.subscribe()
     fanout.publish(IDR, 9)
     assert fresh.get_nowait() == (IDR, 9)
+
+
+def test_pacer_spreads_a_burst_and_resyncs_after_a_stall() -> None:
+    """A burst released at once is sent at the camera's 40 ms rhythm."""
+    pacer = FramePacer(latency=0.3, max_drift=2.0)
+    assert pacer.delay(0, now=100.0) == 0.3
+    # Three frames arrive together 0.5 s later (after a recovered loss).
+    waits = [pacer.delay(ts, now=100.5) for ts in (3600, 7200, 10800)]
+    assert waits == [0.0, 0.0, 0.0]  # already late: send immediately
+    assert pacer.delay(54000, now=100.5) == pytest.approx(0.4)  # 0.6 s mark
+    # A 5 s stall restarts the schedule instead of sleeping or bursting.
+    assert pacer.delay(54000 + 3600, now=106.0) == 0.3

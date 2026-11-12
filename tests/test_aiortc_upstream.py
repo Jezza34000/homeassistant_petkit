@@ -6,8 +6,6 @@ from __future__ import annotations
 
 import asyncio
 import importlib.util
-import io
-import itertools
 import logging
 from pathlib import Path
 import sys
@@ -157,28 +155,3 @@ def test_failed_start_leaves_nothing_running() -> None:
         assert UPSTREAM.created == 2
 
     asyncio.run(run())
-
-
-def test_mpegts_muxer_keeps_camera_timestamps() -> None:
-    """Every access unit comes out at once, with strictly increasing timestamps."""
-    av = pytest.importorskip("av")
-    sps = bytes.fromhex(
-        "0000000127640033ad00ce804202169a808080f800000300080000030191898003d090"
-    )
-    frames = [sps + b"\x00\x00\x00\x01\x65" + bytes(200)] + [
-        b"\x00\x00\x00\x01\x41" + bytes(50)
-    ] * 3
-    timestamps = [0, 3600, 3600, 10800]  # one duplicate, as after a gap
-
-    muxer = aiortc_upstream.MpegTsMuxer()
-    chunks = [
-        muxer.mux(frame, ts) for frame, ts in zip(frames, timestamps, strict=True)
-    ]
-    muxer.close()
-    assert all(chunks)
-
-    demuxed = av.open(io.BytesIO(b"".join(chunks)), format="mpegts")
-    pts = [p.pts for p in demuxed.demux(video=0) if p.size]
-    assert len(pts) == 4
-    assert all(b > a for a, b in itertools.pairwise(pts))
-    assert pts[1] - pts[0] == 3600

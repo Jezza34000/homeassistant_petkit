@@ -1,20 +1,19 @@
-"""Receive the PetKit/Agora video with aiortc and expose it as MPEG-TS.
+"""Receive the PetKit/Agora video with aiortc and expose it as raw H.264.
 
 go2rtc's WebRTC client has no jitter buffer and drops RTX retransmissions, so
 every lost packet corrupts a keyframe (green video, undecodable recordings).
 aiortc reorders packets, NACKs losses and accepts RTX, then hands complete
-access units to go2rtc through a plain HTTP MPEG-TS stream. MPEG-TS carries
-the camera's own timestamps; a raw H.264 stream would make go2rtc stamp frames
-by arrival time, which breaks recordings when the jitter buffer releases a
-burst of frames (non-monotonic DTS in the mp4 muxer).
+access units to go2rtc through a plain HTTP Annex-B stream, paced by the
+camera's frame timestamps because go2rtc stamps raw H.264 by arrival time.
+(MPEG-TS with the camera's timestamps was tried: they drift from the NAS
+clock, ffmpeg in HA re-syncs them to RTCP wall time and emits duplicate DTS
+at segment boundaries, so camera.record fails.)
 """
 
 from __future__ import annotations
 
 import asyncio
 import contextlib
-from fractions import Fraction
-import io
 from typing import TYPE_CHECKING, Any
 
 from aiohttp import web
@@ -27,12 +26,11 @@ from aiortc import (
 from aiortc.jitterbuffer import JitterBuffer
 from aiortc.mediastreams import MediaStreamError
 from aiortc.rtcrtpparameters import RTCRtpCodecParameters
-import av
 
 from homeassistant.components.http import HomeAssistantView
 
 from .const import DOMAIN, LOGGER
-from .h264_fanout import Frame, H264Fanout
+from .h264_fanout import Frame, FramePacer, H264Fanout
 from .whep_proxy import _check_external_auth, get_whep_upstream_manager
 
 if TYPE_CHECKING:
@@ -49,52 +47,11 @@ _IDLE_TIMEOUT_SECONDS = 30
 _VIDEO_JITTER_CAPACITY = 128
 
 
-_VIDEO_TIME_BASE = Fraction(1, 90000)
-
-
 class _PassthroughDecoder:
     """Return the depacketized frame (data + 90 kHz timestamp), not a picture."""
 
     def decode(self, encoded_frame: Any) -> list[Any]:
         return [encoded_frame]
-
-
-class MpegTsMuxer:
-    """Wrap timestamped Annex-B access units into MPEG-TS bytes."""
-
-    def __init__(self) -> None:
-        """Open an in-memory MPEG-TS muxer with one H.264 stream."""
-        self._out = io.BytesIO()
-        self._container = av.open(
-            self._out,
-            mode="w",
-            format="mpegts",
-            container_options={"flush_packets": "1"},
-        )
-        self._stream = self._container.add_stream("h264")
-        self._stream.time_base = _VIDEO_TIME_BASE
-        self._last_dts: int | None = None
-
-    def mux(self, access_unit: bytes, timestamp: int) -> bytes:
-        """Return the MPEG-TS bytes for one access unit (may be empty)."""
-        # Equal or older timestamps would be rejected by the muxer.
-        if self._last_dts is not None and timestamp <= self._last_dts:
-            timestamp = self._last_dts + 1
-        self._last_dts = timestamp
-        packet = av.Packet(access_unit)
-        packet.stream = self._stream
-        packet.time_base = _VIDEO_TIME_BASE
-        packet.pts = packet.dts = timestamp
-        self._container.mux(packet)
-        data = self._out.getvalue()
-        self._out.seek(0)
-        self._out.truncate()
-        return data
-
-    def close(self) -> None:
-        """Release the muxer."""
-        with contextlib.suppress(av.FFmpegError):
-            self._container.close()
 
 
 def _patch_aiortc() -> None:
@@ -236,7 +193,7 @@ async def async_cleanup_aiortc_streams(hass: HomeAssistant) -> None:
 
 
 class PetkitH264StreamView(HomeAssistantView):
-    """MPEG-TS H.264 stream consumed by the shared go2rtc instance."""
+    """Raw H.264 Annex-B stream consumed by the shared go2rtc instance."""
 
     url = "/api/petkit/h264/{device_id}"
     name = "api:petkit:h264"
@@ -259,18 +216,20 @@ class PetkitH264StreamView(HomeAssistantView):
             LOGGER.error("PetKit aiortc upstream failed for %s: %s", device_id, err)
             return web.Response(status=502, text=str(err))
 
-        response = web.StreamResponse(headers={"Content-Type": "video/mp2t"})
-        muxer = MpegTsMuxer()
+        response = web.StreamResponse(headers={"Content-Type": "video/h264"})
+        pacer = FramePacer()
+        loop = asyncio.get_running_loop()
         try:
             await response.prepare(request)
             while (
                 frame := await asyncio.wait_for(queue.get(), _IDLE_TIMEOUT_SECONDS)
             ) is not None:
-                if data := muxer.mux(*frame):
-                    await response.write(data)
+                access_unit, timestamp = frame
+                if wait := pacer.delay(timestamp, loop.time()):
+                    await asyncio.sleep(wait)
+                await response.write(access_unit)
         except (TimeoutError, ConnectionResetError) as err:
             LOGGER.debug("PetKit H.264 stream %s ended: %r", device_id, err)
         finally:
-            muxer.close()
             await stream.async_unsubscribe(queue)
         return response

@@ -74,3 +74,30 @@ class H264Fanout:
                 queue.get_nowait()
             queue.put_nowait(None)
         self._subscribers.clear()
+
+
+class FramePacer:
+    """Spread frames out in time the way the camera produced them.
+
+    go2rtc stamps raw H.264 by arrival time. After a lost packet is recovered
+    the jitter buffer releases several frames at once, which would give them
+    almost the same timestamp; pacing by the 90 kHz frame timestamps keeps the
+    arrival times (and so the recording) even.
+    """
+
+    def __init__(self, latency: float = 0.3, max_drift: float = 2.0) -> None:
+        """Delay frames by `latency` s; resync after a gap or jump of `max_drift` s."""
+        self._latency = latency
+        self._max_drift = max_drift
+        self._base: tuple[float, int] | None = None
+
+    def delay(self, timestamp: int, now: float) -> float:
+        """Return how long to wait before sending the frame stamped `timestamp`."""
+        if self._base is not None:
+            base_time, base_ts = self._base
+            wait = base_time + (timestamp - base_ts) / 90000 - now
+            if -self._max_drift < wait < self._max_drift:
+                return max(wait, 0.0)
+        # First frame, stall or timestamp jump: restart the schedule here.
+        self._base = (now + self._latency, timestamp)
+        return self._latency
