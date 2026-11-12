@@ -1,15 +1,20 @@
-"""Receive the PetKit/Agora video with aiortc and expose it as raw H.264.
+"""Receive the PetKit/Agora video with aiortc and expose it as MPEG-TS.
 
 go2rtc's WebRTC client has no jitter buffer and drops RTX retransmissions, so
 every lost packet corrupts a keyframe (green video, undecodable recordings).
 aiortc reorders packets, NACKs losses and accepts RTX, then hands complete
-access units to go2rtc through a plain HTTP Annex-B stream.
+access units to go2rtc through a plain HTTP MPEG-TS stream. MPEG-TS carries
+the camera's own timestamps; a raw H.264 stream would make go2rtc stamp frames
+by arrival time, which breaks recordings when the jitter buffer releases a
+burst of frames (non-monotonic DTS in the mp4 muxer).
 """
 
 from __future__ import annotations
 
 import asyncio
 import contextlib
+from fractions import Fraction
+import io
 from typing import TYPE_CHECKING, Any
 
 from aiohttp import web
@@ -22,11 +27,12 @@ from aiortc import (
 from aiortc.jitterbuffer import JitterBuffer
 from aiortc.mediastreams import MediaStreamError
 from aiortc.rtcrtpparameters import RTCRtpCodecParameters
+import av
 
 from homeassistant.components.http import HomeAssistantView
 
 from .const import DOMAIN, LOGGER
-from .h264_fanout import H264Fanout
+from .h264_fanout import Frame, H264Fanout
 from .whep_proxy import _check_external_auth, get_whep_upstream_manager
 
 if TYPE_CHECKING:
@@ -43,11 +49,52 @@ _IDLE_TIMEOUT_SECONDS = 30
 _VIDEO_JITTER_CAPACITY = 128
 
 
-class _PassthroughDecoder:
-    """Return the depacketized access unit instead of decoding it."""
+_VIDEO_TIME_BASE = Fraction(1, 90000)
 
-    def decode(self, encoded_frame: Any) -> list[bytes]:
-        return [encoded_frame.data]
+
+class _PassthroughDecoder:
+    """Return the depacketized frame (data + 90 kHz timestamp), not a picture."""
+
+    def decode(self, encoded_frame: Any) -> list[Any]:
+        return [encoded_frame]
+
+
+class MpegTsMuxer:
+    """Wrap timestamped Annex-B access units into MPEG-TS bytes."""
+
+    def __init__(self) -> None:
+        """Open an in-memory MPEG-TS muxer with one H.264 stream."""
+        self._out = io.BytesIO()
+        self._container = av.open(
+            self._out,
+            mode="w",
+            format="mpegts",
+            container_options={"flush_packets": "1"},
+        )
+        self._stream = self._container.add_stream("h264")
+        self._stream.time_base = _VIDEO_TIME_BASE
+        self._last_dts: int | None = None
+
+    def mux(self, access_unit: bytes, timestamp: int) -> bytes:
+        """Return the MPEG-TS bytes for one access unit (may be empty)."""
+        # Equal or older timestamps would be rejected by the muxer.
+        if self._last_dts is not None and timestamp <= self._last_dts:
+            timestamp = self._last_dts + 1
+        self._last_dts = timestamp
+        packet = av.Packet(access_unit)
+        packet.stream = self._stream
+        packet.time_base = _VIDEO_TIME_BASE
+        packet.pts = packet.dts = timestamp
+        self._container.mux(packet)
+        data = self._out.getvalue()
+        self._out.seek(0)
+        self._out.truncate()
+        return data
+
+    def close(self) -> None:
+        """Release the muxer."""
+        with contextlib.suppress(av.FFmpegError):
+            self._container.close()
 
 
 def _patch_aiortc() -> None:
@@ -84,7 +131,7 @@ class PetkitAiortcStream:
     def _device_id(self) -> str:
         return str(self.camera.device.id)
 
-    async def async_subscribe(self) -> asyncio.Queue[bytes | None]:
+    async def async_subscribe(self) -> asyncio.Queue[Frame | None]:
         """Subscribe to the stream, starting the Agora session if needed."""
         async with self._lock:
             queue = self.fanout.subscribe()
@@ -97,7 +144,7 @@ class PetkitAiortcStream:
                     raise
             return queue
 
-    async def async_unsubscribe(self, queue: asyncio.Queue[bytes | None]) -> None:
+    async def async_unsubscribe(self, queue: asyncio.Queue[Frame | None]) -> None:
         """Unsubscribe and stop the session once nobody listens."""
         async with self._lock:
             self.fanout.unsubscribe(queue)
@@ -147,7 +194,8 @@ class PetkitAiortcStream:
     async def _async_pump(self, track) -> None:
         try:
             while True:
-                self.fanout.publish(await track.recv())
+                frame = await track.recv()
+                self.fanout.publish(frame.data, frame.timestamp)
         except MediaStreamError:
             pass
         finally:
@@ -188,7 +236,7 @@ async def async_cleanup_aiortc_streams(hass: HomeAssistant) -> None:
 
 
 class PetkitH264StreamView(HomeAssistantView):
-    """Raw H.264 Annex-B stream consumed by the shared go2rtc instance."""
+    """MPEG-TS H.264 stream consumed by the shared go2rtc instance."""
 
     url = "/api/petkit/h264/{device_id}"
     name = "api:petkit:h264"
@@ -211,17 +259,18 @@ class PetkitH264StreamView(HomeAssistantView):
             LOGGER.error("PetKit aiortc upstream failed for %s: %s", device_id, err)
             return web.Response(status=502, text=str(err))
 
-        response = web.StreamResponse(headers={"Content-Type": "video/h264"})
+        response = web.StreamResponse(headers={"Content-Type": "video/mp2t"})
+        muxer = MpegTsMuxer()
         try:
             await response.prepare(request)
             while (
-                access_unit := await asyncio.wait_for(
-                    queue.get(), _IDLE_TIMEOUT_SECONDS
-                )
+                frame := await asyncio.wait_for(queue.get(), _IDLE_TIMEOUT_SECONDS)
             ) is not None:
-                await response.write(access_unit)
+                if data := muxer.mux(*frame):
+                    await response.write(data)
         except (TimeoutError, ConnectionResetError) as err:
             LOGGER.debug("PetKit H.264 stream %s ended: %r", device_id, err)
         finally:
+            muxer.close()
             await stream.async_unsubscribe(queue)
         return response

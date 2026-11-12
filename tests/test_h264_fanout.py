@@ -34,10 +34,10 @@ def test_subscriber_starts_on_sps_and_gets_following_frames() -> None:
     """New subscribers start on a keyframe."""
     fanout = H264Fanout()
     queue = fanout.subscribe()
-    fanout.publish(P)
-    fanout.publish(SC4 + b"\x06sei" + IDR)
-    fanout.publish(P)
-    assert [queue.get_nowait(), queue.get_nowait()] == [IDR, P]
+    fanout.publish(P, 2)
+    fanout.publish(SC4 + b"\x06sei" + IDR, 1)
+    fanout.publish(P, 2)
+    assert [queue.get_nowait(), queue.get_nowait()] == [(IDR, 1), (P, 2)]
     assert queue.empty()
 
 
@@ -46,22 +46,22 @@ def test_slow_subscriber_restarts_on_next_sps() -> None:
     fanout = H264Fanout(max_queue=2)
     queue = fanout.subscribe()
     for frame in (IDR, P, P, P):
-        fanout.publish(frame)
+        fanout.publish(frame, 0)
     assert queue.empty()  # backlog dropped on overflow
-    fanout.publish(P)
+    fanout.publish(P, 2)
     assert queue.empty()  # still waiting for a keyframe
-    fanout.publish(IDR)
-    assert queue.get_nowait() == IDR
+    fanout.publish(IDR, 9)
+    assert queue.get_nowait() == (IDR, 9)
 
 
 def test_close_ends_subscribers_and_allows_new_ones() -> None:
     """Closing ends current subscribers only."""
     fanout = H264Fanout(max_queue=1)
     queue = fanout.subscribe()
-    fanout.publish(IDR)
+    fanout.publish(IDR, 9)
     fanout.close()
     assert queue.get_nowait() is None
     assert fanout.subscriber_count == 0
     fresh = fanout.subscribe()
-    fanout.publish(IDR)
-    assert fresh.get_nowait() == IDR
+    fanout.publish(IDR, 9)
+    assert fresh.get_nowait() == (IDR, 9)

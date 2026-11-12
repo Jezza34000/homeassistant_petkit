@@ -1,8 +1,11 @@
-"""Fan-out of H.264 Annex-B access units to streaming HTTP subscribers."""
+"""Fan-out of timestamped H.264 Annex-B access units to streaming subscribers."""
 
 from __future__ import annotations
 
 import asyncio
+
+# (Annex-B access unit, 90 kHz timestamp); None ends the stream.
+type Frame = tuple[bytes, int]
 
 _NAL_TYPE_SPS = 7
 _START_CODE = b"\x00\x00\x01"
@@ -27,25 +30,25 @@ class H264Fanout:
         """Initialize an empty subscriber set."""
         self._max_queue = max_queue
         # Subscriber queue -> True while it still waits for a decodable start.
-        self._subscribers: dict[asyncio.Queue[bytes | None], bool] = {}
+        self._subscribers: dict[asyncio.Queue[Frame | None], bool] = {}
 
     @property
     def subscriber_count(self) -> int:
         """Return the number of active subscribers."""
         return len(self._subscribers)
 
-    def subscribe(self) -> asyncio.Queue[bytes | None]:
+    def subscribe(self) -> asyncio.Queue[Frame | None]:
         """Register a subscriber; it receives data from the next SPS onwards."""
-        queue: asyncio.Queue[bytes | None] = asyncio.Queue(self._max_queue)
+        queue: asyncio.Queue[Frame | None] = asyncio.Queue(self._max_queue)
         self._subscribers[queue] = True
         return queue
 
-    def unsubscribe(self, queue: asyncio.Queue[bytes | None]) -> None:
+    def unsubscribe(self, queue: asyncio.Queue[Frame | None]) -> None:
         """Forget a subscriber."""
         self._subscribers.pop(queue, None)
 
-    def publish(self, access_unit: bytes) -> None:
-        """Queue one access unit for every subscriber."""
+    def publish(self, access_unit: bytes, timestamp: int) -> None:
+        """Queue one access unit and its 90 kHz timestamp for every subscriber."""
         offset: int | None = -1  # computed lazily, only when someone waits
         for queue, waiting in self._subscribers.items():
             data = access_unit
@@ -61,7 +64,7 @@ class H264Fanout:
                     queue.get_nowait()
                 self._subscribers[queue] = True
                 continue
-            queue.put_nowait(data)
+            queue.put_nowait((data, timestamp))
             self._subscribers[queue] = False
 
     def close(self) -> None:
