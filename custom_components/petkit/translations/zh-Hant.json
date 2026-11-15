@@ -1,0 +1,1038 @@
+{
+  "config": {
+    "error": {
+      "account_exists": "此帳號已存在。",
+      "connection": "無法連線到伺服器。",
+      "unknown": "發生未知錯誤，請查看記錄。",
+      "invalid_auth": "電子郵件或密碼無效",
+      "invalid_region": "沒有使用此電子郵件的帳號。請確認您選擇的區域是否正確？",
+      "cannot_connect": "無法連線到 Petkit 伺服器。",
+      "session_error": "工作階段錯誤，請重試",
+      "server_busy": "伺服器忙碌中，請重試"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "password": "密碼",
+          "username": "使用者名稱"
+        },
+        "data_description": {
+          "username": "{username_hint}"
+        },
+        "description": "請輸入 Home Assistant 用來與 PetKit 雲端溝通的 PetKit 帳號。\n\n**重要：**此帳號必須是與您登入手機 App 所用帳號*不同*的 PetKit 帳號。PetKit 每個帳號只允許一個有效的登入工作階段，因此在此使用您的主帳號登入，會把您從 App 登出（反之亦然）。\n\n**設定步驟：**\n1. 建立第二個 PetKit 帳號（使用不同的電子郵件）。\n2. 在 PetKit 手機 App 中，以主帳號登入，開啟**家庭管理**並建立一個家庭。\n3. 邀請第二個帳號成為家庭成員，並接受邀請。\n4. 在下方輸入第二個帳號的登入資訊。\n\n完整指南：[設定 Wiki]({wiki_url})。",
+        "sections": {
+          "advanced_options": {
+            "data": {
+              "region": "區域",
+              "time_zone": "時區"
+            },
+            "data_description": {
+              "region": "由 Home Assistant 自動偵測。僅在您的 PetKit 帳號註冊於不同區域的伺服器時才需要覆寫。",
+              "time_zone": "由 Home Assistant 自動偵測。如有需要請自行覆寫。"
+            },
+            "description": "區域與時區會由 Home Assistant 自動偵測。僅在需要覆寫時才展開。",
+            "name": "進階"
+          }
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "yowling_detected": {
+        "name": "偵測到嚎叫"
+      },
+      "litter_tray_installed": {
+        "name": "貓砂盤已安裝"
+      },
+      "abnormal_ph_detected": {
+        "name": "偵測到 pH 值異常"
+      },
+      "soft_stool_detected": {
+        "name": "偵測到軟便"
+      },
+      "battery": {
+        "name": "電池"
+      },
+      "water_pump_running": {
+        "name": "水泵運轉中"
+      },
+      "clean_water_tank_low": {
+        "name": "清水箱水量低"
+      },
+      "clean_water_tank_empty": {
+        "name": "清水箱已空"
+      },
+      "waste_tank_full": {
+        "name": "廢水箱已滿"
+      },
+      "add_water_state": {
+        "name": "補水中"
+      },
+      "heater_installed": {
+        "name": "加熱器已安裝"
+      },
+      "waste_tank_installed": {
+        "name": "廢水箱已安裝"
+      },
+      "clean_water_tank_installed": {
+        "name": "清水箱已安裝"
+      },
+      "recirculation_tray_low": {
+        "name": "循環盤水量低"
+      },
+      "flush_state": {
+        "name": "沖洗中"
+      },
+      "disinfect_state": {
+        "name": "消毒中"
+      },
+      "weight_error": {
+        "name": "重量異常"
+      },
+      "pet_error": {
+        "name": "寵物異常"
+      },
+      "light": {
+        "name": "燈光"
+      },
+      "spray": {
+        "name": "噴霧"
+      },
+      "camera_status": {
+        "name": "攝影機狀態"
+      },
+      "n60_deodorize_presence": {
+        "name": "N60 除臭模組狀態"
+      },
+      "care_plus_subscription": {
+        "name": "Care+ 訂閱"
+      },
+      "deodorizer": {
+        "name": "除臭器"
+      },
+      "deodorization_running": {
+        "name": "除臭中"
+      },
+      "do_not_disturb_state": {
+        "name": "勿擾模式"
+      },
+      "eating": {
+        "name": "進食中"
+      },
+      "feeding": {
+        "name": "餵食中"
+      },
+      "food_level": {
+        "name": "飼料量"
+      },
+      "food_level_1": {
+        "name": "1 號糧倉飼料量"
+      },
+      "food_level_2": {
+        "name": "2 號糧倉飼料量"
+      },
+      "frequent_use": {
+        "name": "頻繁使用偵測"
+      },
+      "lack_warning": {
+        "name": "缺水警告"
+      },
+      "pet_detected": {
+        "name": "寵物飲水中"
+      },
+      "pump_running": {
+        "name": "水泵"
+      },
+      "liquid_lack": {
+        "name": "液位"
+      },
+      "litter": {
+        "name": "貓砂"
+      },
+      "low_battery": {
+        "name": "電池電量低"
+      },
+      "low_power": {
+        "name": "電力"
+      },
+      "manually_paused": {
+        "name": "已手動暫停"
+      },
+      "on_ac_power": {
+        "name": "使用市電"
+      },
+      "pura_air_liquid": {
+        "name": "Pura Air 藥液"
+      },
+      "replace_filter": {
+        "name": "需更換濾芯"
+      },
+      "sand_lack": {
+        "name": "缺少貓砂"
+      },
+      "toilet_occupied": {
+        "name": "廁所使用中"
+      },
+      "waste_bin": {
+        "name": "集便桶已滿"
+      },
+      "waste_bin_presence": {
+        "name": "集便桶已安裝"
+      },
+      "water_level": {
+        "name": "水位"
+      }
+    },
+    "button": {
+      "refill": {
+        "name": "補水"
+      },
+      "drain": {
+        "name": "排水"
+      },
+      "drain_and_flush": {
+        "name": "排水並沖洗"
+      },
+      "action_continue": {
+        "name": "動作：繼續"
+      },
+      "action_pause": {
+        "name": "動作：暫停"
+      },
+      "pause": {
+        "name": "暫停"
+      },
+      "resume": {
+        "name": "繼續"
+      },
+      "action_reset": {
+        "name": "動作：重置"
+      },
+      "call_pet": {
+        "name": "呼叫寵物"
+      },
+      "play_sound": {
+        "name": "播放聲音"
+      },
+      "cancel_manual_feed": {
+        "name": "取消手動餵食"
+      },
+      "deodorize": {
+        "name": "除臭"
+      },
+      "deep_clean": {
+        "name": "深層清潔"
+      },
+      "dump_litter": {
+        "name": "倒出貓砂"
+      },
+      "exit_maintenance": {
+        "name": "維護：結束"
+      },
+      "food_replenished": {
+        "name": "已補充飼料"
+      },
+      "reset_desiccant": {
+        "name": "重置乾燥劑"
+      },
+      "reset_n50_odor_eliminator": {
+        "name": "重置 N50 除臭劑"
+      },
+      "reset_n60_odor_eliminator": {
+        "name": "重置 N60 除臭劑"
+      },
+      "start_maintenance": {
+        "name": "維護：開始"
+      },
+      "start_scoop": {
+        "name": "鏟屎"
+      },
+      "level_litter": {
+        "name": "整平貓砂"
+      },
+      "reset_filter": {
+        "name": "重置濾芯"
+      },
+      "ptz_left": {
+        "name": "雲台向左"
+      },
+      "ptz_right": {
+        "name": "雲台向右"
+      },
+      "ptz_stop": {
+        "name": "雲台停止"
+      },
+      "ptz_flip": {
+        "name": "雲台翻轉"
+      }
+    },
+    "fan": {
+      "air_purifier_fan": {
+        "name": "空氣清淨機"
+      }
+    },
+    "image": {
+      "last_eat_event": {
+        "name": "最近進食事件"
+      },
+      "last_feed_event": {
+        "name": "最近餵食事件"
+      },
+      "last_toileting_event": {
+        "name": "最近如廁事件"
+      },
+      "last_visit_event": {
+        "name": "最近造訪事件"
+      },
+      "dish_before": {
+        "name": "進食前餐盤"
+      },
+      "dish_after": {
+        "name": "進食後餐盤"
+      },
+      "waste_check": {
+        "name": "排泄物檢查"
+      },
+      "last_pet_detect_event": {
+        "name": "最近偵測到寵物事件"
+      },
+      "last_drink_event": {
+        "name": "最近飲水事件"
+      }
+    },
+    "number": {
+      "cleaning_delay": {
+        "name": "清潔延遲"
+      },
+      "heater_temp": {
+        "name": "加熱器溫度"
+      },
+      "fountain_time": {
+        "name": "飲水機運轉時間"
+      },
+      "sleep_time": {
+        "name": "休眠時間"
+      },
+      "pet_notify_interval": {
+        "name": "寵物通知間隔"
+      },
+      "manual_feed": {
+        "name": "手動餵食"
+      },
+      "min_eating_duration": {
+        "name": "最短進食時間"
+      },
+      "surplus": {
+        "name": "餘量"
+      },
+      "volume": {
+        "name": "音量"
+      }
+    },
+    "select": {
+      "avoid_repeat_cleaning_interval": {
+        "name": "避免重複清潔間隔"
+      },
+      "eat_detection_sensitivity": {
+        "name": "AI 進食偵測靈敏度"
+      },
+      "litter_type": {
+        "name": "貓砂種類"
+      },
+      "working_mode": {
+        "name": "工作模式"
+      },
+      "led_brightness": {
+        "name": "LED 亮度"
+      },
+      "move_detection_sensitivity": {
+        "name": "移動偵測靈敏度"
+      },
+      "pet_detection_sensitivity": {
+        "name": "AI 寵物偵測靈敏度"
+      },
+      "surplus_level": {
+        "name": "餘量控制等級"
+      },
+      "auto_drain_flush": {
+        "name": "自動排水並沖洗"
+      },
+      "auto_drain_refill": {
+        "name": "自動排水並補水"
+      },
+      "flow": {
+        "name": "水流"
+      }
+    },
+    "sensor": {
+      "urine_measured_ph": {
+        "name": "尿液 pH 值"
+      },
+      "device_id": {
+        "name": "裝置 ID"
+      },
+      "pet_last_urination_date": {
+        "name": "最近排尿時間"
+      },
+      "heater_real_temp": {
+        "name": "加熱器溫度"
+      },
+      "clean_water_tank_state": {
+        "name": "清水箱狀態",
+        "state": {
+          "normal": "正常",
+          "empty": "已空",
+          "low": "偏低",
+          "unknown": "未知"
+        }
+      },
+      "drink_count": {
+        "name": "飲水次數"
+      },
+      "drink_time_avg": {
+        "name": "平均飲水時間"
+      },
+      "filter_left_days": {
+        "name": "濾芯剩餘天數"
+      },
+      "next_flush_time": {
+        "name": "下次沖洗"
+      },
+      "next_water_change_time": {
+        "name": "下次換水"
+      },
+      "drink_time": {
+        "name": "最近飲水時間"
+      },
+      "pet_last_defecation_date": {
+        "name": "最近排便時間"
+      },
+      "air_purified": {
+        "name": "已淨化空氣"
+      },
+      "amount_eaten": {
+        "name": "進食量"
+      },
+      "battery_voltage": {
+        "name": "電池電壓"
+      },
+      "supply_voltage": {
+        "name": "供電電壓"
+      },
+      "average_time": {
+        "name": "平均使用時間"
+      },
+      "avg_eating_time": {
+        "name": "平均進食時間"
+      },
+      "battery_level": {
+        "name": "電池電量"
+      },
+      "power_type": {
+        "name": "供電類型",
+        "state": {
+          "main_power": "市電",
+          "on_battery": "電池",
+          "on_battery_low": "電池（電量低）",
+          "unknown": "未知"
+        }
+      },
+      "odor_eliminator_n50_left_days": {
+        "name": "N50 除臭劑剩餘天數"
+      },
+      "odor_eliminator_n60_left_days": {
+        "name": "N60 除臭劑剩餘天數"
+      },
+      "deodorizer_level": {
+        "name": "除臭劑量"
+      },
+      "desiccant_left_days": {
+        "name": "乾燥劑剩餘天數"
+      },
+      "device_status": {
+        "name": "裝置狀態",
+        "state": {
+          "offline": "離線",
+          "online_ac": "上線",
+          "online_battery": "上線（電池）",
+          "unknown": "未知"
+        }
+      },
+      "drink_times": {
+        "name": "飲水次數"
+      },
+      "last_drink_pet": {
+        "name": "最近飲水的寵物"
+      },
+      "raw_drink_data": {
+        "name": "原始飲水資料"
+      },
+      "end_date_care_plus_subscription": {
+        "name": "Care+ 剩餘天數"
+      },
+      "error": {
+        "name": "錯誤"
+      },
+      "battery": {
+        "name": "電池"
+      },
+      "error_message": {
+        "name": "錯誤",
+        "state": {
+          "no_error": "無錯誤"
+        }
+      },
+      "feeder_error": {
+        "name": "餵食器錯誤"
+      },
+      "filter_percent": {
+        "name": "濾芯剩餘量"
+      },
+      "food_bowl_percentage": {
+        "name": "食盆飼料量"
+      },
+      "food_in_bowl": {
+        "name": "食盆內飼料"
+      },
+      "food_left": {
+        "name": "剩餘飼料"
+      },
+      "last_connection": {
+        "name": "最近藍牙連線"
+      },
+      "last_update": {
+        "name": "最近更新"
+      },
+      "last_used_by": {
+        "name": "最近使用者"
+      },
+      "litter_last_event": {
+        "name": "最近事件",
+        "state": {
+          "auto_cleaning_canceled": "自動清潔已取消",
+          "auto_cleaning_canceled_kitten": "自動清潔已取消：幼貓",
+          "auto_cleaning_completed": "自動清潔完成",
+          "auto_cleaning_failed_full": "自動清潔失敗：已滿",
+          "auto_cleaning_failed_hall_l": "自動清潔失敗：霍爾感測器 L",
+          "auto_cleaning_failed_hall_t": "自動清潔失敗：霍爾感測器 T",
+          "auto_cleaning_terminated": "自動清潔已終止",
+          "auto_odor_failed": "自動除臭失敗",
+          "clean_over": "清潔",
+          "deodorant_finished": "除臭完成",
+          "deodorant_finished_liquid_lack": "除臭完成：藥液不足",
+          "light_over": "燈光",
+          "litter_empty_completed": "清空貓砂完成",
+          "litter_empty_failed_full": "清空貓砂失敗：已滿",
+          "litter_empty_failed_hall_l": "清空貓砂失敗：霍爾感測器 L",
+          "litter_empty_failed_hall_t": "清空貓砂失敗：霍爾感測器 T",
+          "litter_empty_terminated": "清空貓砂已終止",
+          "manual_cleaning_canceled": "手動清潔已取消",
+          "manual_cleaning_completed": "手動清潔完成",
+          "manual_cleaning_failed_full": "手動清潔失敗：已滿",
+          "manual_cleaning_failed_hall_l": "手動清潔失敗：霍爾感測器 L",
+          "manual_cleaning_failed_hall_t": "手動清潔失敗：霍爾感測器 T",
+          "manual_cleaning_terminated": "手動清潔已終止",
+          "manual_odor_completed": "手動除臭完成",
+          "manual_odor_completed_liquid_lack": "手動除臭完成：藥液不足",
+          "manual_odor_failed": "手動除臭失敗",
+          "periodic_cleaning_canceled": "定期清潔已取消",
+          "periodic_cleaning_canceled_kitten": "定期清潔已取消：幼貓",
+          "periodic_cleaning_completed": "定期清潔完成",
+          "periodic_cleaning_terminated": "定期清潔已終止",
+          "periodic_odor_completed": "定期除臭完成",
+          "periodic_odor_completed_liquid_lack": "定期除臭完成：藥液不足",
+          "periodic_odor_failed": "定期除臭失敗",
+          "pet_detect": "偵測到寵物",
+          "pet_out": "寵物已離開",
+          "reset_completed": "重置完成",
+          "reset_failed_full": "重置失敗：已滿",
+          "reset_failed_hall_l": "重置失敗：霍爾感測器 L",
+          "reset_failed_hall_t": "重置失敗：霍爾感測器 T",
+          "reset_over": "重置",
+          "reset_terminated": "重置已終止",
+          "scheduled_cleaning_failed_full": "排程清潔失敗：已滿",
+          "scheduled_cleaning_failed_hall_l": "排程清潔失敗：霍爾感測器 L",
+          "scheduled_cleaning_failed_hall_t": "排程清潔失敗：霍爾感測器 T",
+          "spray_over": "除臭"
+        }
+      },
+      "litter_level": {
+        "name": "貓砂量"
+      },
+      "litter_state": {
+        "name": "狀態",
+        "state": {
+          "calibrating": "校準中",
+          "cleaning": "清潔中",
+          "cleaning_paused": "清潔已暫停",
+          "cleaning_paused_cover": "清潔已暫停：蓋子",
+          "cleaning_paused_pet_approach": "清潔已暫停：寵物靠近",
+          "cleaning_paused_pet_entered": "清潔已暫停：寵物進入",
+          "cleaning_paused_pet_using": "清潔已暫停：寵物使用中",
+          "cleaning_paused_system_error": "清潔已暫停：系統錯誤",
+          "dumping": "倒出中",
+          "dumping_paused": "倒出已暫停",
+          "dumping_paused_cover": "倒出已暫停：蓋子",
+          "dumping_paused_pet_approach": "倒出已暫停：寵物靠近",
+          "dumping_paused_pet_entered": "倒出已暫停：寵物進入",
+          "dumping_paused_pet_using": "倒出已暫停：寵物使用中",
+          "dumping_paused_system_error": "倒出已暫停：系統錯誤",
+          "idle": "閒置",
+          "leveling": "整平中",
+          "maintenance": "維護中",
+          "maintenance_paused": "維護已暫停",
+          "maintenance_paused_cover": "維護已暫停：蓋子",
+          "maintenance_paused_pet_approach": "維護已暫停：寵物靠近",
+          "maintenance_paused_pet_entered": "維護已暫停：寵物進入",
+          "maintenance_paused_pet_using": "維護已暫停：寵物使用中",
+          "maintenance_paused_system_error": "維護已暫停：系統錯誤",
+          "paused": "已暫停",
+          "paused_cover": "已暫停：蓋子",
+          "paused_pet_approach": "已暫停：寵物靠近",
+          "paused_pet_entered": "已暫停：寵物進入",
+          "paused_pet_using": "已暫停：寵物使用中",
+          "paused_system_error": "已暫停：系統錯誤",
+          "resetting": "重置中",
+          "resetting_device": "裝置重置中",
+          "unknown": "未知"
+        }
+      },
+      "litter_weight": {
+        "name": "貓砂重量"
+      },
+      "manual_dispensed": {
+        "name": "手動出糧量"
+      },
+      "manual_dispensed_hopper_1": {
+        "name": "1 號糧倉手動出糧量"
+      },
+      "manual_dispensed_hopper_2": {
+        "name": "2 號糧倉手動出糧量"
+      },
+      "package_used": {
+        "name": "已使用包數"
+      },
+      "pet_last_device_used": {
+        "name": "最近使用的貓砂盆"
+      },
+      "pet_last_use_date": {
+        "name": "最近使用日期"
+      },
+      "connection_state": {
+        "name": "連線狀態"
+      },
+      "pet_last_use_duration": {
+        "name": "最近使用持續時間"
+      },
+      "pet_last_weight_measurement": {
+        "name": "最近體重測量"
+      },
+      "planned_dispensed": {
+        "name": "預定出糧量"
+      },
+      "planned_dispensed_hopper_1": {
+        "name": "1 號糧倉預定出糧量"
+      },
+      "planned_dispensed_hopper_2": {
+        "name": "2 號糧倉預定出糧量"
+      },
+      "purified_water": {
+        "name": "已淨化水量"
+      },
+      "purifier_liquid": {
+        "name": "液位"
+      },
+      "raw_distribution_data": {
+        "name": "原始出糧資料"
+      },
+      "rssi": {
+        "name": "RSSI"
+      },
+      "spray_times": {
+        "name": "噴霧次數"
+      },
+      "spray_deodorant_liquid": {
+        "name": "除臭噴霧藥液"
+      },
+      "times_dispensed": {
+        "name": "出糧次數"
+      },
+      "times_eaten": {
+        "name": "進食次數"
+      },
+      "times_used": {
+        "name": "使用次數"
+      },
+      "total_dispensed": {
+        "name": "總出糧量"
+      },
+      "total_dispensed_hopper_1": {
+        "name": "1 號糧倉總出糧量"
+      },
+      "total_dispensed_hopper_2": {
+        "name": "2 號糧倉總出糧量"
+      },
+      "total_package": {
+        "name": "總包數"
+      },
+      "total_planned": {
+        "name": "總預定量"
+      },
+      "total_planned_hopper_1": {
+        "name": "1 號糧倉總預定量"
+      },
+      "total_planned_hopper_2": {
+        "name": "2 號糧倉總預定量"
+      },
+      "total_time": {
+        "name": "總使用時間"
+      },
+      "garbage_bag_box_state": {
+        "name": "垃圾袋盒",
+        "state": {
+          "normal": "正常",
+          "running_out": "即將用完",
+          "used_up": "已用完",
+          "expired": "已過期",
+          "not_available": "無法使用",
+          "not_installed": "未安裝"
+        }
+      },
+      "purification_n60_left_days": {
+        "name": "N60 淨化剩餘天數"
+      },
+      "last_pack_time": {
+        "name": "最近打包時間"
+      },
+      "last_bag_replacement_time": {
+        "name": "最近更換垃圾袋"
+      },
+      "sand_tray_left_days": {
+        "name": "貓砂盤剩餘天數"
+      },
+      "pet_last_meal_date": {
+        "name": "最近用餐日期"
+      },
+      "pet_last_meal_duration": {
+        "name": "最近用餐持續時間"
+      },
+      "pet_last_feeder_used": {
+        "name": "最近使用的餵食器"
+      },
+      "pet_meals_today": {
+        "name": "今日用餐次數"
+      }
+    },
+    "switch": {
+      "soft_stool": {
+        "name": "AI 軟便偵測"
+      },
+      "soft_stool_stop_cleaning": {
+        "name": "偵測到軟便時停止清潔"
+      },
+      "auto_clean": {
+        "name": "自動清潔"
+      },
+      "auto_refill": {
+        "name": "自動補水"
+      },
+      "heater_switch": {
+        "name": "加熱器"
+      },
+      "auto_water_change": {
+        "name": "自動換水"
+      },
+      "auto_flush": {
+        "name": "自動沖洗"
+      },
+      "pet_detection": {
+        "name": "寵物偵測"
+      },
+      "drink_detection": {
+        "name": "飲水偵測"
+      },
+      "auto_deodor": {
+        "name": "自動除臭"
+      },
+      "avoid_repeat_clean": {
+        "name": "避免重複清潔"
+      },
+      "camera": {
+        "name": "攝影機"
+      },
+      "child_lock": {
+        "name": "兒童鎖"
+      },
+      "cont_rotation": {
+        "name": "持續轉動"
+      },
+      "deep_cleaning": {
+        "name": "深層清潔"
+      },
+      "deodorant_n50_notify": {
+        "name": "需更換 N50 時通知"
+      },
+      "deodorant_n60_notify": {
+        "name": "需更換 N60 時通知"
+      },
+      "desiccant_notif": {
+        "name": "需更換乾燥劑時通知"
+      },
+      "deep_deodor": {
+        "name": "深層除臭"
+      },
+      "pet_notify": {
+        "name": "寵物出現時通知"
+      },
+      "flush_notify": {
+        "name": "沖洗時通知"
+      },
+      "water_change_notify": {
+        "name": "換水時通知"
+      },
+      "clean_water_lack_light": {
+        "name": "清水不足警示燈"
+      },
+      "clean_water_empty_light": {
+        "name": "清水已空警示燈"
+      },
+      "waste_water_full_light": {
+        "name": "廢水箱已滿警示燈"
+      },
+      "dispensing_notif": {
+        "name": "出糧時通知"
+      },
+      "display": {
+        "name": "顯示"
+      },
+      "do_not_disturb": {
+        "name": "勿擾模式"
+      },
+      "feed_sound": {
+        "name": "餵食音效"
+      },
+      "feed_tone": {
+        "name": "餵食提示音"
+      },
+      "highlight": {
+        "name": "寵物追蹤高亮"
+      },
+      "indicator_light": {
+        "name": "指示燈"
+      },
+      "camera_light": {
+        "name": "攝影機指示燈"
+      },
+      "kitten_mode": {
+        "name": "幼貓模式"
+      },
+      "lack_liquid_notify": {
+        "name": "淨化藥液不足時通知"
+      },
+      "pet_toileting_notif": {
+        "name": "寵物如廁時通知"
+      },
+      "lack_sand_notify": {
+        "name": "貓砂不足時通知"
+      },
+      "light": {
+        "name": "燈光"
+      },
+      "light_assist": {
+        "name": "清潔時開燈"
+      },
+      "light_weight": {
+        "name": "輕量偵測"
+      },
+      "litter_full_notify": {
+        "name": "集便桶已滿時通知"
+      },
+      "low_battery_notif": {
+        "name": "電池電量低時通知"
+      },
+      "microphone": {
+        "name": "麥克風"
+      },
+      "move_notif": {
+        "name": "偵測到移動時通知"
+      },
+      "night_vision": {
+        "name": "夜視"
+      },
+      "periodic_cleaning": {
+        "name": "定期清潔"
+      },
+      "periodic_deodorizing": {
+        "name": "定期除臭"
+      },
+      "pet_eat_notif": {
+        "name": "寵物進食時通知"
+      },
+      "pet_in_notify": {
+        "name": "寵物如廁時通知"
+      },
+      "pet_tracking": {
+        "name": "寵物追蹤"
+      },
+      "pet_visit_notif": {
+        "name": "寵物造訪時通知"
+      },
+      "power": {
+        "name": "電源"
+      },
+      "proximity_sensor": {
+        "name": "感應模式"
+      },
+      "refill_notif": {
+        "name": "需補充時通知"
+      },
+      "sand_saving": {
+        "name": "省砂"
+      },
+      "shortage_alarm": {
+        "name": "缺料警報"
+      },
+      "surplus_control": {
+        "name": "餘量控制"
+      },
+      "system_notification": {
+        "name": "系統提示音"
+      },
+      "video_timestamp": {
+        "name": "顯示時間戳記"
+      },
+      "voice_dispense": {
+        "name": "語音出糧"
+      },
+      "waste_covering": {
+        "name": "排泄物覆蓋"
+      },
+      "work_log_notify": {
+        "name": "執行排程工作時通知"
+      },
+      "toilet_light": {
+        "name": "如廁時開燈"
+      },
+      "privacy_mode": {
+        "name": "隱私模式"
+      },
+      "work_notify": {
+        "name": "裝置清潔時通知"
+      },
+      "privacy_camera_off": {
+        "name": "隱私：關閉攝影機"
+      },
+      "privacy_camera_inward": {
+        "name": "隱私：攝影機朝內"
+      },
+      "privacy_microphone_off": {
+        "name": "隱私：關閉麥克風"
+      },
+      "ai_ph_detection": {
+        "name": "AI pH 值偵測"
+      },
+      "ai_yowling": {
+        "name": "AI 嚎叫偵測"
+      },
+      "feeding_schedule": {
+        "name": "餵食排程"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "燈光"
+      }
+    },
+    "camera": {
+      "camera": {
+        "name": "攝影機串流"
+      }
+    },
+    "text": {
+      "manual_feed_dual_h1": {
+        "name": "1 號糧倉手動餵食"
+      },
+      "manual_feed_dual_h2": {
+        "name": "2 號糧倉手動餵食"
+      },
+      "manual_feed_single": {
+        "name": "手動餵食"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "always_on_stream": "持續轉播",
+          "region": "區域",
+          "time_zone": "時區"
+        },
+        "data_description": {
+          "always_on_stream": "讓內部轉播工作階段保持預熱，使瀏覽器檢視、WHEP 用戶端與此攝影機的一般串流使用者都能快速連線。轉播串流也可供其他使用者重複使用。這會讓一個上游工作階段持續保持運作，並使用較多裝置與雲端資源。"
+        },
+        "sections": {
+          "bluetooth_options": {
+            "data": {
+              "ble_relay_enabled": "啟用藍牙中繼",
+              "scan_interval_bluetooth": "藍牙更新間隔（分鐘）"
+            },
+            "data_description": {
+              "ble_relay_enabled": "停用時，飲水機只有在透過 App 更新裝置時才會更新。"
+            },
+            "description": "這些選項僅在您有飲水機，且至少有一台可作為藍牙中繼的裝置（例如餵食器、貓砂盆）時才有效。詳情請參閱 Petkit App。",
+            "name": "藍牙選項"
+          },
+          "medias_options": {
+            "data": {
+              "delete_media_after": "多少天後刪除媒體（天）",
+              "media_dl_image": "擷取圖片",
+              "media_dl_video": "擷取影片",
+              "media_ev_type": "下載的事件類型",
+              "media_path": "媒體路徑",
+              "scan_interval_media": "媒體更新間隔（分鐘）"
+            },
+            "data_description": {
+              "delete_media_after": "在指定天數後刪除已下載的媒體。（0 = 永不刪除）",
+              "media_dl_image": "下載您裝置上的所有圖片，並依下方所選事件篩選（不需要有效的 Care+ 訂閱）。",
+              "media_dl_video": "下載您裝置上的所有影片，並依下方所選事件篩選。（需要有效的 Care+ 訂閱）",
+              "media_path": "媒體的儲存路徑。若未指定，媒體會儲存在 Home Assistant 的 /media 資料夾。",
+              "scan_interval_media": "從 Petkit 伺服器下載新媒體（圖片與影片）的間隔。"
+            },
+            "description": "這些選項僅在您至少有一台能拍攝圖片與影片的裝置（例如餵食器、貓砂盆）時才有效",
+            "name": "媒體選項"
+          },
+          "notifications_options": {
+            "data": {
+              "enabled_notifications": "已啟用的通知"
+            },
+            "data_description": {
+              "enabled_notifications": "選擇哪些 PetKit 事件要在 Home Assistant 中發出持續通知。取消勾選某個類別即可在 Home Assistant 中將其靜音。這些類別與 Petkit App 中裝置端的通知開關各自獨立。"
+            },
+            "description": "獨立於 Petkit App 的設定，控制哪些 PetKit 裝置事件會在 Home Assistant 中發出持續通知。",
+            "name": "通知"
+          }
+        },
+        "title": "Petkit 整合設定"
+      }
+    }
+  },
+  "selector": {
+    "petkit_notification_category": {
+      "options": {
+        "feeder_error": "餵食器 — 裝置錯誤",
+        "feeder_food_low": "餵食器 — 飼料量低",
+        "fountain_cwt_empty": "飲水機 — 清水箱已空",
+        "fountain_cwt_low": "飲水機 — 清水箱水量低",
+        "fountain_filter": "飲水機 — 需更換濾芯",
+        "fountain_water_low": "飲水機 — 水位低",
+        "fountain_wt_full": "飲水機 — 廢水箱已滿",
+        "litter_box_full": "貓砂盆 — 集便桶已滿",
+        "litter_error": "貓砂盆 — 裝置錯誤",
+        "litter_event": "貓砂盆 — 清潔／寵物造訪事件",
+        "litter_sand_low": "貓砂盆 — 貓砂量低"
+      }
+    }
+  }
+}
