@@ -381,7 +381,10 @@ class PetkitIotMqttListener:
             self._connection_status = MqttConnectionStatus.FAILED
             return
 
-        self._watchdog_task = self.hass.async_create_task(self._connection_watchdog())
+        # Background tasks: a long-running listener must not hold up Home Assistant's startup
+        self._watchdog_task = self.hass.async_create_background_task(
+            self._connection_watchdog(), "petkit mqtt watchdog"
+        )
 
         LOGGER.debug(
             "Listener started (broker=%s:%s, topics=%s)",
@@ -548,7 +551,9 @@ class PetkitIotMqttListener:
         if self._refresh_task is not None and not self._refresh_task.done():
             LOGGER.debug("Refresh task is already running.")
             return
-        self._refresh_task = self.hass.async_create_task(self._debounced_refresh())
+        self._refresh_task = self.hass.async_create_background_task(
+            self._debounced_refresh(), "petkit mqtt refresh"
+        )
 
     async def _debounced_refresh(self) -> None:
         """Debounce the refresh."""
